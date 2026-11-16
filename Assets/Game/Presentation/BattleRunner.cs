@@ -91,9 +91,10 @@ namespace LittleKeep.Game
             hud.ShowPause(value);
         }
 
+        /// On a phone, leaving the app pauses the Battle. Not in the editor, where clicking another window would.
         void OnApplicationPause(bool pausing)
         {
-            if (pausing) SetPaused(true);
+            if (pausing && !Application.isEditor) SetPaused(true);
         }
 
         /// Fit the Keep and the whole lane inside the safe area's width, leaving room above and below for the HUD.

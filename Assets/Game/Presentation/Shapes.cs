@@ -7,14 +7,16 @@ namespace LittleKeep.Game
     {
         static Sprite square, circle, ring, diamond;
 
-        public static Sprite Square => square ??= Make(64, (x, y) => 1f);
-        public static Sprite Circle => circle ??= Make(128, (x, y) => Edge(1f - Mathf.Sqrt(x * x + y * y)));
-        public static Sprite Ring => ring ??= Make(128, (x, y) =>
+        // Cached across play sessions, which survive without a domain reload; the textures do not, so test with
+        // Unity's own null check (a destroyed Sprite == null) rather than ??=, which would hand back a dead sprite.
+        public static Sprite Square => square != null ? square : square = Make(64, (x, y) => 1f);
+        public static Sprite Circle => circle != null ? circle : circle = Make(128, (x, y) => Edge(1f - Mathf.Sqrt(x * x + y * y)));
+        public static Sprite Ring => ring != null ? ring : ring = Make(128, (x, y) =>
         {
             float d = Mathf.Sqrt(x * x + y * y);
             return Edge(1f - d) * Edge(d - 0.82f);
         });
-        public static Sprite Diamond => diamond ??= Make(128, (x, y) => Edge(1f - (Mathf.Abs(x) + Mathf.Abs(y))));
+        public static Sprite Diamond => diamond != null ? diamond : diamond = Make(128, (x, y) => Edge(1f - (Mathf.Abs(x) + Mathf.Abs(y))));
 
         /// Soft edge: 1 inside, fading to 0 across the last few pixels.
         static float Edge(float distInside) => Mathf.Clamp01(distInside * 40f);
