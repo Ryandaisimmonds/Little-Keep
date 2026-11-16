@@ -16,6 +16,7 @@ MonoBehaviour:
     Id: star_volley
     Name: Star Volley
     Shape: 0
+    Element: 3
     Cooldown: 7
     Damage: 8
     Count: 5
@@ -50,6 +51,7 @@ MonoBehaviour:
     Id: star_volley_master
     Name: Starfall
     Shape: 0
+    Element: 3
     Cooldown: 6
     Damage: 12
     Count: 9

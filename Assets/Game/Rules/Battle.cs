@@ -109,6 +109,7 @@ namespace LittleKeep.Rules
             UpdateSquad(dt);
             UpdateProjectiles(dt);
             UpdateHeroes(dt);
+            RemoveDefeated();
             CheckOutcome();
         }
 
@@ -166,6 +167,8 @@ namespace LittleKeep.Rules
             for (int i = heroes.Count - 1; i >= 0; i--)
             {
                 var h = heroes[i];
+                UpdateStatus(h, dt);
+                if (h.Hp <= 0f) continue;
                 if (h.Def.Summon != null && h.Def.SummonCount > 0)
                 {
                     h.summonTimer -= dt;
@@ -193,7 +196,7 @@ namespace LittleKeep.Rules
                     continue;
                 }
                 h.IsEngaged = false;
-                h.Position = new Vec2(h.Position.X - h.Def.Speed * dt, h.Position.Y);
+                h.Position = new Vec2(h.Position.X - Speed(h) * dt, h.Position.Y);
                 if (h.Position.X <= t.KeepX)
                 {
                     heroes.RemoveAt(i);
@@ -201,6 +204,30 @@ namespace LittleKeep.Rules
                     Emit(new BattleEvent { Kind = BattleEventKind.HeroReachedKeep, SourceId = h.Id, Position = h.Position, Amount = h.Def.KeepDamage });
                 }
             }
+        }
+
+        /// A Hero's walking speed after chill and root.
+        float Speed(Hero h) =>
+            h.Status == Element.Bloom ? 0f : h.Status == Element.Frost ? h.Def.Speed * (1f - t.ChillSlow) : h.Def.Speed;
+
+        void UpdateStatus(Hero h, float dt)
+        {
+            if (h.Status == Element.None) return;
+            if (h.Status == Element.Fire)
+            {
+                h.burnTimer -= dt;
+                if (h.burnTimer <= 0f)
+                {
+                    h.burnTimer += t.BurnTickSeconds;
+                    DamageHero(h, h.burnPerTick, h.statusSource, true, Element.Fire, HitKind.Burn);
+                }
+            }
+            h.StatusRemaining -= dt;
+            if (h.StatusRemaining > 0f || h.Hp <= 0f) return;
+            var ended = h.Status;
+            h.Status = Element.None;
+            h.StatusRemaining = 0f;
+            Emit(new BattleEvent { Kind = BattleEventKind.StatusEnded, TargetId = h.Id, Position = h.Position, Element = ended });
         }
 
         static float AttackInterval(Hero h) => h.Def.MeleeDamage > 0f ? h.Def.MeleeInterval : h.Def.ShotInterval;
@@ -281,7 +308,7 @@ namespace LittleKeep.Rules
             {
                 Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = aim, Amount = skill.Radius, Tag = skill.Id });
                 foreach (var h in heroes)
-                    if (Vec2.Distance(h.Position, aim) <= skill.Radius + h.Def.Size) DamageHero(h, skill.Damage, f.Id, true);
+                    if (Vec2.Distance(h.Position, aim) <= skill.Radius + h.Def.Size) DamageHero(h, skill.Damage, f.Id, true, skill.Element);
                 return;
             }
             Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = aim, Tag = skill.Id });
@@ -290,7 +317,7 @@ namespace LittleKeep.Rules
             for (int i = 0; i < count; i++)
             {
                 float angle = count == 1 ? 0f : -skill.Spread * 0.5f + skill.Spread * i / (count - 1);
-                projectiles.Add(new Projectile(nextId++, f.Id, f.Position, dir.Rotated(angle) * skill.ProjectileSpeed, skill.Damage, true, true, skill.Tier));
+                projectiles.Add(new Projectile(nextId++, f.Id, f.Position, dir.Rotated(angle) * skill.ProjectileSpeed, skill.Damage, true, true, skill.Tier, skill.Element));
             }
         }
 
@@ -319,11 +346,11 @@ namespace LittleKeep.Rules
             return best;
         }
 
-        static Vec2 Lead(Vec2 from, Hero h, float projectileSpeed)
+        Vec2 Lead(Vec2 from, Hero h, float projectileSpeed)
         {
             if (h.IsEngaged || projectileSpeed <= 0f) return h.Position;
             float time = Vec2.Distance(from, h.Position) / projectileSpeed;
-            return new Vec2(h.Position.X - h.Def.Speed * time, h.Position.Y);
+            return new Vec2(h.Position.X - Speed(h) * time, h.Position.Y);
         }
 
         void UpdateProjectiles(float dt)
@@ -338,7 +365,7 @@ namespace LittleKeep.Rules
                     foreach (var h in heroes)
                     {
                         if (Vec2.Distance(h.Position, p.Position) > h.Def.Size + 0.15f) continue;
-                        DamageHero(h, p.damage, p.SourceId, p.FromSkill);
+                        DamageHero(h, p.damage, p.SourceId, p.FromSkill, p.Element);
                         remove = true;
                         break;
                     }
@@ -358,13 +385,62 @@ namespace LittleKeep.Rules
             RemoveDefeated();
         }
 
-        void DamageHero(Hero h, float amount, int sourceId, bool fromSkill)
+        enum HitKind { Normal, Burn, Combo }
+
+        /// Damage a Hero. A normal hit with an Element leaves its status, or sets off a Combo if the Hero carries another's.
+        void DamageHero(Hero h, float amount, int sourceId, bool fromSkill, Element element = Element.None, HitKind kind = HitKind.Normal)
         {
             if (h.Hp <= 0f) return;
             if (!fromSkill) amount *= 1f - h.Def.AttackBlock;
+            if (h.Status == Element.Spark) amount *= 1f + t.ShockBonus;
             h.Hp -= amount;
-            Emit(new BattleEvent { Kind = BattleEventKind.Hit, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Amount = amount, FromSkill = fromSkill });
-            if (h.Hp > 0f) return;
+            Emit(new BattleEvent { Kind = BattleEventKind.Hit, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Amount = amount, FromSkill = fromSkill, Element = element, Combo = kind == HitKind.Combo });
+            bool defeated = h.Hp <= 0f;
+            if (defeated) Defeat(h, sourceId);
+            if (kind != HitKind.Normal || element == Element.None) return;
+
+            if (h.Status != Element.None && h.Status != element)
+            {
+                var consumed = h.Status;
+                ClearStatus(h);
+                float burst = amount * t.ComboMultiplier;
+                Emit(new BattleEvent { Kind = BattleEventKind.Combo, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Amount = burst, Element = element, Other = consumed });
+                var center = h.Position;
+                foreach (var other in heroes.ToArray())
+                {
+                    if (Vec2.Distance(other.Position, center) > t.ComboRadius + other.Def.Size) continue;
+                    // The burst blows away the statuses it touches, so one cast sets off one Combo, not a chain.
+                    ClearStatus(other);
+                    DamageHero(other, burst, sourceId, true, element, HitKind.Combo);
+                }
+                return;
+            }
+
+            if (defeated) return;
+            bool refresh = h.Status == element;
+            h.Status = element;
+            h.statusSource = sourceId;
+            h.StatusRemaining = element == Element.Bloom ? t.RootSeconds * (h.Def.IsBoss ? t.BossRootFactor : 1f) : t.StatusSeconds;
+            if (element == Element.Fire)
+            {
+                // A fresh hit renews the burn at the stronger rate; the tick clock keeps running so burn always lands.
+                int ticks = Math.Max(1, (int)Math.Round(t.StatusSeconds / t.BurnTickSeconds));
+                float perTick = amount * t.BurnFraction / ticks;
+                h.burnPerTick = refresh ? Math.Max(h.burnPerTick, perTick) : perTick;
+                if (!refresh) h.burnTimer = t.BurnTickSeconds;
+            }
+            Emit(new BattleEvent { Kind = BattleEventKind.StatusApplied, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Element = element });
+        }
+
+        /// Removes a status without the wearing-off event (it was used up by a Combo).
+        static void ClearStatus(Hero h)
+        {
+            h.Status = Element.None;
+            h.StatusRemaining = 0f;
+        }
+
+        void Defeat(Hero h, int sourceId)
+        {
             Emit(new BattleEvent { Kind = BattleEventKind.HeroDefeated, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Tag = h.Def.Id });
             if (string.IsNullOrEmpty(h.Def.CreatureId)) return;
             freedCreatures.Add(h.Def.CreatureId);

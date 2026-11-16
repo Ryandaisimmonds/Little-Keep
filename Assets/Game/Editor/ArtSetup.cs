@@ -210,6 +210,11 @@ namespace LittleKeep.Editor
             t.iconTower = Find<Sprite>(demo, "Icon_MenuIcon_Falg.png");
             t.iconGate = Find<Sprite>(item, "Icon_ItemIcon_Shield_A.png");
             t.iconMedal = Find<Sprite>(item, "Icon_ItemIcon_Medal_Gold.png");
+            t.iconFire = Find<Sprite>(picto, "Icon_PictoIcon_Fire.png");
+            t.iconFrost = Find<Sprite>(picto, "Icon_PictoIcon_Water.png");
+            t.iconSpark = Find<Sprite>(picto, "Icon_PictoIcon_Thunder.png");
+            t.iconBloom = Find<Sprite>(item, "Icon_ItemIcon_Clover.png");
+            t.iconInfo = Find<Sprite>(picto, "Icon_PictoIcon_Mark_Info-1.png");
             EditorUtility.SetDirty(t);
             return t;
         }

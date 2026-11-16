@@ -82,7 +82,7 @@ namespace LittleKeep.Game
         {
             if (battle == null) return;
             FitCamera(force: false);
-            if (!paused && !ended)
+            if (!paused && !ended && !ExplainPopup.IsOpen)
             {
                 var held = aim.Read();
                 battle.SetAim(held.HasValue ? ClampToLane(held.Value) : (Vec2?)null);

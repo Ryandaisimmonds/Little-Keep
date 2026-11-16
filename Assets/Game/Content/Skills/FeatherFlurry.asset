@@ -16,6 +16,7 @@ MonoBehaviour:
     Id: feather_flurry
     Name: Clover Flurry
     Shape: 0
+    Element: 2
     Cooldown: 6
     Damage: 5
     Count: 6
@@ -50,6 +51,7 @@ MonoBehaviour:
     Id: feather_flurry_master
     Name: Lucky Gale
     Shape: 0
+    Element: 2
     Cooldown: 5
     Damage: 7
     Count: 12

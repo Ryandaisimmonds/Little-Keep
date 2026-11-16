@@ -51,6 +51,11 @@ namespace LittleKeep.Rules
         public float MaxHp => Def.Hp;
         /// True while stopped to fight a Keeper or Familiar.
         public bool IsEngaged { get; internal set; }
+        /// The status this Hero carries (None if none), and how long it has left.
+        public Element Status { get; internal set; }
+        public float StatusRemaining { get; internal set; }
+        internal float burnPerTick, burnTimer;
+        internal int statusSource;
         internal float attackTimer;
         internal float summonTimer;
 
@@ -75,10 +80,12 @@ namespace LittleKeep.Rules
         public int SourceId { get; }
         /// Visual loudness of the Skill that fired it (0 for ordinary attacks).
         public int Tier { get; }
+        public Element Element { get; }
         internal readonly float damage;
 
-        internal Projectile(int id, int sourceId, Vec2 position, Vec2 velocity, float damage, bool fromSquad, bool fromSkill, int tier = 0)
+        internal Projectile(int id, int sourceId, Vec2 position, Vec2 velocity, float damage, bool fromSquad, bool fromSkill, int tier = 0, Element element = Element.None)
         {
+            Element = element;
             Tier = tier;
             Id = id;
             SourceId = sourceId;

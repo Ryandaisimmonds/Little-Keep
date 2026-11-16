@@ -55,6 +55,11 @@ MonoBehaviour:
   iconTower: {fileID: 21300000, guid: edcfb9b2f8cb0489c826ad45e35b9c9c, type: 3}
   iconGate: {fileID: 21300000, guid: 93621bf71b14b4ec586d25a113a139a6, type: 3}
   iconMedal: {fileID: 21300000, guid: 07339705e4db448e8b3b5ad6a6914b9d, type: 3}
+  iconFire: {fileID: 21300000, guid: e7db6ada2a41c4083a9291a707b0765b, type: 3}
+  iconFrost: {fileID: 21300000, guid: 00f4d96075614443fb042d54d62effd9, type: 3}
+  iconSpark: {fileID: 21300000, guid: 1db965eef26834593adb678409a53ca0, type: 3}
+  iconBloom: {fileID: 21300000, guid: 39d033a1c909b44b0924abd4a3dcdf55, type: 3}
+  iconInfo: {fileID: 21300000, guid: de88e3b5c51154830a30b5248ba859f3, type: 3}
   text: {r: 0.98, g: 0.93, b: 0.82, a: 1}
   textDark: {r: 0.27, g: 0.21, b: 0.18, a: 1}
   textGold: {r: 1, g: 0.82, b: 0.35, a: 1}

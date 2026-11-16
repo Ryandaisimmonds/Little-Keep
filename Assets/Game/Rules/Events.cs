@@ -19,6 +19,12 @@ namespace LittleKeep.Rules
         HeroAttack,
         /// A defeated Hero's creature is free. Tag is the creature id.
         CreatureFreed,
+        /// A Hero now carries a status. Element is the Element that left it.
+        StatusApplied,
+        /// A Hero's status wore off. Element is the status that ended.
+        StatusEnded,
+        /// A second Element hit a Hero carrying another's status. Element hit, Other was the status; Amount is the burst damage.
+        Combo,
         Won,
         Lost,
     }
@@ -37,6 +43,12 @@ namespace LittleKeep.Rules
         public string Tag;
         /// For Hit: true if the damage came from a Skill.
         public bool FromSkill;
+        /// For Hit, StatusApplied, StatusEnded and Combo: the Element involved.
+        public Element Element;
+        /// For Combo: the status that was consumed.
+        public Element Other;
+        /// For Hit: true if the damage is a Combo's burst.
+        public bool Combo;
 
         public override string ToString() => $"{Kind} src={SourceId} tgt={TargetId} amt={Amount:0.#} {Tag}";
     }

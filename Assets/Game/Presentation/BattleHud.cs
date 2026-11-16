@@ -52,9 +52,11 @@ namespace LittleKeep.Game
             Label("Title", keep, "Keep", 30, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(96f, 2f), new Vector2(100f, 60f));
             keepBar = Bar("Hp", keep, Theme != null ? Theme.health : Palette.Health, new Vector2(0f, 0.5f), new Vector2(190f, 0f), new Vector2(300f, 40f));
             keepText = Label("Value", keepBar.Back, "", 24, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(300f, 40f));
+            Explain.On(keep, "Keep health", Explain.KeepHealth, Theme?.iconHeart);
 
             var header = Panel("Header", safe, new Vector2(0.5f, 1f), new Vector2(40f, -16f), new Vector2(580f, 90f));
             headerText = Label("Text", header, "", 28, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(540f, 80f));
+            Explain.On(header, "Waves", "Heroes come in waves. Hold back every wave to win the Battle; the next wave comes once the lane is clear.");
             headerText.enableAutoSizing = true;
             headerText.fontSizeMax = 28;
             headerText.fontSizeMin = 18;
@@ -83,9 +85,18 @@ namespace LittleKeep.Game
             var rallyButton = rallyRoot.gameObject.AddComponent<Button>();
             rallyButton.targetGraphic = rallyBack;
             rallyButton.onClick.AddListener(() => RallyPressed?.Invoke());
+            var rallyInfo = UiKit.Icon("Info", rallyRoot, Theme?.iconInfo, new Vector2(0f, 1f), new Vector2(0f, 10f), 60f);
+            Explain.On(rallyInfo, "Rally", Explain.Rally);
 
-            pausePanel = Overlay("Paused", "Paused", "Your Run is saved. If you quit, this Battle starts over next time, but the Keep keeps any damage it has taken.", out _, out _,
-                ("Resume", ButtonStyle.Green, () => ResumePressed?.Invoke()), ("Quit to title", ButtonStyle.Brown, () => QuitPressed?.Invoke()));
+            pausePanel = Overlay("Paused", "Paused", "Your Run is saved. If you quit, this Battle starts over next time, but the Keep keeps any damage it has taken.", out _, out var pauseBody,
+                ("Resume", ButtonStyle.Green, () => ResumePressed?.Invoke()), ("Quit to the Keep", ButtonStyle.Brown, () => QuitPressed?.Invoke()));
+            // Statuses can't be tapped on the lane (holding there aims), so the pause panel explains them.
+            var panel = (RectTransform)pauseBody.transform.parent;
+            pauseBody.rectTransform.anchoredPosition += new Vector2(0f, 25f);
+            Label("Statuses", panel, "Statuses (tap to read):", 26, TextAnchor.MiddleRight, new Vector2(0.5f, 0.5f), new Vector2(-150f, -32f), new Vector2(340f, 60f));
+            var elements = new[] { Element.Fire, Element.Frost, Element.Spark, Element.Bloom };
+            for (int i = 0; i < elements.Length; i++)
+                Explain.Chip(panel, elements[i], new Vector2(0.5f, 0.5f), new Vector2(40f + i * 76f, -32f), 56f);
             endPanel = Overlay("End", "", "", out endTitle, out endBody, ("Continue", ButtonStyle.Green, () => ContinuePressed?.Invoke()));
         }
 
@@ -116,14 +127,23 @@ namespace LittleKeep.Game
             nameText.fontSizeMax = 24;
             nameText.fontSizeMin = 14;
             card.hp = Bar("Hp", root, Theme != null ? Theme.health : Palette.Health, new Vector2(0f, 1f), new Vector2(16f, -84f), new Vector2(192f, 22f));
+            Explain.On(card.hp.Back, $"{f.Def.Name}'s health", Explain.FighterHealth);
             var skillColor = asset != null ? asset.skillColor : Color.white;
             for (int i = 0; i < skills; i++)
             {
                 var def = f.Skills[i].Def;
-                var bar = Bar("Skill", root, def.Tier == 2 ? Color.Lerp(skillColor, Color.white, 0.35f) : skillColor, new Vector2(0f, 1f), new Vector2(16f, -116f - i * 34f), new Vector2(192f, 28f));
+                var barColor = def.Element != Element.None ? ElementLook.Color(def.Element) : skillColor;
+                var bar = Bar("Skill", root, def.Tier == 2 ? Color.Lerp(barColor, Color.white, 0.35f) : barColor, new Vector2(0f, 1f), new Vector2(50f, -116f - i * 34f), new Vector2(158f, 28f));
                 card.skills.Add(bar);
+                Explain.Chip(root, def.Element, new Vector2(0f, 1f), new Vector2(14f, -114f - i * 34f), 30f);
+                var skillAsset = content.SkillAsset(def.Id);
+                string desc = (def.Tier == 2 ? skillAsset?.masterDescription : skillAsset?.description) ?? "";
+                Explain.Skill(bar.Back, def, desc + "\n" + Explain.SkillCharge);
                 string stars = def.Tier == 2 ? " ++" : def.Tier == 1 ? " +" : "";
-                Label("SkillName", bar.Back, def.Name + stars, 18, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0f, 1f), new Vector2(188f, 28f));
+                var skillName = Label("SkillName", bar.Back, def.Name + stars, 18, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0f, 1f), new Vector2(154f, 28f));
+                skillName.enableAutoSizing = true;
+                skillName.fontSizeMax = 18;
+                skillName.fontSizeMin = 12;
             }
             card.koText = Label("KO", root, "Zzz", 44, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(180f, 80f));
             return card;

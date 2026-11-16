@@ -33,6 +33,36 @@ namespace LittleKeep.Game
 
         public void Shake(float amount) => shake = Mathf.Max(shake, amount);
 
+        sealed class Floater
+        {
+            public TMPro.TextMeshPro text;
+            public float age, life;
+            public Color color;
+            public Vector3 from;
+        }
+
+        readonly List<Floater> floaters = new List<Floater>();
+
+        /// Words that pop up, rise and fade (Combo names and the like).
+        public void Text(Vector2 pos, string words, Color color, float size = 1f, float life = 1.1f)
+        {
+            var go = new GameObject("fx-text");
+            go.transform.SetParent(transform, false);
+            var t = go.AddComponent<TMPro.TextMeshPro>();
+            var theme = UiKit.Theme;
+            if (theme != null && (theme.fontOutlined != null || theme.font != null)) t.font = theme.fontOutlined != null ? theme.fontOutlined : theme.font;
+            t.text = words;
+            t.fontSize = 9f * size;
+            t.outlineWidth = 0.2f;
+            t.outlineColor = new Color32(40, 28, 20, 255);
+            t.alignment = TMPro.TextAlignmentOptions.Center;
+            t.color = color;
+            t.sortingOrder = 1100;
+            t.rectTransform.sizeDelta = new Vector2(8f, 2f);
+            go.transform.position = new Vector3(pos.x, pos.y, 0f);
+            floaters.Add(new Floater { text = t, life = life, color = color, from = go.transform.position });
+        }
+
         void Spawn(Sprite sprite, Vector2 pos, float from, float to, Color color, float life, int order)
         {
             var sr = pool.Count > 0 ? pool.Pop() : NewRenderer();
@@ -70,6 +100,23 @@ namespace LittleKeep.Game
                     p.sr.gameObject.SetActive(false);
                     pool.Push(p.sr);
                     live.RemoveAt(i);
+                }
+            }
+            for (int i = floaters.Count - 1; i >= 0; i--)
+            {
+                var f = floaters[i];
+                f.age += dt;
+                float k = Mathf.Clamp01(f.age / f.life);
+                float pop = k < 0.15f ? Mathf.Lerp(0.4f, 1.15f, k / 0.15f) : Mathf.Lerp(1.15f, 1f, (k - 0.15f) / 0.85f);
+                f.text.transform.localScale = Vector3.one * pop;
+                f.text.transform.position = f.from + new Vector3(0f, k * 0.8f, 0f);
+                var c = f.color;
+                c.a = k < 0.7f ? 1f : 1f - (k - 0.7f) / 0.3f;
+                f.text.color = c;
+                if (k >= 1f)
+                {
+                    Destroy(f.text.gameObject);
+                    floaters.RemoveAt(i);
                 }
             }
             if (cam == null) return;

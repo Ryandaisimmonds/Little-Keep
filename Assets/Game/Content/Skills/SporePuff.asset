@@ -16,6 +16,7 @@ MonoBehaviour:
     Id: spore_puff
     Name: Spore Puff
     Shape: 1
+    Element: 4
     Cooldown: 6.5
     Damage: 14
     Count: 1
@@ -50,6 +51,7 @@ MonoBehaviour:
     Id: spore_puff_master
     Name: Spore Cloud
     Shape: 1
+    Element: 4
     Cooldown: 5.5
     Damage: 26
     Count: 1

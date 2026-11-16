@@ -16,6 +16,7 @@ MonoBehaviour:
     Id: bubble_volley
     Name: Bubble Volley
     Shape: 0
+    Element: 2
     Cooldown: 6
     Damage: 9
     Count: 4
@@ -50,6 +51,7 @@ MonoBehaviour:
     Id: bubble_volley_master
     Name: Tidal Wave
     Shape: 0
+    Element: 2
     Cooldown: 5
     Damage: 11
     Count: 10

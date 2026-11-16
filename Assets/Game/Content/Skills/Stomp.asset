@@ -16,6 +16,7 @@ MonoBehaviour:
     Id: stomp
     Name: Bark Blast
     Shape: 1
+    Element: 3
     Cooldown: 7
     Damage: 16
     Count: 1
@@ -50,6 +51,7 @@ MonoBehaviour:
     Id: stomp_master
     Name: Howling Blast
     Shape: 1
+    Element: 3
     Cooldown: 6
     Damage: 30
     Count: 1

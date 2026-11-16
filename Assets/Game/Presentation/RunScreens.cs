@@ -96,6 +96,7 @@ namespace LittleKeep.Game
             var gems = Panel("Gems", p, TopRight, new Vector2(-20f, -20f), new Vector2(300f, 100f));
             Icon("Icon", gems, Theme?.iconGem, new Vector2(0f, 0.5f), new Vector2(26f, 2f), 64f);
             Label("Value", gems, $"{keep.Gems}", 40, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(100f, 2f), new Vector2(180f, 70f), TextGold);
+            Explain.On(gems, "Gems", Explain.Gems, Theme?.iconGem);
             return gems;
         }
 
@@ -135,7 +136,14 @@ namespace LittleKeep.Game
                 if (!have) portrait.color = new Color(0f, 0f, 0f, 0.85f);
                 Label("Name", card, have ? asset?.def.Name : "???", 36, TextAnchor.MiddleLeft, TopLeft, new Vector2(220f, -40f), new Vector2(w - 240f, 50f), have ? TextGold : TextColor);
                 string body;
-                if (have) body = asset != null ? string.Join("\n", asset.skills.Where(x => x != null).Select(x => x.def.Name + ": " + x.description)) : "";
+                if (have)
+                {
+                    body = "";
+                    float sy = -90f;
+                    if (asset != null)
+                        foreach (var sk in asset.skills.Where(x => x != null))
+                            sy -= SkillRow(card, sk.def, sk.description, $"<color=#FFD15A>{sk.def.Name}</color>: {sk.description}", sy, w - 240f, 22, 110f) + 6f;
+                }
                 else
                 {
                     body = asset?.unlockHint ?? "";
@@ -146,6 +154,7 @@ namespace LittleKeep.Game
                 {
                     var bar = Bar("Bond", card, Theme != null ? Theme.rally : Palette.Rally, Bottom, new Vector2(110f, 30f), new Vector2(w - 260f, 26f));
                     bar.Value = keep.BondProgress(unlock.Id) / (float)Mathf.Max(1, unlock.BondSize);
+                    Explain.On(bar.Back, "Bond", Explain.Bond);
                 }
             }
             Button("Back", p, "Back", 32, BottomLeft, new Vector2(170f, 60f), new Vector2(260f, 100f), onBack, ButtonStyle.Brown, Theme?.iconHome);
@@ -247,9 +256,10 @@ namespace LittleKeep.Game
             Icon("Heart", bar, Theme?.iconHeart, new Vector2(0f, 0.5f), new Vector2(470f, 2f), 56f);
             var hp = Bar("Hp", bar, run.KeepHp / run.KeepMaxHp < 0.3f ? (Theme != null ? Theme.healthLow : Palette.HealthLow) : (Theme != null ? Theme.health : Palette.Health), new Vector2(0f, 0.5f), new Vector2(536f, 0f), new Vector2(300f, 38f));
             hp.Value = run.KeepHp / run.KeepMaxHp;
+            Explain.On(hp.Back, "Keep health", Explain.KeepHealth, Theme?.iconHeart);
             Label("HpText", hp.Back, $"{Mathf.CeilToInt(run.KeepHp)}/{Mathf.CeilToInt(run.KeepMaxHp)}", 24, TextAnchor.MiddleCenter, Center, new Vector2(0f, 2f), new Vector2(300f, 38f));
             Icon("GoldIcon", bar, Theme?.iconGold, new Vector2(0f, 0.5f), new Vector2(870f, 2f), 60f);
-            Label("Gold", bar, $"{run.Gold} Gold", 32, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(940f, 2f), new Vector2(220f, 60f), TextGold);
+            Explain.On(Label("Gold", bar, $"{run.Gold} Gold", 32, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(940f, 2f), new Vector2(220f, 60f), TextGold), "Gold", Explain.Gold, Theme?.iconGold);
             if (onSquad != null) Button("Squad", p, "Squad", 32, TopRight, new Vector2(onQuit != null ? -170f : -20f, -14f), new Vector2(240f, 104f), onSquad, ButtonStyle.Blue, Theme?.iconSquad);
             if (onQuit != null) RoundButton("Quit", p, Theme?.iconHome, "Title", TopRight, new Vector2(-20f, -10f), 110f, onQuit);
         }
@@ -308,7 +318,8 @@ namespace LittleKeep.Game
                 var card = (RectTransform)Button("Upgrade", p, "", 1, Center, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -40f), new Vector2(w, 500f), () => onPick(index),
                     o.MakesMaster ? ButtonStyle.Purple : ButtonStyle.Brown).transform;
                 Portrait(card, asset, TopLeft, new Vector2(80f, -72f), 230f);
-                Label("Who", card, $"{o.Member.Def.Name}\n<size=22>{o.Skill.Base.Name}</size>", 30, TextAnchor.MiddleLeft, TopLeft, new Vector2(140f, -70f), new Vector2(w - 170f, 90f));
+                var who = Label("Who", card, $"{o.Member.Def.Name}\n<size=22>{o.Skill.Base.Name}</size>", 30, TextAnchor.MiddleLeft, TopLeft, new Vector2(140f, -70f), new Vector2(w - 230f, 90f));
+                Explain.Chip(card, o.Skill.Base.Element, TopRight, new Vector2(-30f, -40f), 60f);
                 Label("Name", card, o.Upgrade.Name, 42, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -150f), new Vector2(w - 80f, 60f), TextGold);
                 Label("Desc", card, o.Upgrade.Description, 28, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -215f), new Vector2(w - 80f, 130f));
                 Label("Count", card, $"Upgrade {o.Skill.Taken.Count + 1} of {SkillProgress.UpgradesForMaster} towards its Master Form", 22, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -350f), new Vector2(w - 80f, 60f), TextColor.WithAlpha(0.8f));
@@ -350,9 +361,25 @@ namespace LittleKeep.Game
             Portrait(card, asset, Top, new Vector2(0f, -120f), 400f);
             Label("Name", card, asset.def.Name, 46, TextAnchor.MiddleCenter, Top, new Vector2(0f, -230f), new Vector2(size.x - 60f, 60f), TextGold);
             Label("Desc", card, asset.description, 26, TextAnchor.UpperCenter, Top, new Vector2(0f, -272f), new Vector2(size.x - 90f, 90f));
-            string skills = string.Join("\n", asset.skills.Where(s => s != null).Select(s => $"<color=#FFD15A>{s.def.Name}</color>: {s.description}"));
-            Label("Skills", card, skills, 24, TextAnchor.UpperCenter, Top, new Vector2(0f, -355f), new Vector2(size.x - 90f, 120f));
+            float y = -350f;
+            foreach (var s in asset.skills.Where(s => s != null))
+                y -= SkillRow(card, s.def, s.description, $"<color=#FFD15A>{s.def.Name}</color>: {s.description}", y, size.x - 70f, 22) + 8f;
             return card;
+        }
+
+        /// One Skill line: a tappable Element chip, then text that explains the Skill when tapped. Returns its height.
+        float SkillRow(RectTransform parent, SkillDef def, string description, string text, float y, float width, int fontSize, float x = 0f)
+        {
+            float chip = fontSize * 1.5f;
+            var row = Rect("Skill", parent, Top, Top, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(width, chip));
+            Explain.Chip(row, def.Element, new Vector2(0f, 1f), new Vector2(0f, 0f), chip);
+            var label = Label("Text", row, text, fontSize, TextAnchor.UpperLeft, new Vector2(0f, 1f), new Vector2(chip + 10f, -2f), new Vector2(width - chip - 10f, chip));
+            label.ForceMeshUpdate();
+            float h = Mathf.Max(chip, label.preferredHeight);
+            label.rectTransform.sizeDelta = new Vector2(width - chip - 10f, h);
+            row.sizeDelta = new Vector2(width, h);
+            Explain.Skill(label, def, description);
+            return h;
         }
 
         /// A character's idle animation with the visible character centred on pos and about `size` pixels tall,
@@ -398,7 +425,11 @@ namespace LittleKeep.Game
                 string who = repair ? "For the Keep" : $"{item.Upgrade.Member.Def.Name} · {item.Upgrade.Skill.Base.Name}";
                 string body = repair ? $"Repair the Keep by {run.Tuning.ShopRepairAmount:0}." : item.Upgrade.Upgrade.Description + (item.Upgrade.Skill.NextMakesMaster && !item.Sold ? $"\n<color=#FFD15A>Becomes {item.Upgrade.Skill.Base.MasterForm.Name}!</color>" : "");
                 if (repair) Icon("Icon", card, Theme?.iconRest, Top, new Vector2(0f, -40f), 100f);
-                else Portrait(card, content.FighterAsset(item.Upgrade.Member.Def.Id), Top, new Vector2(0f, -75f), 260f);
+                else
+                {
+                    Portrait(card, content.FighterAsset(item.Upgrade.Member.Def.Id), Top, new Vector2(0f, -75f), 260f);
+                    Explain.Chip(card, item.Upgrade.Skill.Base.Element, TopRight, new Vector2(-24f, -24f), 54f);
+                }
                 Label("Who", card, who, 24, TextAnchor.UpperCenter, Top, new Vector2(0f, -150f), new Vector2(w - 60f, 40f), TextColor.WithAlpha(0.8f));
                 Label("Title", card, title, 36, TextAnchor.UpperCenter, Top, new Vector2(0f, -190f), new Vector2(w - 60f, 50f), TextGold);
                 Label("Body", card, body, 24, TextAnchor.UpperCenter, Top, new Vector2(0f, -248f), new Vector2(w - 70f, 130f));
@@ -422,7 +453,7 @@ namespace LittleKeep.Game
             {
                 int index = i;
                 var o = e.Options[i];
-                string label = o.GoldCost > 0 ? $"{o.Text}  ({o.GoldCost} gold)" : o.Text;
+                string label = o.GoldCost > 0 ? $"{o.Text}  ({o.GoldCost} Gold)" : o.Text;
                 var b = Button("Option", card, label, 32, Bottom, new Vector2(0f, 70f + (e.Options.Count - 1 - i) * 120f), new Vector2(940f, 104f), () => onChoose(index),
                     i == 0 ? ButtonStyle.Green : ButtonStyle.Brown);
                 SetEnabled(b, run.CanChoose(i));
@@ -448,13 +479,15 @@ namespace LittleKeep.Game
                 var card = Panel("Member", overlay.rectTransform, Center, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -30f), new Vector2(w, 640f));
                 Portrait(card, asset, Top, new Vector2(0f, -85f), 320f);
                 Label("Name", card, m.Def.Name, 38, TextAnchor.MiddleCenter, Top, new Vector2(0f, -170f), new Vector2(w - 30f, 50f), TextGold);
-                var lines = m.Skills.Select(s =>
+                float sy = -230f;
+                foreach (var s in m.Skills)
                 {
                     string name = s.IsMaster ? $"<color=#FFD15A>{s.Base.MasterForm.Name} (Master)</color>" : $"<b>{s.Base.Name}</b>";
-                    string ups = s.Taken.Count == 0 ? "  no upgrades yet" : string.Join("\n", s.Taken.Select(u => "  + " + u.Name));
-                    return $"{name}\n{ups}";
-                });
-                Label("Skills", card, string.Join("\n\n", lines), 24, TextAnchor.UpperLeft, Top, new Vector2(0f, -230f), new Vector2(w - 50f, 380f));
+                    string ups = s.Taken.Count == 0 ? "no upgrades yet" : string.Join("\n", s.Taken.Select(u => "+ " + u.Name));
+                    var skillAsset = content.SkillAsset(s.Base.Id);
+                    string desc = s.IsMaster ? skillAsset?.masterDescription : skillAsset?.description;
+                    sy -= SkillRow(card, s.Build(), desc ?? "", $"{name}\n<size=20>{ups}</size>", sy, w - 50f, 24) + 16f;
+                }
             }
             Button("Close", overlay.rectTransform, "Close", 34, Bottom, new Vector2(0f, 50f), new Vector2(300f, 100f), () => { Destroy(overlay.gameObject); onClose?.Invoke(); }, ButtonStyle.Green);
         }

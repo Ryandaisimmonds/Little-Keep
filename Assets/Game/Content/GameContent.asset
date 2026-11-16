@@ -95,6 +95,7 @@ MonoBehaviour:
     PerBattle: 3
     PerChapter: 10
     ForWin: 25
+    Minimum: 5
   runTuning:
     StepsPerChapter: 7
     MidBossStep: 3
@@ -107,7 +108,7 @@ MonoBehaviour:
     ShopRepairAmount: 30
     ShopUpgrades: 3
     ConsolationGold: 15
-    HeroHpScale: 1.65
+    HeroHpScale: 2.2
     HeroCountScale: 1.6
     HeroHpPerChapter: 0.35
     HeroHpPerStep: 0.04
@@ -139,3 +140,12 @@ MonoBehaviour:
     RallyCooldown: 30
     RallyStartCharge: 0.5
     SkillStartCharge: 0
+    StatusSeconds: 3
+    RootSeconds: 1.5
+    BossRootFactor: 0.5
+    BurnFraction: 0.5
+    BurnTickSeconds: 0.5
+    ChillSlow: 0.4
+    ShockBonus: 0.2
+    ComboMultiplier: 1.25
+    ComboRadius: 1.5

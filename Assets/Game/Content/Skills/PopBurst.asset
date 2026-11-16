@@ -16,6 +16,7 @@ MonoBehaviour:
     Id: pop_burst
     Name: Pop Burst
     Shape: 1
+    Element: 1
     Cooldown: 6
     Damage: 18
     Count: 1
@@ -50,6 +51,7 @@ MonoBehaviour:
     Id: pop_burst_master
     Name: Bonfire Bloom
     Shape: 1
+    Element: 1
     Cooldown: 5
     Damage: 32
     Count: 1

@@ -13,7 +13,7 @@ namespace LittleKeep.Game
         {
             public Transform root;
             public SpriteRenderer body;
-            public SpriteRenderer barBack, barFill;
+            public SpriteRenderer barBack, barFill, statusIcon;
             public Color color;
             public float baseScale, aspect = 1f;
             public float flash, squash;
@@ -115,6 +115,9 @@ namespace LittleKeep.Game
             v.barFill = MakeSprite("HpFill", Shapes.Square, Palette.Health, 1f, 0, root);
             v.barFill.transform.localPosition = v.barBack.transform.localPosition;
             v.barFill.transform.localScale = v.barBack.transform.localScale;
+            v.statusIcon = MakeSprite("Status", null, Color.white, 0.42f, 0, root);
+            v.statusIcon.transform.localPosition = new Vector3(0f, barY + 0.32f, 0f);
+            v.statusIcon.enabled = false;
             return v;
         }
 
@@ -146,7 +149,25 @@ namespace LittleKeep.Game
                     case BattleEventKind.Hit:
                         if (heroes.TryGetValue(e.TargetId, out var hv)) { hv.flash = 0.08f; hv.squash = 0.12f; }
                         else if (fighters.TryGetValue(e.TargetId, out var fv)) { fv.flash = 0.1f; fv.squash = 0.15f; }
-                        if (e.FromSkill) fx.Blob(pos, 0.5f, SkillColorOf(e.SourceId), 0.2f);
+                        if (e.Combo) break;
+                        if (e.Element != Element.None) fx.Blob(pos, 0.5f, ElementLook.Color(e.Element).WithAlpha(0.8f), 0.2f);
+                        else if (e.FromSkill) fx.Blob(pos, 0.5f, SkillColorOf(e.SourceId), 0.2f);
+                        break;
+                    case BattleEventKind.StatusApplied:
+                        fx.Ring(pos, 0.7f, ElementLook.Color(e.Element), 0.3f, 0.4f);
+                        break;
+                    case BattleEventKind.Combo:
+                        {
+                            var a = ElementLook.Color(e.Element);
+                            var b = ElementLook.Color(e.Other);
+                            float r = battle.Tuning.ComboRadius;
+                            fx.Blob(pos, r * 1.3f, Color.Lerp(a, b, 0.5f).WithAlpha(0.55f), 0.45f);
+                            fx.Ring(pos, r * 1.2f, a, 0.5f, 0.1f);
+                            fx.Ring(pos, r * 1.6f, b, 0.7f, 0.15f);
+                            fx.Ring(pos, r * 2f, Color.white.WithAlpha(0.8f), 0.8f, 0.3f);
+                            fx.Text(pos + new Vector2(0f, 0.9f), ElementLook.ComboName(e.Element, e.Other), Color.Lerp(a, Color.white, 0.25f), 1.1f);
+                            fx.Shake(0.22f);
+                        }
                         break;
                     case BattleEventKind.SkillCast:
                         var col = SkillColorOf(e.SourceId);
@@ -247,9 +268,20 @@ namespace LittleKeep.Game
                     heroes[h.Id] = v;
                 }
                 v.root.position = new Vector3(h.Position.X, h.Position.Y, 0f);
-                Animate(v, v.color, dt, 1f, h.IsEngaged ? CharacterPose.Idle : CharacterPose.Move, h.Position.Y);
+                bool held = h.IsEngaged || h.Status == Element.Bloom;
+                if (h.Status == Element.Bloom) v.animTime -= dt; // rooted: frozen mid-step
+                Animate(v, StatusTint(v.color, h.Status), dt, 1f, held ? CharacterPose.Idle : CharacterPose.Move, h.Position.Y);
                 SetBar(v, h.Hp / h.MaxHp, Palette.HeroHealth, h.Hp < h.MaxHp);
-                if (v.art == null && !h.IsEngaged) v.body.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * 10f + h.Id) * 4f);
+                v.statusIcon.enabled = h.Status != Element.None;
+                if (v.statusIcon.enabled)
+                {
+                    v.statusIcon.sprite = ElementLook.Icon(h.Status);
+                    v.statusIcon.color = ElementLook.IconTint(h.Status);
+                    v.statusIcon.sortingOrder = v.barFill.sortingOrder + 1;
+                    float fade = Mathf.Clamp01(h.StatusRemaining / 0.6f);
+                    v.statusIcon.transform.localScale = Vector3.one * (0.55f + Mathf.Sin(Time.time * 9f) * 0.04f) * (0.6f + 0.4f * fade);
+                }
+                if (v.art == null && !held) v.body.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * 10f + h.Id) * 4f);
             }
             RemoveMissing(heroes);
 
@@ -261,7 +293,9 @@ namespace LittleKeep.Game
                 {
                     sr = shotPool.Count > 0 ? shotPool.Pop() : MakeSprite("Shot", Shapes.Circle, Color.white, 1f, 800, world);
                     sr.gameObject.SetActive(true);
-                    sr.color = p.FromSquad ? (p.FromSkill ? SkillColorOf(p.SourceId) : new Color(1f, 0.98f, 0.85f)) : Palette.HeroShot;
+                    sr.color = !p.FromSquad ? Palette.HeroShot
+                        : p.Element != Element.None ? ElementLook.Color(p.Element)
+                        : p.FromSkill ? SkillColorOf(p.SourceId) : new Color(1f, 0.98f, 0.85f);
                     sr.transform.localScale = Vector3.one * (p.FromSkill ? 0.32f + p.Tier * 0.1f : 0.2f);
                     shots[p.Id] = sr;
                 }
@@ -314,6 +348,14 @@ namespace LittleKeep.Game
             float height = v.baseScale * sizeMul * (1f - s * 0.3f);
             float width = v.baseScale * v.aspect * sizeMul * (1f + s * 0.3f);
             v.body.transform.localScale = new Vector3(width, height, 1f);
+        }
+
+        /// A Hero's body colour while it carries a status: burn and shock flicker, chill and root hold a cool or green cast.
+        static Color StatusTint(Color baseColor, Element status)
+        {
+            if (status == Element.None) return baseColor;
+            float k = status == Element.Frost || status == Element.Bloom ? 0.45f : 0.3f + Mathf.Sin(Time.time * 18f) * 0.15f;
+            return Color.Lerp(baseColor, ElementLook.Color(status), k);
         }
 
         static void SetBar(UnitView v, float fraction, Color color, bool visible)

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace LittleKeep.Rules
 {
+    /// A kind of Skill damage. Each leaves its own status on a Hero: Fire burns, Frost chills, Spark shocks, Bloom roots.
+    public enum Element { None, Fire, Frost, Spark, Bloom }
+
     public enum SkillShape
     {
         /// Fires Count projectiles at the target, fanned across Spread degrees.
@@ -18,6 +21,7 @@ namespace LittleKeep.Rules
         public string Id = "skill";
         public string Name = "Skill";
         public SkillShape Shape;
+        public Element Element;
         public float Cooldown = 6f;
         public float Damage = 10f;
         public int Count = 1;
@@ -166,6 +170,22 @@ namespace LittleKeep.Rules
         public float RallyStartCharge = 0.5f;
         /// Fraction of a Skill's cooldown already charged when a Battle starts.
         public float SkillStartCharge = 0f;
+
+        /// How long burn, chill and shock last.
+        public float StatusSeconds = 3f;
+        /// How long root holds a Hero; bosses are held for BossRootFactor of that.
+        public float RootSeconds = 1.5f;
+        public float BossRootFactor = 0.5f;
+        /// Burn deals this fraction of the hit that lit it, spread over StatusSeconds.
+        public float BurnFraction = 0.5f;
+        public float BurnTickSeconds = 0.5f;
+        /// Chill takes this fraction off a Hero's speed.
+        public float ChillSlow = 0.4f;
+        /// A shocked Hero takes this much more damage.
+        public float ShockBonus = 0.2f;
+        /// A Combo deals this multiple of the hit that set it off, to every Hero within ComboRadius.
+        public float ComboMultiplier = 1.25f;
+        public float ComboRadius = 1.5f;
 
         public BattleTuning Clone() => (BattleTuning)MemberwiseClone();
     }
