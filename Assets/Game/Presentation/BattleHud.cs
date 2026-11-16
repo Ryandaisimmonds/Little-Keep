@@ -47,8 +47,8 @@ namespace LittleKeep.Game
             keepFill = Bar("Hp", keep, Palette.Health, new Vector2(0f, 0.5f), new Vector2(130f, 0f), new Vector2(380f, 34f));
             keepText = Label("Value", keepFill.rectTransform.parent as RectTransform, "", 24, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(380f, 34f));
 
-            var header = Panel("Header", safe, new Vector2(0.5f, 1f), new Vector2(0f, -28f), new Vector2(520f, 70f));
-            headerText = Label("Text", header, "", 28, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(500f, 70f));
+            var header = Panel("Header", safe, new Vector2(0.5f, 1f), new Vector2(0f, -28f), new Vector2(640f, 70f));
+            headerText = Label("Text", header, "", 26, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(620f, 70f));
 
             Button("Pause", safe, "II", 36, new Vector2(1f, 1f), new Vector2(-40f, -28f), new Vector2(110f, 90f), () => PausePressed?.Invoke());
             speedText = Button("Speed", safe, "1x", 32, new Vector2(1f, 1f), new Vector2(-170f, -28f), new Vector2(130f, 90f), () => SpeedPressed?.Invoke()).GetComponentInChildren<Text>();
@@ -72,7 +72,7 @@ namespace LittleKeep.Game
             rallyButton.targetGraphic = rallyBack;
             rallyButton.onClick.AddListener(() => RallyPressed?.Invoke());
 
-            pausePanel = Overlay("Paused", "Paused", "Your Run is saved. Quitting now restarts this Battle next time.", out _, out _,
+            pausePanel = Overlay("Paused", "Paused", "Your Run is saved. If you quit, this Battle starts over next time, but the Keep keeps any damage it has taken.", out _, out _,
                 ("Resume", () => ResumePressed?.Invoke()), ("Quit to title", () => QuitPressed?.Invoke()));
             endPanel = Overlay("End", "", "", out endTitle, out endBody, ("Continue", () => ContinuePressed?.Invoke()));
         }

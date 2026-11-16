@@ -42,7 +42,15 @@ _Avoid_: Map, node map
 
 **Battle**:
 One real-time fight in a side-on lane, viewed in landscape.
-_Avoid_: Fight, encounter, day
+_Avoid_: Fight, day
+
+**Encounter**:
+The line-up a Battle is played from: its waves of Heroes and the gold it pays. Each Battle Stop draws one from its Chapter.
+_Avoid_: Level, mission, wave set
+
+**Gold**:
+The Run's own currency, earned from Battles and events and spent in shops and events. It does not outlast the Run.
+_Avoid_: Coins, money
 
 **Stop**:
 One step on the Trail: a Battle, a tough Battle, a rest, a shop, a story event or a wild creature.

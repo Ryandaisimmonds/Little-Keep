@@ -19,7 +19,7 @@ namespace LittleKeep.Game
         AimInput aim;
         string header;
         Action<BattleReport> onFinished;
-        Action onQuit;
+        Action<float> onQuit;
         int speedIndex;
         bool paused, ended;
         float lastAspect;
@@ -42,7 +42,12 @@ namespace LittleKeep.Game
             hud.PausePressed += () => SetPaused(true);
             hud.ResumePressed += () => SetPaused(false);
             hud.SpeedPressed += () => speedIndex = (speedIndex + 1) % Speeds.Length;
-            hud.QuitPressed += () => { Stop(); onQuit?.Invoke(); };
+            hud.QuitPressed += () =>
+            {
+                float keep = battle.KeepHp;
+                Stop();
+                onQuit?.Invoke(keep);
+            };
             hud.ContinuePressed += () =>
             {
                 var report = BattleReport.From(battle);
@@ -52,7 +57,8 @@ namespace LittleKeep.Game
             gameObject.SetActive(false);
         }
 
-        public void Begin(BattleSetup setup, CompiledContent content, string header, Action<BattleReport> onFinished, Action onQuit)
+        /// onQuit gets the Keep's health at the moment the Player left.
+        public void Begin(BattleSetup setup, CompiledContent content, string header, Action<BattleReport> onFinished, Action<float> onQuit)
         {
             gameObject.SetActive(true);
             this.content = content;

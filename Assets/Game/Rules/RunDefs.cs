@@ -102,6 +102,39 @@ namespace LittleKeep.Rules
         public BattleTuning BattleTuning = new BattleTuning();
 
         public FighterDef FindFamiliar(string id) => Familiars.Find(f => f.Id == id);
+
+        /// A short code that changes whenever anything a saved Run depends on changes: ids, order, counts and the
+        /// Trail and reward numbers that steer its random draws.
+        public string Fingerprint()
+        {
+            var sb = new System.Text.StringBuilder();
+            void Fighter(FighterDef f)
+            {
+                sb.Append(f.Id).Append('[');
+                foreach (var s in f.Skills)
+                {
+                    sb.Append(s.Id).Append('(');
+                    foreach (var u in s.Upgrades) sb.Append(u.Id).Append(',');
+                    sb.Append(s.MasterForm?.Id).Append(')');
+                }
+                sb.Append(']');
+            }
+            Fighter(Keeper);
+            foreach (var f in Familiars) Fighter(f);
+            foreach (var c in Chapters)
+            {
+                sb.Append('|').Append(c.Battles.Count).Append(',').Append(c.ToughBattles.Count);
+                foreach (var e in c.Battles) sb.Append(e.Id).Append(',');
+                foreach (var e in c.ToughBattles) sb.Append(e.Id).Append(',');
+                sb.Append(c.MidBoss?.Id).Append(c.Boss?.Id);
+            }
+            foreach (var e in Events) sb.Append('|').Append(e.Id).Append(e.Options.Count);
+            var t = Tuning;
+            sb.Append($"|{t.StepsPerChapter},{t.MidBossStep},{t.UpgradeOfferSize},{t.ShopUpgrades},{t.MaxFamiliars},{t.WeightBattle},{t.WeightTough},{t.WeightRest},{t.WeightShop},{t.WeightEvent},{t.WeightWild}");
+            uint hash = 2166136261;
+            foreach (char ch in sb.ToString()) hash = (hash ^ ch) * 16777619;
+            return hash.ToString("x8");
+        }
     }
 
     /// What a finished Battle tells the Run.

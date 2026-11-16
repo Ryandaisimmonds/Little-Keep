@@ -39,9 +39,10 @@ namespace LittleKeep.Game
 
         // --- Title and start -----------------------------------------------------
 
-        public void ShowTitle(bool canContinue, Action onContinue, Action onNewRun)
+        public void ShowTitle(bool canContinue, Action onContinue, Action onNewRun, string notice = "")
         {
             var p = NewPage();
+            if (!string.IsNullOrEmpty(notice)) Toast(p, notice);
             Label("Title", p, "Little Keep", 120, TextAnchor.MiddleCenter, Center, new Vector2(0f, 240f), new Vector2(1400f, 180f), Palette.TextDark);
             Label("Tag", p, "Hold the Keep. Grow the squad.", 34, TextAnchor.MiddleCenter, Center, new Vector2(0f, 120f), new Vector2(1200f, 60f), Palette.TextDark);
             if (canContinue) Button("Continue", p, "Continue Run", 40, Center, new Vector2(0f, -40f), new Vector2(520f, 120f), onContinue);
@@ -231,7 +232,7 @@ namespace LittleKeep.Game
                 var card = Panel("Item", p, Center, new Vector2(x, -10f), new Vector2(w, 440f));
                 string title = item.Kind == ShopItemKind.Repair ? "Repairs" : item.Upgrade.Upgrade.Name;
                 string who = item.Kind == ShopItemKind.Repair ? "For the Keep" : $"{item.Upgrade.Member.Def.Name} · {item.Upgrade.Skill.Base.Name}";
-                string body = item.Kind == ShopItemKind.Repair ? $"Repair the Keep by {run.Tuning.ShopRepairAmount:0}." : item.Upgrade.Upgrade.Description + (item.Upgrade.MakesMaster ? $"\n★ Becomes {item.Upgrade.Skill.Base.MasterForm.Name}!" : "");
+                string body = item.Kind == ShopItemKind.Repair ? $"Repair the Keep by {run.Tuning.ShopRepairAmount:0}." : item.Upgrade.Upgrade.Description + (item.Upgrade.Skill.NextMakesMaster && !item.Sold ? $"\n★ Becomes {item.Upgrade.Skill.Base.MasterForm.Name}!" : "");
                 Label("Who", card, who, 24, TextAnchor.UpperLeft, TopLeft, new Vector2(22f, -20f), new Vector2(w - 44f, 40f), Palette.Text.WithAlpha(0.8f));
                 Label("Title", card, title, 36, TextAnchor.UpperLeft, TopLeft, new Vector2(22f, -66f), new Vector2(w - 44f, 60f));
                 Label("Body", card, body, 24, TextAnchor.UpperLeft, TopLeft, new Vector2(22f, -130f), new Vector2(w - 44f, 180f));

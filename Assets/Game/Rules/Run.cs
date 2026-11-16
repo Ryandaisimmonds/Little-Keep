@@ -24,7 +24,7 @@ namespace LittleKeep.Rules
     /// all randomness comes from the seed, and the choices are recorded, so Save/Load replays a Run exactly.
     public sealed class Run
     {
-        const string SaveHeader = "littlekeep-run/1";
+        const string SaveHeader = "littlekeep-run/2";
 
         readonly RunContent content;
         readonly RunTuning t;
@@ -70,12 +70,16 @@ namespace LittleKeep.Rules
         public IReadOnlyList<Stop> NextChoices => position + 1 < steps.Count ? steps[position + 1] : new List<Stop>();
         /// The step after that, shown faintly. Empty past the boss: the next Chapter stays in fog.
         public IReadOnlyList<Stop> Beyond => position + 2 < steps.Count ? steps[position + 2] : new List<Stop>();
+        /// 1-based step of the Stop being played or just finished (0 before the first).
+        public int Step => position + 1;
+        public int StepsInChapter => steps.Count;
         /// Steps left including the boss.
         public int StepsToBoss => steps.Count - 1 - position;
 
         public Run(RunContent content, int seed, string starterId)
         {
             this.content = content ?? throw new ArgumentNullException(nameof(content));
+            Validate(content);
             t = content.Tuning ?? new RunTuning();
             this.seed = seed;
             this.starterId = starterId;
@@ -85,6 +89,24 @@ namespace LittleKeep.Rules
             var starter = content.FindFamiliar(starterId) ?? content.Familiars.FirstOrDefault();
             if (starter != null) familiars.Add(new SquadMember(starter));
             StartChapter(0);
+        }
+
+        /// Refuses content a Run could not finish, before anything is played or saved.
+        static void Validate(RunContent c)
+        {
+            var problems = new List<string>();
+            if (c.Keeper == null) problems.Add("no Keeper");
+            if (c.Chapters.Count == 0) problems.Add("no Chapters");
+            for (int i = 0; i < c.Chapters.Count; i++)
+            {
+                var ch = c.Chapters[i];
+                if (ch.Battles.Count == 0) problems.Add($"Chapter {i + 1} has no Battles");
+                if (ch.Boss == null) problems.Add($"Chapter {i + 1} has no boss");
+                if (ch.MidBoss == null && ch.ToughBattles.Count == 0) problems.Add($"Chapter {i + 1} has no mid-boss or tough Battles");
+            }
+            foreach (var e in c.Events)
+                if (!e.Options.Exists(o => o.GoldCost == 0)) problems.Add($"event '{e.Id}' has no free option, so a Run without gold would be stuck");
+            if (problems.Count > 0) throw new ArgumentException("Run content is incomplete: " + string.Join("; ", problems));
         }
 
         // --- Trail -------------------------------------------------------------
@@ -231,11 +253,21 @@ namespace LittleKeep.Rules
             return s;
         }
 
+        /// The Player left mid-Battle. The Battle will restart on resume, but the Keep keeps the damage it took,
+        /// so quitting a losing Battle is never a free retry.
+        public void SuspendBattle(float keepHp)
+        {
+            Require(RunPhase.Battle);
+            if (keepHp >= KeepHp) return;
+            log.Add(string.Format(CultureInfo.InvariantCulture, "K:{0:G9}", keepHp));
+            KeepHp = Math.Max(1f, keepHp);
+        }
+
         public void FinishBattle(BattleReport report)
         {
             Require(RunPhase.Battle);
             var freed = report.FreedCreatures ?? new List<string>();
-            log.Add(string.Format(CultureInfo.InvariantCulture, "B:{0}:{1:R}:{2}", report.Won ? 1 : 0, report.KeepHp, string.Join(",", freed)));
+            log.Add(string.Format(CultureInfo.InvariantCulture, "B:{0}:{1:G9}:{2}", report.Won ? 1 : 0, report.KeepHp, string.Join(",", freed)));
             KeepHp = Math.Max(0f, Math.Min(KeepMaxHp, report.KeepHp));
             if (!report.Won || KeepHp <= 0f)
             {
@@ -250,7 +282,6 @@ namespace LittleKeep.Rules
                 var def = content.FindFamiliar(id);
                 if (def == null || InSquad(def) || pendingCreatures.Contains(def)) continue;
                 pendingCreatures.Enqueue(def);
-                break;
             }
             Advance();
         }
@@ -491,13 +522,16 @@ namespace LittleKeep.Rules
         // --- Save and resume ---------------------------------------------------------
 
         /// The whole Run as text: its seed, starter and every choice so far.
-        public string Save() => $"{SaveHeader}|{seed}|{starterId}\n{string.Join(";", log)}";
+        /// Saves replay choices, so they only mean the same Run against the same content: the header carries a
+        /// fingerprint of the content, and Load refuses a save made with different content (see ADR 0003).
+        public string Save() => $"{SaveHeader}|{seed}|{starterId}|{content.Fingerprint()}\n{string.Join(";", log)}";
 
         public static Run Load(RunContent content, string save)
         {
             var lines = save.Split('\n');
             var head = lines[0].Split('|');
-            if (head.Length < 3 || head[0] != SaveHeader) throw new FormatException("Not a Little Keep Run save.");
+            if (head.Length < 4 || head[0] != SaveHeader) throw new FormatException("This Run was saved by an older version of the game.");
+            if (head[3] != content.Fingerprint()) throw new FormatException("The game's content has changed since this Run was saved.");
             var run = new Run(content, int.Parse(head[1], CultureInfo.InvariantCulture), head[2]);
             if (lines.Length < 2 || lines[1].Length == 0) return run;
             foreach (var action in lines[1].Split(';')) run.Replay(action);
@@ -511,6 +545,7 @@ namespace LittleKeep.Rules
             switch (parts[0])
             {
                 case "S": ChooseStop(Arg(1)); break;
+                case "K": SuspendBattle(float.Parse(parts[1], CultureInfo.InvariantCulture)); break;
                 case "B":
                     FinishBattle(new BattleReport
                     {

@@ -11,17 +11,24 @@
 - Heroes that bring a creature (story 16) and mid-bosses and bosses (story 17) land here.
 - Hit flashes, squash and screen shake already exist in grey-box form; ticket 07 replaces them.
 
-**Status:** ready-for-agent
+**Status:** in progress: built and tested; waiting on the phone play-test
 
-- [ ] The Run module takes a seed, a starting Familiar and a sequence of choices, and the same seed and choices give the same Run
-- [ ] The Trail always reaches the boss, forks, and exposes exactly the next two steps plus the boss's distance
-- [ ] All six Stop types work: Battle, tough Battle (better reward), rest (repairs the Keep), shop (spends Run earnings), story event (choices with consequences), wild creature
-- [ ] Skill Upgrade offers are 3 options drawn only from Skills the squad has, each stating plainly what it changes
-- [ ] A Skill's third upgrade makes its Master Form
-- [ ] Befriending adds a creature as a Familiar for the rest of the Run; a full squad offers a choice; Heroes are never befriended
-- [ ] Three Chapters of about seven Stops, each with a mid-boss and a boss with their own behaviour
-- [ ] Keep health persists between Battles; the Run ends when it falls or the last boss is beaten, with a summary screen
-- [ ] The build so far can be viewed at any time during a Run
-- [ ] A Run in progress is saved after every choice and resumes identically
-- [ ] Edit-mode tests cover the behaviours above through the Run module's interface only
+**Deferred from the ticket 02 review (to ticket 05 unless noted):**
+- Mid-bosses are scaled-up ordinary Heroes and all bosses share one behaviour (calling in Heroes); give each its own behaviour with the full roster.
+- The squad view is reachable from every Run screen but not during a Battle (the Battle shows each Fighter's card).
+- Auto-aim stays "nearest the Keep": decided as good enough for now, revisit with faster Heroes.
+- Wild creature Stops draw from every Familiar, starters included; ticket 03 should limit them to creatures the Player can Bond with.
+- Skipping a Skill Upgrade is allowed (not in the spec); keep unless playtesting says otherwise.
+
+- [x] The Run module takes a seed, a starting Familiar and a sequence of choices, and the same seed and choices give the same Run
+- [x] The Trail always reaches the boss, forks, and exposes exactly the next two steps plus the boss's distance
+- [x] All six Stop types work: Battle, tough Battle (better reward), rest (repairs the Keep), shop (spends Run earnings), story event (choices with consequences), wild creature
+- [x] Skill Upgrade offers are 3 options drawn only from Skills the squad has, each stating plainly what it changes
+- [x] A Skill's third upgrade makes its Master Form
+- [x] Befriending adds a creature as a Familiar for the rest of the Run; a full squad offers a choice; Heroes are never befriended
+- [x] Three Chapters of about seven Stops, each with a mid-boss and a boss with their own behaviour
+- [x] Keep health persists between Battles; the Run ends when it falls or the last boss is beaten, with a summary screen
+- [x] The build so far can be viewed at any time during a Run
+- [x] A Run in progress is saved after every choice and resumes identically
+- [x] Edit-mode tests cover the behaviours above through the Run module's interface only
 - [ ] Milestone 2 build installed and played on the developer's phone

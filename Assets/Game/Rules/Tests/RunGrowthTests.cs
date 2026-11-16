@@ -198,6 +198,56 @@ namespace LittleKeep.Rules.Tests
             Assert.That(Autoplay(resumed), Is.EqualTo(Autoplay(run)));
         }
 
+        [Test]
+        public void Leaving_mid_Battle_keeps_the_damage_the_Keep_has_taken_when_the_Run_resumes()
+        {
+            var content = Make();
+            var run = new Run(content, 6, "pip");
+            GoToBattle(run);
+
+            run.SuspendBattle(35f);
+            var resumed = Run.Load(content, run.Save());
+
+            Assert.That(resumed.Phase, Is.EqualTo(RunPhase.Battle));
+            Assert.That(resumed.KeepHp, Is.EqualTo(35f));
+            Assert.That(resumed.CreateBattle().KeepHp, Is.EqualTo(35f));
+        }
+
+        [Test]
+        public void Every_creature_freed_in_one_Battle_is_offered_in_turn()
+        {
+            var run = AfterFirstBattle(1, "pony", "owl");
+            while (run.Phase == RunPhase.Upgrade) run.SkipUpgrade();
+
+            Assert.That(run.CreatureOffer.Id, Is.EqualTo("pony"));
+            run.PassCreature();
+            Assert.That(run.CreatureOffer.Id, Is.EqualTo("owl"));
+        }
+
+        [Test]
+        public void A_save_made_with_different_content_is_refused_rather_than_replayed_wrongly()
+        {
+            var run = new Run(Make(), 3, "pip");
+            run.ChooseStop(0);
+            var changed = Make();
+            changed.Chapters[0].Battles.Add(Encounter("new_battle"));
+
+            Assert.Throws<System.FormatException>(() => Run.Load(changed, run.Save()));
+            Assert.DoesNotThrow(() => Run.Load(Make(), run.Save()));
+        }
+
+        [Test]
+        public void Content_that_could_leave_a_Run_stuck_is_refused_up_front()
+        {
+            var noBoss = Make();
+            noBoss.Chapters[1].Boss = null;
+            var paidOnly = Make();
+            paidOnly.Events.Add(new EventDef { Id = "toll", Options = { new EventOption { Text = "Pay", GoldCost = 5 } } });
+
+            Assert.Throws<System.ArgumentException>(() => new Run(noBoss, 1, "pip"));
+            Assert.Throws<System.ArgumentException>(() => new Run(paidOnly, 1, "pip"));
+        }
+
         static int IndexOf(Run run, StopKind kind) => run.NextChoices.ToList().FindIndex(s => s.Kind == kind);
     }
 }

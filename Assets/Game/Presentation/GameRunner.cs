@@ -42,10 +42,12 @@ namespace LittleKeep.Game
 
         void Start() => ShowTitle();
 
-        void ShowTitle()
+        void ShowTitle() => ShowTitle("");
+
+        void ShowTitle(string notice)
         {
             run = null;
-            screens.ShowTitle(HasSave, ContinueRun, () => screens.ShowStarterChoice(StartRun, ShowTitle));
+            screens.ShowTitle(HasSave, ContinueRun, () => screens.ShowStarterChoice(StartRun, ShowTitle), notice);
         }
 
         static bool HasSave => PlayerPrefs.HasKey(SaveKey);
@@ -68,7 +70,7 @@ namespace LittleKeep.Game
                 // A save from an older build that no longer replays: drop it rather than get stuck.
                 Debug.LogWarning("Could not resume the saved Run: " + e.Message);
                 PlayerPrefs.DeleteKey(SaveKey);
-                ShowTitle();
+                ShowTitle(e.Message + " It can't be continued, sorry: start a new Run.");
                 return;
             }
             Show();
@@ -83,10 +85,15 @@ namespace LittleKeep.Game
 
         void SaveAndShow()
         {
+            Save();
+            Show();
+        }
+
+        void Save()
+        {
             if (run.Phase == RunPhase.Ended) PlayerPrefs.DeleteKey(SaveKey);
             else PlayerPrefs.SetString(SaveKey, run.Save());
             PlayerPrefs.Save();
-            Show();
         }
 
         void Show()
@@ -98,11 +105,11 @@ namespace LittleKeep.Game
                     break;
                 case RunPhase.Battle:
                     screens.Hide();
-                    string header = run.CurrentStop.Kind == StopKind.Boss || run.CurrentStop.Kind == StopKind.MidBoss
-                        ? $"{run.EncounterName}" : $"Chapter {run.Chapter + 1}";
+                    string header = $"Ch {run.Chapter + 1} · Step {run.Step}/{run.StepsInChapter}";
+                    if (!string.IsNullOrEmpty(run.EncounterName)) header += $" · {run.EncounterName}";
                     battle.Begin(run.CreateBattle(), compiled, header,
                         report => Act(() => run.FinishBattle(report)),
-                        ShowTitle);
+                        keep => { run.SuspendBattle(keep); Save(); ShowTitle(); });
                     break;
                 case RunPhase.Upgrade:
                     screens.ShowUpgrade(run, i => Act(() => run.PickUpgrade(i)), () => Act(run.SkipUpgrade), ShowSquad);

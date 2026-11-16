@@ -58,8 +58,7 @@ namespace LittleKeep.Editor
                             run.LeaveShop();
                             break;
                         case RunPhase.Event:
-                            int o = 0;
-                            while (!run.CanChoose(o)) o++;
+                            int o = Enumerable.Range(0, run.CurrentEvent.Options.Count).FirstOrDefault(run.CanChoose);
                             run.ChooseEventOption(o);
                             break;
                     }
