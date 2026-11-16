@@ -24,4 +24,3 @@ crashlytics-build.properties
 .vs/
 .vscode/
 .DS_Store
-/.staging/

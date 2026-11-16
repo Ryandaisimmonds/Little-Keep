@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
+  m_Name: Shieldbearer
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
+  def:
+    Id: shieldbearer
+    Name: Shieldbearer
+    Hp: 130
+    Speed: 0.9
+    KeepDamage: 12
+    Size: 0.45
+    MeleeDamage: 10
+    MeleeInterval: 1.4
+    MeleeRange: 0.95
+    ShotDamage: 0
+    ShotInterval: 1.5
+    ShotRange: 6
+    ShotSpeed: 9
+    AttackBlock: 0.7
+  description: Hides behind an enormous shield. Ordinary attacks barely scratch it; Skills hit in full.
+  color: {r: 0.55, g: 0.65, b: 0.85, a: 1}
+  look: 1

@@ -22,6 +22,7 @@ namespace LittleKeep.Rules
         float waveTimer;
         float spawnTimer;
         Vec2? aimPoint;
+        float rallyRemaining;
 
         public float Time { get; private set; }
         public float KeepHp { get; private set; }
@@ -36,6 +37,8 @@ namespace LittleKeep.Rules
         public int WaveNumber => waveIndex + 1;
         public int WaveCount => setup.Waves.Count;
         public BattleTuning Tuning => t;
+        /// 0 = just used, 1 = ready.
+        public float RallyCharge => t.RallyCooldown <= 0f ? 1f : 1f - rallyRemaining / t.RallyCooldown;
 
         public Battle(BattleSetup setup)
         {
@@ -44,6 +47,7 @@ namespace LittleKeep.Rules
             rng = new Rng(setup.Seed);
             KeepHp = Math.Min(setup.KeepHp, setup.KeepMaxHp);
             waveTimer = t.FirstWaveDelay;
+            rallyRemaining = t.RallyCooldown * (1f - t.RallyStartCharge);
 
             squad.Add(new Fighter(nextId++, setup.Keeper, true, t.KeeperPosition, t.SkillStartCharge));
             for (int i = 0; i < setup.Familiars.Count && i < t.FamiliarPositions.Length; i++)
@@ -54,6 +58,25 @@ namespace LittleKeep.Rules
         public Vec2? AimPoint => aimPoint;
 
         public void SetAim(Vec2? point) => aimPoint = point;
+
+        /// Rally: every Keeper and Familiar who is up casts every Skill at once. Needs a Hero on the lane and a full charge.
+        public bool TryRally()
+        {
+            if (Outcome != BattleOutcome.Ongoing || rallyRemaining > 0f || ClosestToKeep() == null) return false;
+            rallyRemaining = t.RallyCooldown;
+            Emit(new BattleEvent { Kind = BattleEventKind.Rally, SourceId = Keeper.Id, Position = Keeper.Position });
+            foreach (var f in squad)
+            {
+                if (f.IsKnockedOut) continue;
+                foreach (var skill in f.skills)
+                {
+                    Cast(f, skill.Def);
+                    skill.CooldownRemaining = skill.Def.Cooldown;
+                }
+            }
+            RemoveDefeated();
+            return true;
+        }
 
         /// Events since the last call, oldest first.
         public List<BattleEvent> TakeEvents()
@@ -78,6 +101,7 @@ namespace LittleKeep.Rules
         {
             const float dt = TickSeconds;
             Time += dt;
+            rallyRemaining = Math.Max(0f, rallyRemaining - dt);
             UpdateWaves(dt);
             UpdateSquad(dt);
             UpdateProjectiles(dt);
@@ -213,6 +237,13 @@ namespace LittleKeep.Rules
                     Emit(new BattleEvent { Kind = BattleEventKind.Recovered, TargetId = f.Id, Position = f.Position });
                     continue;
                 }
+                foreach (var skill in f.skills)
+                {
+                    skill.CooldownRemaining = Math.Max(0f, skill.CooldownRemaining - dt);
+                    if (skill.CooldownRemaining > 0f || ClosestToKeep() == null) continue;
+                    Cast(f, skill.Def);
+                    skill.CooldownRemaining = skill.Def.Cooldown;
+                }
                 f.attackTimer -= dt;
                 if (f.attackTimer > 0f) continue;
                 if (!TryGetAim(f, f.Def.ProjectileSpeed, out var aim)) continue;
@@ -222,6 +253,28 @@ namespace LittleKeep.Rules
                 Emit(new BattleEvent { Kind = BattleEventKind.Attack, SourceId = f.Id, Position = aim });
             }
         }
+
+        void Cast(Fighter f, SkillDef skill)
+        {
+            if (!TryGetAim(f, skill.Shape == SkillShape.Volley ? skill.ProjectileSpeed : 0f, out var aim)) return;
+            if (skill.Shape == SkillShape.Burst)
+            {
+                Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = aim, Amount = skill.Radius, Tag = skill.Id });
+                foreach (var h in heroes)
+                    if (Vec2.Distance(h.Position, aim) <= skill.Radius + h.Def.Size) DamageHero(h, skill.Damage, f.Id, true);
+                return;
+            }
+            Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = aim, Tag = skill.Id });
+            var dir = (aim - f.Position).Normalized;
+            int count = Math.Max(1, skill.Count);
+            for (int i = 0; i < count; i++)
+            {
+                float angle = count == 1 ? 0f : -skill.Spread * 0.5f + skill.Spread * i / (count - 1);
+                projectiles.Add(new Projectile(nextId++, f.Id, f.Position, dir.Rotated(angle) * skill.ProjectileSpeed, skill.Damage, true, true));
+            }
+        }
+
+        void RemoveDefeated() => heroes.RemoveAll(h => h.Hp <= 0f);
 
         /// Where a fighter should aim: the Hero closest to the Keep, led by its movement.
         bool TryGetAim(Fighter f, float projectileSpeed, out Vec2 aim)
@@ -282,7 +335,7 @@ namespace LittleKeep.Rules
                 }
                 if (remove) projectiles.RemoveAt(i);
             }
-            heroes.RemoveAll(h => h.Hp <= 0f);
+            RemoveDefeated();
         }
 
         void DamageHero(Hero h, float amount, int sourceId, bool fromSkill)

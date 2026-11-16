@@ -1,0 +1,14 @@
+{
+    "name": "LittleKeep.Editor",
+    "rootNamespace": "LittleKeep.Editor",
+    "references": ["LittleKeep.Rules", "LittleKeep.Game"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
