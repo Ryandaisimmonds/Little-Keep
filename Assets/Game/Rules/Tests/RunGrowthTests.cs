@@ -248,6 +248,69 @@ namespace LittleKeep.Rules.Tests
             Assert.Throws<System.ArgumentException>(() => new Run(paidOnly, 1, "pip"));
         }
 
+        [Test]
+        public void Keeper_upgrades_and_the_difficulty_tier_shape_the_Run_and_survive_a_save()
+        {
+            var content = Make();
+            var bonuses = new RunBonuses { KeepMaxHpBonus = 20f, StartGold = 15, KeeperDamage = 1.5f, RallyCooldown = 0.8f, HeroHp = 1.3f, HeroCount = 2f, Tier = 1 };
+            var plain = new Run(content, 8, "pip");
+            var run = new Run(content, 8, "pip", bonuses);
+            GoToBattle(plain);
+            GoToBattle(run);
+
+            var a = plain.CreateBattle();
+            var b = run.CreateBattle();
+            var resumed = Run.Load(content, run.Save()).CreateBattle();
+
+            Assert.That(run.KeepMaxHp, Is.EqualTo(120f));
+            Assert.That(run.KeepHp, Is.EqualTo(120f));
+            Assert.That(b.Keeper.AttackDamage, Is.EqualTo(a.Keeper.AttackDamage * 1.5f).Within(1e-4));
+            Assert.That(b.Tuning.RallyCooldown, Is.EqualTo(a.Tuning.RallyCooldown * 0.8f).Within(1e-4));
+            Assert.That(b.Waves[0].Entries[0].Hero.Hp, Is.EqualTo(a.Waves[0].Entries[0].Hero.Hp * 1.3f).Within(1e-3));
+            Assert.That(b.Waves[0].Entries[0].Count, Is.EqualTo(a.Waves[0].Entries[0].Count * 2));
+            Assert.That(resumed.Keeper.AttackDamage, Is.EqualTo(b.Keeper.AttackDamage));
+            Assert.That(resumed.KeepMaxHp, Is.EqualTo(120f));
+            Assert.That(a.Tuning.RallyCooldown, Is.EqualTo(new BattleTuning().RallyCooldown), "the shared tuning is not changed");
+        }
+
+        [Test]
+        public void A_Run_reports_every_creature_it_befriended_and_its_tier()
+        {
+            var run = new Run(Make(), 1, "pip", new RunBonuses { Tier = 2 });
+            GoToBattle(run);
+            run.FinishBattle(Win(run, -1f, "pony", "owl"));
+            while (run.Phase == RunPhase.Upgrade) run.SkipUpgrade();
+            run.Befriend();
+            run.Befriend();
+            while (run.Phase != RunPhase.Trail) Resolve(run);
+            GoToBattle(run);
+            run.FinishBattle(new BattleReport { Won = false, KeepHp = 0f });
+
+            Assert.That(run.Result.Befriended, Is.EqualTo(new[] { "pony", "owl" }));
+            Assert.That(run.Result.Tier, Is.EqualTo(2));
+            Assert.That(run.Result.StartingFamiliar, Is.EqualTo("pip"));
+        }
+
+        [Test]
+        public void Wild_creature_Stops_only_offer_creatures_the_Player_can_Bond_with()
+        {
+            var content = Make();
+            content.WildCreatures.Add("owl");
+            var offered = new HashSet<string>();
+            for (int seed = 1; seed <= 40; seed++)
+            {
+                var run = new Run(content, seed, "pip");
+                for (int guard = 0; guard < 30 && run.Phase != RunPhase.Ended; guard++)
+                {
+                    if (run.Phase == RunPhase.Trail) { int w = IndexOf(run, StopKind.Wild); run.ChooseStop(w < 0 ? 0 : w); }
+                    else if (run.Phase == RunPhase.Befriend) { if (run.CurrentStop.Kind == StopKind.Wild) offered.Add(run.CreatureOffer.Id); run.PassCreature(); }
+                    else Resolve(run);
+                }
+            }
+
+            Assert.That(offered, Is.EquivalentTo(new[] { "owl" }));
+        }
+
         static int IndexOf(Run run, StopKind kind) => run.NextChoices.ToList().FindIndex(s => s.Kind == kind);
     }
 }

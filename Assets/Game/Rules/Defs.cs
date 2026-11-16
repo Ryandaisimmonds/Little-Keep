@@ -166,6 +166,8 @@ namespace LittleKeep.Rules
         public float RallyStartCharge = 0.5f;
         /// Fraction of a Skill's cooldown already charged when a Battle starts.
         public float SkillStartCharge = 0f;
+
+        public BattleTuning Clone() => (BattleTuning)MemberwiseClone();
     }
 
     /// Everything needed to start a Battle.

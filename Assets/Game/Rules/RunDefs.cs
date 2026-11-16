@@ -100,6 +100,8 @@ namespace LittleKeep.Rules
         public List<EventDef> Events = new List<EventDef>();
         public RunTuning Tuning = new RunTuning();
         public BattleTuning BattleTuning = new BattleTuning();
+        /// Creatures wild creature Stops can offer (ids). Empty = any Familiar not in the squad.
+        public List<string> WildCreatures = new List<string>();
 
         public FighterDef FindFamiliar(string id) => Familiars.Find(f => f.Id == id);
 
@@ -160,5 +162,9 @@ namespace LittleKeep.Rules
         /// 1-based Chapter the Run ended in.
         public int ChapterReached;
         public int Gold;
+        public int Tier;
+        public string StartingFamiliar = "";
+        /// Every creature befriended this Run, in order (repeats included).
+        public List<string> Befriended = new List<string>();
     }
 }

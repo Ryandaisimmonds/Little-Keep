@@ -24,13 +24,15 @@ namespace LittleKeep.Rules
     /// all randomness comes from the seed, and the choices are recorded, so Save/Load replays a Run exactly.
     public sealed class Run
     {
-        const string SaveHeader = "littlekeep-run/2";
+        const string SaveHeader = "littlekeep-run/3";
 
         readonly RunContent content;
         readonly RunTuning t;
         readonly Rng rng;
         readonly int seed;
         readonly string starterId;
+        readonly RunBonuses bonuses;
+        readonly List<string> befriended = new List<string>();
         readonly List<string> log = new List<string>();
         readonly List<SquadMember> familiars = new List<SquadMember>();
         readonly Queue<FighterDef> pendingCreatures = new Queue<FighterDef>();
@@ -76,15 +78,19 @@ namespace LittleKeep.Rules
         /// Steps left including the boss.
         public int StepsToBoss => steps.Count - 1 - position;
 
-        public Run(RunContent content, int seed, string starterId)
+        public RunBonuses Bonuses => bonuses;
+
+        public Run(RunContent content, int seed, string starterId, RunBonuses bonuses = null)
         {
+            this.bonuses = bonuses ?? new RunBonuses();
             this.content = content ?? throw new ArgumentNullException(nameof(content));
             Validate(content);
             t = content.Tuning ?? new RunTuning();
             this.seed = seed;
             this.starterId = starterId;
             rng = new Rng(seed);
-            KeepMaxHp = KeepHp = t.KeepMaxHp;
+            KeepMaxHp = KeepHp = t.KeepMaxHp + this.bonuses.KeepMaxHpBonus;
+            Gold = this.bonuses.StartGold;
             Keeper = new SquadMember(content.Keeper);
             var starter = content.FindFamiliar(starterId) ?? content.Familiars.FirstOrDefault();
             if (starter != null) familiars.Add(new SquadMember(starter));
@@ -218,13 +224,21 @@ namespace LittleKeep.Rules
         public BattleSetup CreateBattle()
         {
             Require(RunPhase.Battle);
+            var keeper = Keeper.Build();
+            if (bonuses.KeeperDamage != 1f)
+            {
+                keeper.AttackDamage *= bonuses.KeeperDamage;
+                foreach (var s in keeper.Skills) s.Damage *= bonuses.KeeperDamage;
+            }
+            var tuning = content.BattleTuning.Clone();
+            tuning.RallyCooldown *= bonuses.RallyCooldown;
             var setup = new BattleSetup
             {
-                Keeper = Keeper.Build(),
+                Keeper = keeper,
                 KeepHp = KeepHp,
                 KeepMaxHp = KeepMaxHp,
                 Seed = battleSeed,
-                Tuning = content.BattleTuning,
+                Tuning = tuning,
             };
             foreach (var f in familiars) setup.Familiars.Add(f.Build());
             foreach (var w in encounter.Waves)
@@ -233,7 +247,7 @@ namespace LittleKeep.Rules
                 foreach (var e in w.Entries)
                 {
                     bool boss = e.Hero != null && e.Hero.IsBoss;
-                    int count = boss ? e.Count : Math.Max(1, (int)Math.Round(e.Count * t.HeroCountScale));
+                    int count = boss ? e.Count : Math.Max(1, (int)Math.Round(e.Count * t.HeroCountScale * bonuses.HeroCount));
                     wave.Entries.Add(new WaveEntry { Hero = Scaled(e.Hero), Count = count });
                 }
                 setup.Waves.Add(wave);
@@ -247,7 +261,7 @@ namespace LittleKeep.Rules
             if (scaledHeroes.TryGetValue(h, out var s)) return s;
             s = h.Clone();
             int step = CurrentStop != null ? CurrentStop.Step : 0;
-            s.Hp = h.Hp * t.HeroHpScale * (1f + t.HeroHpPerChapter * Chapter) * (1f + t.HeroHpPerStep * step);
+            s.Hp = h.Hp * t.HeroHpScale * bonuses.HeroHp * (1f + t.HeroHpPerChapter * Chapter) * (1f + t.HeroHpPerStep * step);
             scaledHeroes[h] = s;
             s.Summon = Scaled(h.Summon);
             return s;
@@ -378,9 +392,13 @@ namespace LittleKeep.Rules
 
         bool InSquad(FighterDef def) => familiars.Exists(f => f.Def == def);
 
+        /// A creature a wild Stop (or an event) can offer: one the Player can Bond with, not already in the squad.
         FighterDef RandomCreature()
         {
-            var candidates = content.Familiars.Where(f => !InSquad(f)).ToList();
+            var pool = content.WildCreatures.Count > 0
+                ? content.WildCreatures.Select(content.FindFamiliar).Where(f => f != null)
+                : content.Familiars;
+            var candidates = pool.Where(f => !InSquad(f)).ToList();
             return candidates.Count == 0 ? null : candidates[rng.Range(0, candidates.Count)];
         }
 
@@ -391,6 +409,7 @@ namespace LittleKeep.Rules
             if (SquadFull && (replaceIndex < 0 || replaceIndex >= familiars.Count))
                 throw new ArgumentOutOfRangeException(nameof(replaceIndex), "The squad is full: choose a Familiar to swap out.");
             log.Add("F:" + replaceIndex);
+            befriended.Add(CreatureOffer.Id);
             var member = new SquadMember(CreatureOffer);
             if (SquadFull)
             {
@@ -511,6 +530,9 @@ namespace LittleKeep.Rules
                 BattlesWon = BattlesWon,
                 ChapterReached = Chapter + 1,
                 Gold = Gold,
+                Tier = bonuses.Tier,
+                StartingFamiliar = starterId ?? "",
+                Befriended = new List<string>(befriended),
             };
         }
 
@@ -524,15 +546,15 @@ namespace LittleKeep.Rules
         /// The whole Run as text: its seed, starter and every choice so far.
         /// Saves replay choices, so they only mean the same Run against the same content: the header carries a
         /// fingerprint of the content, and Load refuses a save made with different content (see ADR 0003).
-        public string Save() => $"{SaveHeader}|{seed}|{starterId}|{content.Fingerprint()}\n{string.Join(";", log)}";
+        public string Save() => $"{SaveHeader}|{seed}|{starterId}|{content.Fingerprint()}|{bonuses.Encode()}\n{string.Join(";", log)}";
 
         public static Run Load(RunContent content, string save)
         {
             var lines = save.Split('\n');
             var head = lines[0].Split('|');
-            if (head.Length < 4 || head[0] != SaveHeader) throw new FormatException("This Run was saved by an older version of the game.");
+            if (head.Length < 5 || head[0] != SaveHeader) throw new FormatException("This Run was saved by an older version of the game.");
             if (head[3] != content.Fingerprint()) throw new FormatException("The game's content has changed since this Run was saved.");
-            var run = new Run(content, int.Parse(head[1], CultureInfo.InvariantCulture), head[2]);
+            var run = new Run(content, int.Parse(head[1], CultureInfo.InvariantCulture), head[2], RunBonuses.Decode(head[4]));
             if (lines.Length < 2 || lines[1].Length == 0) return run;
             foreach (var action in lines[1].Split(';')) run.Replay(action);
             return run;
