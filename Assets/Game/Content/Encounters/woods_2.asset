@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e09413cc5db254d45a122760db57e450, type: 3}
+  m_Name: woods_2
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EncounterAsset
+  id: woods_2
+  displayName: 
+  gold: 18
+  waves:
+  - entries:
+    - hero: {fileID: 11400000, guid: 0e80d6a23cabd427b998b916ee819df7, type: 2}
+      count: 2
+    - hero: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
+      count: 3
+    spawnInterval: 0.8
+  - entries:
+    - hero: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
+      count: 5
+    - hero: {fileID: 11400000, guid: 9eedb637f82cd46419a33f29ff715084, type: 2}
+      count: 1
+    spawnInterval: 0.7

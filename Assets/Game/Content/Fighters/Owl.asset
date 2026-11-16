@@ -10,25 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cacf7eb95b504b7c9a2dbd91ab9b6f2, type: 3}
-  m_Name: Bramble
+  m_Name: Owl
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.FighterAsset
   def:
-    Id: bramble
-    Name: Bramble
-    Hp: 70
+    Id: owl
+    Name: Owl
+    Hp: 40
     AttackDamage: 3
-    AttackInterval: 0.6
-    ProjectileSpeed: 15
-    Skills:
-    - Id: thorn_fan
-      Name: Thorn Fan
-      Shape: 0
-      Cooldown: 8
-      Damage: 10
-      Count: 7
-      Spread: 60
-      Radius: 1.5
-      ProjectileSpeed: 16
-  description: A mossy hedgehog. Sprays a wide fan of thorns.
-  color: {r: 0.55, g: 0.75, b: 0.45, a: 1}
-  skillColor: {r: 0.45, g: 0.95, b: 0.5, a: 1}
+    AttackInterval: 0.3
+    ProjectileSpeed: 18
+    Skills: []
+  skills:
+  - {fileID: 11400000, guid: 610cf615abfae45e4bcc20b809cd4103, type: 2}
+  description: A falconer's owl who never liked the falconer. Quick and sharp-eyed.
+  color: {r: 0.75, g: 0.68, b: 0.85, a: 1}
+  skillColor: {r: 0.8, g: 0.7, b: 1, a: 1}

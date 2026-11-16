@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa89f722b7b3a4e7495362df0dc508e2, type: 3}
+  m_Name: GameContent
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.GameContent
+  keeper: {fileID: 11400000, guid: 31481cfcb68314e67a7d2f8d9d63d943, type: 2}
+  starters:
+  - {fileID: 11400000, guid: be835fa8ab3bd4cf587ccaeaf485015d, type: 2}
+  - {fileID: 11400000, guid: 30e2159d878a441b4b988f877d4ee78c, type: 2}
+  familiars:
+  - {fileID: 11400000, guid: be835fa8ab3bd4cf587ccaeaf485015d, type: 2}
+  - {fileID: 11400000, guid: 30e2159d878a441b4b988f877d4ee78c, type: 2}
+  - {fileID: 11400000, guid: f11775d1b01fb4e1a9b0591f3ff50de0, type: 2}
+  - {fileID: 11400000, guid: 3cf5aea1cb80d44378e0bd6aad473bcc, type: 2}
+  heroes:
+  - {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
+  - {fileID: 11400000, guid: 8c7e87a97b92f4ddcabd7ffb3166537b, type: 2}
+  - {fileID: 11400000, guid: b53f94414e5b2490b9e54d1959c31cd0, type: 2}
+  - {fileID: 11400000, guid: 0e80d6a23cabd427b998b916ee819df7, type: 2}
+  - {fileID: 11400000, guid: 9eedb637f82cd46419a33f29ff715084, type: 2}
+  - {fileID: 11400000, guid: ebe7bcde408564d06af0a0f3cdb7e311, type: 2}
+  - {fileID: 11400000, guid: e23773ff12dc247179ba76d28e3c0a8a, type: 2}
+  - {fileID: 11400000, guid: 31a3b65e2b2504ccea8b8d703454fab7, type: 2}
+  - {fileID: 11400000, guid: b28f4eee091944af3a648e035b05868e, type: 2}
+  - {fileID: 11400000, guid: 09cf5313ea6e54559a9754a46786b671, type: 2}
+  - {fileID: 11400000, guid: fa2f4431e678d4d9fb4139042d59cbff, type: 2}
+  chapters:
+  - {fileID: 11400000, guid: ffcff1a6874e84daf9a884cd32e40b34, type: 2}
+  - {fileID: 11400000, guid: 6f2d1a41a9e7747c28cd2cd4705229be, type: 2}
+  - {fileID: 11400000, guid: 1bc2c6379294e4d7f92929958ca24e5d, type: 2}
+  events:
+  - {fileID: 11400000, guid: 4bc3ea0b39f954f659bb682d0e7920ae, type: 2}
+  - {fileID: 11400000, guid: 44556c0060e7b4900bfc23f2f8c9bd88, type: 2}
+  - {fileID: 11400000, guid: 5824d26629aed4786a3e093e89db045f, type: 2}
+  - {fileID: 11400000, guid: fb2170ebc84b94946a2a9d71f25b60ca, type: 2}
+  - {fileID: 11400000, guid: e445f65ab7fdc4b44b581aab72f417f0, type: 2}
+  - {fileID: 11400000, guid: 2ec50b71c4aa04a18bfc23180d221c68, type: 2}
+  runTuning:
+    StepsPerChapter: 7
+    MidBossStep: 3
+    KeepMaxHp: 100
+    RestHeal: 30
+    UpgradeOfferSize: 3
+    MaxFamiliars: 4
+    ShopUpgradePrice: 40
+    ShopRepairPrice: 25
+    ShopRepairAmount: 30
+    ShopUpgrades: 3
+    ConsolationGold: 15
+    HeroHpScale: 1.65
+    HeroCountScale: 1.6
+    HeroHpPerChapter: 0.35
+    HeroHpPerStep: 0.04
+    WeightBattle: 40
+    WeightTough: 12
+    WeightRest: 10
+    WeightShop: 12
+    WeightEvent: 16
+    WeightWild: 10
+  battleTuning:
+    LaneLength: 16
+    LaneHalfHeight: 2.4
+    KeepX: 0.6
+    KeeperPosition:
+      X: 3
+      Y: 0
+    FamiliarPositions:
+    - X: 2.1
+      Y: 1.5
+    - X: 2.1
+      Y: -1.5
+    - X: 1.5
+      Y: 0.6
+    - X: 1.5
+      Y: -0.6
+    FirstWaveDelay: 1
+    TimeBetweenWaves: 2
+    KnockoutSeconds: 5
+    RallyCooldown: 30
+    RallyStartCharge: 0.5
+    SkillStartCharge: 0

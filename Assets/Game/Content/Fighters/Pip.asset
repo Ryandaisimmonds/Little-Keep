@@ -19,16 +19,9 @@ MonoBehaviour:
     AttackDamage: 4
     AttackInterval: 0.45
     ProjectileSpeed: 16
-    Skills:
-    - Id: pop_burst
-      Name: Pop Burst
-      Shape: 1
-      Cooldown: 6
-      Damage: 18
-      Count: 1
-      Spread: 20
-      Radius: 1.6
-      ProjectileSpeed: 18
+    Skills: []
+  skills:
+  - {fileID: 11400000, guid: 88bb887c6d8154e4898305af1a644def, type: 2}
   description: A little ember sprite. Pops Heroes in a bright burst.
   color: {r: 1, g: 0.62, b: 0.45, a: 1}
   skillColor: {r: 1, g: 0.5, b: 0.2, a: 1}

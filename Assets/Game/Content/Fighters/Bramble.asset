@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cacf7eb95b504b7c9a2dbd91ab9b6f2, type: 3}
+  m_Name: Bramble
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.FighterAsset
+  def:
+    Id: bramble
+    Name: Bramble
+    Hp: 70
+    AttackDamage: 3
+    AttackInterval: 0.6
+    ProjectileSpeed: 15
+    Skills: []
+  skills:
+  - {fileID: 11400000, guid: 03b45edce48de4ca2aa6d84ab87e184b, type: 2}
+  description: A mossy hedgehog. Sprays a wide fan of thorns.
+  color: {r: 0.55, g: 0.75, b: 0.45, a: 1}
+  skillColor: {r: 0.45, g: 0.95, b: 0.5, a: 1}

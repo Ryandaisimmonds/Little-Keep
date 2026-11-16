@@ -79,8 +79,14 @@ namespace LittleKeep.Rules
         public int ShopUpgrades = 3;
         /// Gold given instead when there is nothing left to offer.
         public int ConsolationGold = 15;
+        /// Overall difficulty: multiplies every Hero's health.
+        public float HeroHpScale = 1f;
+        /// Overall difficulty: multiplies how many Heroes come in each wave.
+        public float HeroCountScale = 1f;
         /// Extra Hero health per Chapter after the first (0.35 = +35%).
         public float HeroHpPerChapter = 0.35f;
+        /// Extra Hero health per step along a Chapter's Trail (0.04 = +4% a step).
+        public float HeroHpPerStep = 0.04f;
         public int WeightBattle = 40, WeightTough = 12, WeightRest = 10, WeightShop = 12, WeightEvent = 16, WeightWild = 10;
     }
 

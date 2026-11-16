@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 384e1d193a0614e1295a62643c05c901, type: 3}
+  m_Name: MossyShrine
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EventAsset
+  def:
+    Id: MossyShrine
+    Title: A mossy shrine
+    Text: A tiny shrine, half swallowed by moss. It hums warmly.
+    Options:
+    - Text: Leave an offering
+      Outcome: The Keep's walls feel sturdier.
+      GoldCost: 20
+      Effects:
+      - Kind: 2
+        Amount: 15
+        CreatureId: 
+    - Text: Bow politely and move on
+      Outcome: 
+      GoldCost: 0
+      Effects: []

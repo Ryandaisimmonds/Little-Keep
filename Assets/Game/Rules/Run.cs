@@ -93,7 +93,6 @@ namespace LittleKeep.Rules
         {
             Chapter = chapter;
             position = -1;
-            scaledHeroes.Clear();
             steps = GenerateTrail(chapter);
             Phase = RunPhase.Trail;
         }
@@ -188,6 +187,7 @@ namespace LittleKeep.Rules
         void BeginBattle(EncounterDef e)
         {
             encounter = e;
+            scaledHeroes.Clear();
             battleSeed = (int)(rng.NextUInt() & 0x7fffffff);
             Phase = RunPhase.Battle;
         }
@@ -208,7 +208,12 @@ namespace LittleKeep.Rules
             foreach (var w in encounter.Waves)
             {
                 var wave = new WaveDef { SpawnInterval = w.SpawnInterval };
-                foreach (var e in w.Entries) wave.Entries.Add(new WaveEntry { Hero = Scaled(e.Hero), Count = e.Count });
+                foreach (var e in w.Entries)
+                {
+                    bool boss = e.Hero != null && e.Hero.IsBoss;
+                    int count = boss ? e.Count : Math.Max(1, (int)Math.Round(e.Count * t.HeroCountScale));
+                    wave.Entries.Add(new WaveEntry { Hero = Scaled(e.Hero), Count = count });
+                }
                 setup.Waves.Add(wave);
             }
             return setup;
@@ -216,10 +221,11 @@ namespace LittleKeep.Rules
 
         HeroDef Scaled(HeroDef h)
         {
-            if (h == null || Chapter == 0) return h;
+            if (h == null) return null;
             if (scaledHeroes.TryGetValue(h, out var s)) return s;
             s = h.Clone();
-            s.Hp = h.Hp * (1f + t.HeroHpPerChapter * Chapter);
+            int step = CurrentStop != null ? CurrentStop.Step : 0;
+            s.Hp = h.Hp * t.HeroHpScale * (1f + t.HeroHpPerChapter * Chapter) * (1f + t.HeroHpPerStep * step);
             scaledHeroes[h] = s;
             s.Summon = Scaled(h.Summon);
             return s;

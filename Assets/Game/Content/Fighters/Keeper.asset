@@ -19,16 +19,9 @@ MonoBehaviour:
     AttackDamage: 6
     AttackInterval: 0.3
     ProjectileSpeed: 18
-    Skills:
-    - Id: star_volley
-      Name: Star Volley
-      Shape: 0
-      Cooldown: 7
-      Damage: 8
-      Count: 5
-      Spread: 24
-      Radius: 1.5
-      ProjectileSpeed: 20
+    Skills: []
+  skills:
+  - {fileID: 11400000, guid: 98c13cad37eff4cd6ab480d521e92a1d, type: 2}
   description: The Player on the battlefield. Hold a finger on the lane to aim.
   color: {r: 1, g: 0.93, b: 0.75, a: 1}
   skillColor: {r: 1, g: 0.86, b: 0.35, a: 1}

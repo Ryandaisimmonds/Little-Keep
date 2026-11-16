@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
+  m_Name: SirPompous
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
+  def:
+    Id: sir_pompous
+    Name: Sir Pompous
+    Hp: 950
+    Speed: 0.45
+    KeepDamage: 40
+    Size: 0.8
+    MeleeDamage: 16
+    MeleeInterval: 1.2
+    MeleeRange: 1.3
+    ShotDamage: 0
+    ShotInterval: 1.5
+    ShotRange: 6
+    ShotSpeed: 9
+    AttackBlock: 0
+    CreatureId: 
+    IsBoss: 1
+    SummonInterval: 7
+    SummonCount: 2
+  description: Boss. Brings his squires and his speeches.
+  color: {r: 1, g: 0.82, b: 0.45, a: 1}
+  look: 0
+  creature: {fileID: 0}
+  summon: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}

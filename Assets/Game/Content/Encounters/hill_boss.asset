@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e09413cc5db254d45a122760db57e450, type: 3}
+  m_Name: hill_boss
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EncounterAsset
+  id: hill_boss
+  displayName: The Paragon
+  gold: 60
+  waves:
+  - entries:
+    - hero: {fileID: 11400000, guid: 0e80d6a23cabd427b998b916ee819df7, type: 2}
+      count: 2
+    - hero: {fileID: 11400000, guid: b53f94414e5b2490b9e54d1959c31cd0, type: 2}
+      count: 3
+    spawnInterval: 0.7
+  - entries:
+    - hero: {fileID: 11400000, guid: fa2f4431e678d4d9fb4139042d59cbff, type: 2}
+      count: 1
+    - hero: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
+      count: 2
+    spawnInterval: 1

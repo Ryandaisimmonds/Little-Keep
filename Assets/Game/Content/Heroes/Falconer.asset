@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
+  m_Name: Falconer
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
+  def:
+    Id: falconer
+    Name: Falconer
+    Hp: 32
+    Speed: 1.4
+    KeepDamage: 5
+    Size: 0.36
+    MeleeDamage: 0
+    MeleeInterval: 1
+    MeleeRange: 0.9
+    ShotDamage: 5
+    ShotInterval: 1.3
+    ShotRange: 7
+    ShotSpeed: 10
+    AttackBlock: 0
+    CreatureId: 
+    IsBoss: 0
+    SummonInterval: 8
+    SummonCount: 2
+  description: Shoots from afar with an owl on one arm. Beat the falconer and the owl is free.
+  color: {r: 0.55, g: 0.7, b: 0.85, a: 1}
+  look: 2
+  creature: {fileID: 11400000, guid: 3cf5aea1cb80d44378e0bd6aad473bcc, type: 2}
+  summon: {fileID: 0}

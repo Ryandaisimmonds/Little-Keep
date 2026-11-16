@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
+  m_Name: CaptainBrash
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
+  def:
+    Id: captain_brash
+    Name: Captain Brash
+    Hp: 420
+    Speed: 0.7
+    KeepDamage: 25
+    Size: 0.65
+    MeleeDamage: 14
+    MeleeInterval: 1
+    MeleeRange: 1.2
+    ShotDamage: 0
+    ShotInterval: 1.5
+    ShotRange: 6
+    ShotSpeed: 9
+    AttackBlock: 0
+    CreatureId: 
+    IsBoss: 1
+    SummonInterval: 8
+    SummonCount: 2
+  description: Mid-boss. A loud captain who swings first and thinks never.
+  color: {r: 0.95, g: 0.7, b: 0.4, a: 1}
+  look: 0
+  creature: {fileID: 0}
+  summon: {fileID: 0}

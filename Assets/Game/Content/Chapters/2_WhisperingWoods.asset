@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ebac5d21bebe470eb1166720122d641, type: 3}
+  m_Name: 2_WhisperingWoods
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.ChapterAsset
+  displayName: Whispering Woods
+  battles:
+  - {fileID: 11400000, guid: 84773bbcb62e5497490bf4e3daca5d64, type: 2}
+  - {fileID: 11400000, guid: d5cffaf5374914a329a93db5d00c87cc, type: 2}
+  - {fileID: 11400000, guid: dcc4441d6871c4c118b79ec8b9979490, type: 2}
+  toughBattles:
+  - {fileID: 11400000, guid: e6925fa9b4ee24cbda90dfa26a217571, type: 2}
+  - {fileID: 11400000, guid: ff5641d136fa24002a11799772bc7f8d, type: 2}
+  midBoss: {fileID: 11400000, guid: b81d009b74fd74894ae87f53a8ffb90e, type: 2}
+  boss: {fileID: 11400000, guid: 5f9a0a64a682e43d8a92eb4fa0c08d00, type: 2}

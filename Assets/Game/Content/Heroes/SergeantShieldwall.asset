@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
+  m_Name: SergeantShieldwall
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
+  def:
+    Id: sergeant_shieldwall
+    Name: Sergeant Shieldwall
+    Hp: 520
+    Speed: 0.6
+    KeepDamage: 30
+    Size: 0.7
+    MeleeDamage: 16
+    MeleeInterval: 1.4
+    MeleeRange: 1.2
+    ShotDamage: 0
+    ShotInterval: 1.5
+    ShotRange: 6
+    ShotSpeed: 9
+    AttackBlock: 0.7
+    CreatureId: 
+    IsBoss: 1
+    SummonInterval: 8
+    SummonCount: 2
+  description: Mid-boss. An unstoppable wall of shield.
+  color: {r: 0.45, g: 0.55, b: 0.85, a: 1}
+  look: 1
+  creature: {fileID: 0}
+  summon: {fileID: 0}

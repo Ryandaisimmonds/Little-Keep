@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ebac5d21bebe470eb1166720122d641, type: 3}
+  m_Name: 1_MeadowRoad
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.ChapterAsset
+  displayName: Meadow Road
+  battles:
+  - {fileID: 11400000, guid: 8ba2c9e61b43a46959bbfd5fe7eae870, type: 2}
+  - {fileID: 11400000, guid: 89a3e9d5ef04a418dab7dd2fc5656b6b, type: 2}
+  - {fileID: 11400000, guid: 4dbe82d07cdd3415fa738c002757b5ec, type: 2}
+  toughBattles:
+  - {fileID: 11400000, guid: c24a068e2d66d4d7d80cde36e3ab01b4, type: 2}
+  - {fileID: 11400000, guid: cc9565620951e48cbb34004cce047e8b, type: 2}
+  midBoss: {fileID: 11400000, guid: 34f985a7df9894147be3282429d29fd7, type: 2}
+  boss: {fileID: 11400000, guid: 168f24be69ac848efaa0e0623efb3c3b, type: 2}

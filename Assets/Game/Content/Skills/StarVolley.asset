@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5db4ae07af5c042309e0106dfe6a12f8, type: 3}
+  m_Name: StarVolley
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.SkillAsset
+  def:
+    Id: star_volley
+    Name: Star Volley
+    Shape: 0
+    Cooldown: 7
+    Damage: 8
+    Count: 5
+    Spread: 24
+    Radius: 1.5
+    ProjectileSpeed: 20
+  description: Fires a fan of little stars at the Hero nearest the Keep.
+  upgrades:
+  - Id: star_volley_bright
+    Name: Bright Stars
+    Description: Stars hit 35% harder.
+    Mods:
+    - Stat: 0
+      Op: 1
+      Value: 1.35
+  - Id: star_volley_quick
+    Name: Shooting Stars
+    Description: Recharges 20% faster.
+    Mods:
+    - Stat: 1
+      Op: 1
+      Value: 0.8
+  - Id: star_volley_more
+    Name: Star Shower
+    Description: Two more stars per volley.
+    Mods:
+    - Stat: 2
+      Op: 0
+      Value: 2
+  hasMasterForm: 1
+  masterForm:
+    Id: star_volley_master
+    Name: Starfall
+    Shape: 0
+    Cooldown: 6
+    Damage: 12
+    Count: 9
+    Spread: 50
+    Radius: 1.5
+    ProjectileSpeed: 22
+  masterDescription: A wide rain of big, bright stars.
