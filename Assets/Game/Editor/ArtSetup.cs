@@ -29,6 +29,8 @@ namespace LittleKeep.Editor
             Fighter("Bramble", "Plant Seeder", 1f, "Bramble", "A prickly little plant. Sprays a wide fan of thorns.");
             Fighter("Pony", "Canine Beagle", 1f, "Biscuit", "A knight's hound, glad of a quieter job. Bounds in with a big bark.");
             Fighter("Owl", "Rabbit Horned", 1f, "Bun", "A huntsman's horned rabbit who never liked the huntsman. Quick and fierce.");
+            Fighter("Puff", "Mushroom", 1f, "Puff", "A grumpy mushroom. Puffs clouds of spores.");
+            Fighter("Tide", "Elemental Water 1", 1f, "Tide", "A playful water spirit who only follows those who reach the end of Meadow Road.");
 
             Rename("Stomp", "Bark Blast", "A huge bark that knocks every Hero nearby.", "Howling Blast", "A howl that rattles half the lane.",
                 ("Big Bark", "Barks hit 35% harder."), ("Quick Bark", "Recharges 20% faster."), ("Echoing Bark", "The bark reaches 30% wider."));
@@ -61,7 +63,7 @@ namespace LittleKeep.Editor
         static void Fighter(string file, string monster, float scale, string name, string description)
         {
             var a = AssetDatabase.LoadAssetAtPath<FighterAsset>($"{Content}/Fighters/{file}.asset");
-            if (a == null) { Debug.LogWarning($"No fighter asset {file}"); return; }
+            if (a == null) { Debug.LogWarning($"No fighter asset {file}: run Little Keep/Add Keep Content first if it is Puff or Tide."); return; }
             a.art = Art(monster, scale);
             a.def.Name = name;
             a.description = description;
@@ -201,6 +203,13 @@ namespace LittleKeep.Editor
             t.iconEvent = Find<Sprite>(item, "Icon_ItemIcon_Scroll.png");
             t.iconWild = Find<Sprite>(item, "Icon_ItemIcon_Clover.png");
             t.iconLock = Find<Sprite>(item, "Icon_ItemIcon_Lock.png");
+            string demo = $"{Ui}/Sprites/Demo/Demo_Icon";
+            t.iconGem = Find<Sprite>(demo, "Icon_ImageIcon_Gem.png");
+            t.iconBook = Find<Sprite>(picto, "Icon_PictoIcon_Book.png");
+            t.iconWorkshop = Find<Sprite>(item, "Icon_ItemIcon_Hammer.png");
+            t.iconTower = Find<Sprite>(demo, "Icon_MenuIcon_Falg.png");
+            t.iconGate = Find<Sprite>(item, "Icon_ItemIcon_Shield_A.png");
+            t.iconMedal = Find<Sprite>(item, "Icon_ItemIcon_Medal_Gold.png");
             EditorUtility.SetDirty(t);
             return t;
         }

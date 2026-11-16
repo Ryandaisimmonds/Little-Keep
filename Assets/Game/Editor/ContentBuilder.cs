@@ -161,7 +161,6 @@ namespace LittleKeep.Editor
             {
                 game = ScriptableObject.CreateInstance<GameContent>();
                 game.keeper = keeper;
-                game.starters = new List<FighterAsset> { pip, bramble };
                 game.familiars = new List<FighterAsset> { pip, bramble, pony, owl };
                 game.heroes = new List<HeroAsset> { squire, shieldbearer, archer, knight, falconer, brash, shieldwall, vale, pompous, gleam, paragon };
                 game.chapters = new List<ChapterAsset> { meadow, woods, hill };

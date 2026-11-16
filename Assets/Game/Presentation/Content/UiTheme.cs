@@ -35,7 +35,8 @@ namespace LittleKeep.Game
 
         [Header("Icons")]
         public Sprite iconPause, iconPlay, iconHome, iconSpeed, iconGold, iconHeart, iconCrown, iconSkull,
-            iconBattle, iconShop, iconRest, iconEvent, iconWild, iconStar, iconSquad, iconLock, iconSparkle;
+            iconBattle, iconShop, iconRest, iconEvent, iconWild, iconStar, iconSquad, iconLock, iconSparkle,
+            iconGem, iconBook, iconWorkshop, iconTower, iconGate, iconMedal;
 
         [Header("Colours")]
         public Color text = new Color(0.98f, 0.93f, 0.82f);

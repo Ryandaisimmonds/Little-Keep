@@ -98,6 +98,22 @@ _Avoid_: Capture, captive, recruit; Heroes themselves are never befriended
 
 ### Growth across Runs
 
+**Gems**:
+The permanent currency, earned from every Run (win or lose) and spent on the Keeper's upgrades at the Keep.
+_Avoid_: Acorns, souls, credits; never confuse with Gold, which belongs to one Run
+
+**Keeper upgrade**:
+A permanent improvement bought with Gems in the Keep's Workshop, applied to every later Run.
+_Avoid_: Perk, talent, research
+
+**Difficulty tier**:
+One of three settings (Cozy, Brisk, Fierce) a Run is played on; each is unlocked by winning a Run on the one below.
+_Avoid_: Level, mode, ascension
+
+**Room**:
+A part of the Keep the Player visits between Runs. The Gate starts and resumes Runs; the Familiar Book lists every Familiar and how to earn it; the Workshop sells Keeper upgrades; the Watchtower sets the Difficulty tier. A Room appears only once unlocked.
+_Avoid_: Menu, tab, building
+
 **Deed**:
 A named achievement that permanently unlocks a specific Familiar.
 _Avoid_: Task, quest, achievement

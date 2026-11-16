@@ -4,17 +4,28 @@
 
 **Blocked by:** 02 Run
 
-**Status:** ready-for-agent
+**Status:** done (phone play-test outstanding)
 
-- [ ] The Keep progress module takes Run results and purchases and reports what is owned and unlocked
-- [ ] Every finished Run grants currency, win or lose, with no cap
-- [ ] The Keeper upgrade track can be bought level by level and its effects apply in the next Run
-- [ ] The Familiar book shows all six Familiars, and for each unowned one the Deed or Bond that unlocks it
-- [ ] The Player chooses a starting Familiar from those owned
-- [ ] Completing a Deed grants its Familiar at once; a Bond meter fills on each Befriending and grants the Familiar when full
-- [ ] Three difficulty tiers, each unlocked by winning the one below
-- [ ] The save is a versioned file on the device, written automatically, and a save from an older version loads
-- [ ] The Keep screen starts Runs, resumes a Run in progress, and shows rooms only once unlocked
-- [ ] No real-money purchases and no random pulls for gameplay Familiars
-- [ ] Edit-mode tests cover the behaviours above through the Keep progress module's interface only
+- [x] The Keep progress module takes Run results and purchases and reports what is owned and unlocked
+- [x] Every finished Run grants currency, win or lose, with no cap
+- [x] The Keeper upgrade track can be bought level by level and its effects apply in the next Run
+- [x] The Familiar book shows all six Familiars, and for each unowned one the Deed or Bond that unlocks it
+- [x] The Player chooses a starting Familiar from those owned
+- [x] Completing a Deed grants its Familiar at once; a Bond meter fills on each Befriending and grants the Familiar when full
+- [x] Three difficulty tiers, each unlocked by winning the one below
+- [x] The save is a versioned file on the device, written automatically, and a save from an older version loads
+- [x] The Keep screen starts Runs, resumes a Run in progress, and shows rooms only once unlocked
+- [x] No real-money purchases and no random pulls for gameplay Familiars
+- [x] Edit-mode tests cover the behaviours above through the Keep progress module's interface only
 - [ ] Milestone 3 build installed and played on the developer's phone
+
+## Notes
+
+- Rooms: the Gate and Familiar Book from the start; the Workshop after the first Run; the Watchtower after the first win. They are cards for now; the illustrated Keep comes with ticket 06.
+- Keeper upgrade track: four short tracks (walls, claws, purse, horn) rather than one long one.
+- Deeds complete as soon as their condition is met mid-Run (Clear Meadow Road grants Tide on clearing Chapter 1).
+- Every Run pays at least 5 Gems. Each Run carries a Run number so it can never be paid twice.
+- Wild creatures on the Trail are the Bond Familiars (Biscuit, Bun), so Bonds can fill.
+- Tiers tuned with the Run bot (it never aims): Cozy 0.95x Hero health, about 6/12 bot wins; Brisk 1.15x HP, 1.1x numbers; Fierce 1.3x HP, 1.2x numbers.
+- Deferred: Keeper looks customisation (user story 54) is not in this checklist; suggest it joins ticket 06 or 07.
+- A Run saved by an older build is refused when the content has changed (ADR 0003). This update changes content, so any in-progress Run from the last build ends with a notice.

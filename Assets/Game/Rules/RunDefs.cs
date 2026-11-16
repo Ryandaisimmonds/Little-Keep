@@ -131,6 +131,7 @@ namespace LittleKeep.Rules
                 sb.Append(c.MidBoss?.Id).Append(c.Boss?.Id);
             }
             foreach (var e in Events) sb.Append('|').Append(e.Id).Append(e.Options.Count);
+            sb.Append('|').Append(string.Join(",", WildCreatures));
             var t = Tuning;
             sb.Append($"|{t.StepsPerChapter},{t.MidBossStep},{t.UpgradeOfferSize},{t.ShopUpgrades},{t.MaxFamiliars},{t.WeightBattle},{t.WeightTough},{t.WeightRest},{t.WeightShop},{t.WeightEvent},{t.WeightWild}");
             uint hash = 2166136261;
@@ -163,7 +164,7 @@ namespace LittleKeep.Rules
         public int ChapterReached;
         public int Gold;
         public int Tier;
-        public string StartingFamiliar = "";
+        public int RunNumber;
         /// Every creature befriended this Run, in order (repeats included).
         public List<string> Befriended = new List<string>();
     }

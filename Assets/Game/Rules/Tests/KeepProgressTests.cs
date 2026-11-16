@@ -47,12 +47,12 @@ namespace LittleKeep.Rules.Tests
             var keep = new KeepProgress(Make());
 
             Assert.That(keep.OwnedFamiliars, Is.EquivalentTo(new[] { "pip", "bramble", "puff" }));
-            Assert.That(keep.Acorns, Is.EqualTo(0));
+            Assert.That(keep.Gems, Is.EqualTo(0));
             Assert.That(keep.IsTierUnlocked(0) && !keep.IsTierUnlocked(1), Is.True);
         }
 
         [Test]
-        public void Every_finished_Run_pays_Acorns_win_or_lose_with_no_cap()
+        public void Every_finished_Run_pays_Gems_win_or_lose_with_no_cap()
         {
             var keep = new KeepProgress(Make());
 
@@ -60,9 +60,9 @@ namespace LittleKeep.Rules.Tests
             var won = keep.RecordRun(Result(won: true, battles: 15, chapters: 3));
             for (int i = 0; i < 100; i++) keep.RecordRun(Result(won: true, battles: 15, chapters: 3));
 
-            Assert.That(lost.Acorns, Is.EqualTo(12), "4 Battles x 3");
-            Assert.That(won.Acorns, Is.EqualTo(45 + 30 + 25));
-            Assert.That(keep.Acorns, Is.EqualTo(12 + 101 * 100));
+            Assert.That(lost.Gems, Is.EqualTo(12), "4 Battles x 3");
+            Assert.That(won.Gems, Is.EqualTo(45 + 30 + 25));
+            Assert.That(keep.Gems, Is.EqualTo(12 + 101 * 100));
         }
 
         [Test]
@@ -74,18 +74,18 @@ namespace LittleKeep.Rules.Tests
 
             var brisk = keep.RecordRun(Result(battles: 10, tier: 1));
 
-            Assert.That(brisk.Acorns, Is.EqualTo(45), "30 x 1.5");
+            Assert.That(brisk.Gems, Is.EqualTo(45), "30 x 1.5");
         }
 
         [Test]
         public void Keeper_upgrades_are_bought_level_by_level_and_shape_the_next_Run()
         {
             var keep = new KeepProgress(Make());
-            Assert.That(keep.TryBuy("walls"), Is.False, "no Acorns yet");
+            Assert.That(keep.TryBuy("walls"), Is.False, "no Gems yet");
 
             keep.RecordRun(Result(battles: 100));
             Assert.That(keep.TryBuy("walls"), Is.True);
-            Assert.That(keep.Acorns, Is.EqualTo(280));
+            Assert.That(keep.Gems, Is.EqualTo(280));
             Assert.That(keep.NextCost("walls"), Is.EqualTo(40));
             keep.TryBuy("walls");
             keep.TryBuy("walls");
@@ -172,7 +172,7 @@ namespace LittleKeep.Rules.Tests
 
             var loaded = new KeepProgress(content, keep.ToData());
 
-            Assert.That(loaded.Acorns, Is.EqualTo(keep.Acorns));
+            Assert.That(loaded.Gems, Is.EqualTo(keep.Gems));
             Assert.That(loaded.OwnedFamiliars, Is.EquivalentTo(keep.OwnedFamiliars));
             Assert.That(loaded.BondProgress("bun"), Is.EqualTo(2));
             Assert.That(loaded.UpgradeLevel("walls"), Is.EqualTo(1));
@@ -183,13 +183,85 @@ namespace LittleKeep.Rules.Tests
         [Test]
         public void A_save_from_an_older_version_loads_and_ignores_content_that_no_longer_exists()
         {
-            var old = new ProgressData { Version = 0, Acorns = 77, Owned = new List<string> { "removed_familiar" }, Bonds = null, Upgrades = null, Deeds = null };
+            var old = new ProgressData { Version = 0, Gems = 77, Owned = new List<string> { "removed_familiar" }, Bonds = null, Upgrades = null, Deeds = null };
 
             var keep = new KeepProgress(Make(), old);
 
-            Assert.That(keep.Acorns, Is.EqualTo(77));
+            Assert.That(keep.Gems, Is.EqualTo(77));
             Assert.That(keep.OwnedFamiliars, Is.EquivalentTo(new[] { "pip", "bramble", "puff" }));
             Assert.That(keep.ToData().Version, Is.EqualTo(ProgressData.CurrentVersion));
+        }
+
+        [Test]
+        public void A_Run_lost_at_once_still_pays_the_minimum()
+        {
+            var content = Make();
+            content.Rewards.Minimum = 5;
+            var keep = new KeepProgress(content);
+
+            Assert.That(keep.RecordRun(Result()).Gems, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void The_same_Run_is_never_paid_twice()
+        {
+            var keep = new KeepProgress(Make());
+            var bonuses = keep.BonusesFor(0);
+            var result = Result(battles: 4);
+            result.RunNumber = bonuses.RunNumber;
+
+            var first = keep.RecordRun(result);
+            var reloaded = new KeepProgress(Make(), keep.ToData());
+            var again = reloaded.RecordRun(result);
+
+            Assert.That(first.Gems, Is.GreaterThan(0));
+            Assert.That(again.Gems, Is.EqualTo(0));
+            Assert.That(reloaded.Gems, Is.EqualTo(first.Gems));
+            Assert.That(reloaded.RunsPlayed, Is.EqualTo(1));
+            Assert.That(reloaded.BonusesFor(0).RunNumber, Is.GreaterThan(bonuses.RunNumber));
+        }
+
+        [Test]
+        public void Clearing_a_Chapter_mid_Run_completes_its_Deed_at_once()
+        {
+            var keep = new KeepProgress(Make());
+
+            var now = keep.NoteChaptersCleared(1);
+            var atEnd = keep.RecordRun(Result(chapters: 1));
+
+            Assert.That(now.NewFamiliars, Is.EquivalentTo(new[] { "tide" }));
+            Assert.That(now.Deeds, Is.EquivalentTo(new[] { "clear_meadow" }));
+            Assert.That(keep.Owns("tide"), Is.True);
+            Assert.That(atEnd.NewFamiliars, Is.Empty);
+        }
+
+        [Test]
+        public void The_chosen_tier_is_kept_with_progress_and_must_be_unlocked()
+        {
+            var keep = new KeepProgress(Make());
+
+            Assert.That(keep.ChooseTier(1), Is.False);
+            keep.RecordRun(Result(won: true, chapters: 3));
+            Assert.That(keep.ChooseTier(1), Is.True);
+            var reloaded = new KeepProgress(Make(), keep.ToData());
+
+            Assert.That(reloaded.ChosenTier, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Only_Bond_Familiars_turn_up_in_the_wild()
+        {
+            Assert.That(Make().WildCreatures, Is.EquivalentTo(new[] { "biscuit", "bun" }));
+        }
+
+        [Test]
+        public void A_save_from_a_newer_version_is_flagged_so_it_is_not_overwritten()
+        {
+            var data = new KeepProgress(Make()).ToData();
+            data.Version = ProgressData.CurrentVersion + 1;
+
+            Assert.That(new KeepProgress(Make(), data).FromNewerVersion, Is.True);
+            Assert.That(new KeepProgress(Make(), new KeepProgress(Make()).ToData()).FromNewerVersion, Is.False);
         }
     }
 }

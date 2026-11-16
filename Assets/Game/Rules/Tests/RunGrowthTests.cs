@@ -288,7 +288,6 @@ namespace LittleKeep.Rules.Tests
 
             Assert.That(run.Result.Befriended, Is.EqualTo(new[] { "pony", "owl" }));
             Assert.That(run.Result.Tier, Is.EqualTo(2));
-            Assert.That(run.Result.StartingFamiliar, Is.EqualTo("pip"));
         }
 
         [Test]

@@ -26,3 +26,7 @@ MonoBehaviour:
   color: {r: 0.75, g: 0.68, b: 0.85, a: 1}
   skillColor: {r: 0.8, g: 0.7, b: 1, a: 1}
   art: {fileID: 11400000, guid: ae377b2fa3fc24907a3714267684f085, type: 2}
+  unlock: 1
+  bondSize: 3
+  deedId: 
+  unlockHint: Befriend Bun 3 times. Huntsmen bring her into Battle, and she turns up in the wild.

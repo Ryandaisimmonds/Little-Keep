@@ -26,3 +26,7 @@ MonoBehaviour:
   color: {r: 1, g: 0.93, b: 0.75, a: 1}
   skillColor: {r: 1, g: 0.86, b: 0.35, a: 1}
   art: {fileID: 11400000, guid: 0f14769bcf04748ceadd0deee0160044, type: 2}
+  unlock: 0
+  bondSize: 3
+  deedId: 
+  unlockHint: 

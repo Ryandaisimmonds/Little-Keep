@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using LittleKeep.Rules;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,6 +20,11 @@ namespace LittleKeep.Game
         RunScreens screens;
         BattleScreen battle;
         Run run;
+        KeepProgress keep;
+        RunRewards lastRewards;
+        /// Deeds completed during the current Run, shown again on its summary.
+        readonly System.Collections.Generic.List<string> runDeeds = new System.Collections.Generic.List<string>();
+        string trailNotice = "";
 
         void Awake()
         {
@@ -39,24 +45,49 @@ namespace LittleKeep.Game
             screens.Init(compiled);
             battle = new GameObject("Battle").AddComponent<BattleScreen>();
             battle.Init(cam);
+            keep = ProgressStore.Load(compiled.Progress);
         }
 
-        void Start() => ShowTitle();
+        void Start() => ShowKeep();
 
-        void ShowTitle() => ShowTitle("");
+        void ShowKeep() => ShowKeep("");
 
-        void ShowTitle(string notice)
+        void ShowKeep(string notice)
         {
             run = null;
-            screens.ShowTitle(HasSave, ContinueRun, () => screens.ShowStarterChoice(StartRun, ShowTitle), notice);
+            screens.ShowKeep(keep, HasSave, keep.ChosenTier, ContinueRun, ShowStarters,
+                () => screens.ShowBook(keep, ShowKeep),
+                ShowWorkshop,
+                ShowWatchtower,
+                notice);
         }
+
+        void ShowStarters()
+        {
+            var owned = content.familiars.Where(f => f != null && keep.Owns(f.def.Id)).ToList();
+            screens.ShowStarterChoice(owned, StartRun, ShowKeep);
+        }
+
+        void ShowWorkshop() => screens.ShowWorkshop(keep, id =>
+        {
+            if (keep.TryBuy(id)) ProgressStore.Save(keep);
+            ShowWorkshop();
+        }, ShowKeep);
+
+        void ShowWatchtower() => screens.ShowWatchtower(keep, keep.ChosenTier, i =>
+        {
+            if (keep.ChooseTier(i)) ProgressStore.Save(keep);
+            ShowWatchtower();
+        }, ShowKeep);
 
         static bool HasSave => PlayerPrefs.HasKey(SaveKey);
 
         void StartRun(string starterId)
         {
             int seed = fixedSeed != 0 ? fixedSeed : Environment.TickCount & 0x7fffffff;
-            run = new Run(compiled.Run, seed, starterId);
+            run = new Run(compiled.Run, seed, starterId, keep.BonusesFor(keep.ChosenTier));
+            lastRewards = null;
+            runDeeds.Clear();
             SaveAndShow();
         }
 
@@ -71,9 +102,11 @@ namespace LittleKeep.Game
                 // A save from an older build that no longer replays: drop it rather than get stuck.
                 Debug.LogWarning("Could not resume the saved Run: " + e.Message);
                 PlayerPrefs.DeleteKey(SaveKey);
-                ShowTitle(e.Message + " It can't be continued, sorry: start a new Run.");
+                ShowKeep(e.Message + " It can't be continued, sorry: start a new Run.");
                 return;
             }
+            lastRewards = null;
+            runDeeds.Clear();
             Show();
         }
 
@@ -90,10 +123,32 @@ namespace LittleKeep.Game
             Show();
         }
 
+        /// Saves the Run, and its effect on the Keep: Deeds complete as Chapters are cleared, and a finished Run
+        /// is paid for. The Keep pays each Run number once, so a crash before the Run save is dropped can't pay twice.
         void Save()
         {
-            if (run.Phase == RunPhase.Ended) PlayerPrefs.DeleteKey(SaveKey);
-            else PlayerPrefs.SetString(SaveKey, run.Save());
+            if (run.Phase == RunPhase.Ended)
+            {
+                if (lastRewards == null)
+                {
+                    lastRewards = keep.RecordRun(run.Result);
+                    lastRewards.Deeds.InsertRange(0, runDeeds);
+                    ProgressStore.Save(keep);
+                }
+                PlayerPrefs.DeleteKey(SaveKey);
+            }
+            else
+            {
+                var news = keep.NoteChaptersCleared(run.Chapter);
+                if (news.Deeds.Count > 0)
+                {
+                    runDeeds.AddRange(news.Deeds);
+                    ProgressStore.Save(keep);
+                    trailNotice = string.Join("  ", news.Deeds.Select(id => $"Deed complete: {keep.Content.Deeds.Find(d => d.Id == id)?.Name}!")
+                        .Concat(news.NewFamiliars.Select(id => $"{content.familiars.FirstOrDefault(f => f != null && f.def.Id == id)?.def.Name ?? id} joins your Familiars!")));
+                }
+                PlayerPrefs.SetString(SaveKey, run.Save());
+            }
             PlayerPrefs.Save();
         }
 
@@ -102,7 +157,8 @@ namespace LittleKeep.Game
             switch (run.Phase)
             {
                 case RunPhase.Trail:
-                    screens.ShowTrail(run, i => Act(() => run.ChooseStop(i)), ShowSquad, ShowTitle);
+                    screens.ShowTrail(run, i => Act(() => run.ChooseStop(i)), ShowSquad, ShowKeep, trailNotice);
+                    trailNotice = "";
                     break;
                 case RunPhase.Battle:
                     screens.Hide();
@@ -110,7 +166,7 @@ namespace LittleKeep.Game
                     if (!string.IsNullOrEmpty(run.EncounterName)) header += $" · {run.EncounterName}";
                     battle.Begin(run.CreateBattle(), compiled, header,
                         report => Act(() => run.FinishBattle(report)),
-                        keep => { run.SuspendBattle(keep); Save(); ShowTitle(); });
+                        keepHp => { run.SuspendBattle(keepHp); Save(); ShowKeep(); });
                     break;
                 case RunPhase.Upgrade:
                     screens.ShowUpgrade(run, i => Act(() => run.PickUpgrade(i)), () => Act(run.SkipUpgrade), ShowSquad);
@@ -125,7 +181,7 @@ namespace LittleKeep.Game
                     screens.ShowEvent(run, i => Act(() => run.ChooseEventOption(i)), ShowSquad);
                     break;
                 case RunPhase.Ended:
-                    screens.ShowSummary(run, ShowTitle);
+                    screens.ShowSummary(run, lastRewards, keep, ShowKeep);
                     break;
             }
         }

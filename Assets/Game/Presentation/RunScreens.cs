@@ -35,38 +35,174 @@ namespace LittleKeep.Game
             return page;
         }
 
-        // --- Title and start -----------------------------------------------------
+        // --- The Keep (home) --------------------------------------------------------
 
-        public void ShowTitle(bool canContinue, Action onContinue, Action onNewRun, string notice = "")
+        /// Home: the Keep and its rooms. Rooms the Player has not opened yet show as locked with what opens them.
+        public void ShowKeep(KeepProgress keep, bool canContinue, int tier, Action onContinue, Action onNewRun,
+            Action onBook, Action onWorkshop, Action onWatchtower, string notice = "")
         {
             var p = NewPage();
-            Title("Logo", p, "Little Keep", Center, new Vector2(0f, 250f), 1000f, 84);
-            Label("Tag", p, "Hold the Keep. Grow the squad.", 36, TextAnchor.MiddleCenter, Center, new Vector2(0f, 130f), new Vector2(1200f, 60f));
-            float y = -10f;
-            if (canContinue) { Button("Continue", p, "Continue Run", 42, Center, new Vector2(0f, y), new Vector2(560f, 140f), onContinue, ButtonStyle.Green, Theme?.iconPlay); y -= 170f; }
-            Button("New", p, "New Run", 42, Center, new Vector2(0f, y), new Vector2(560f, 140f), onNewRun, canContinue ? ButtonStyle.Brown : ButtonStyle.Green, Theme?.iconBattle);
-            if (canContinue) Label("Warn", p, "Starting a new Run replaces the one in progress.", 26, TextAnchor.MiddleCenter, Center, new Vector2(0f, y - 110f), new Vector2(1000f, 40f));
+            Title("Logo", p, "Little Keep", Top, new Vector2(0f, -40f), 900f, 70);
+            GemCounter(p, keep);
+
+            int rooms = 2 + (keep.HasWorkshop ? 1 : 0) + (keep.HasWatchtower ? 1 : 0);
+            float w = 400f, gap = 30f;
+            int slot = 0;
+            float X() => Row(slot++, rooms, w, gap);
+
+            var gate = Room(p, X(), "The Gate", "Set out on a Run.", Theme?.iconGate);
+            if (canContinue)
+            {
+                Button("Continue", gate, "Continue Run", 30, Bottom, new Vector2(0f, 150f), new Vector2(w - 70f, 96f), onContinue, ButtonStyle.Green, Theme?.iconPlay);
+                Button("New", gate, "New Run", 28, Bottom, new Vector2(0f, 40f), new Vector2(w - 70f, 90f), onNewRun, ButtonStyle.Brown);
+            }
+            else Button("New", gate, "New Run", 34, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 120f), onNewRun, ButtonStyle.Green, Theme?.iconBattle);
+            if (keep.HasWatchtower && keep.Content.Tiers.Count > tier)
+                Label("Tier", gate, $"Difficulty tier: {keep.Content.Tiers[tier].Name}", 24, TextAnchor.MiddleCenter, Top, new Vector2(0f, -300f), new Vector2(w - 40f, 40f), TextGold);
+
+            int owned = keep.OwnedFamiliars.Count, all = keep.Content.Familiars.Count;
+            var book = Room(p, X(), "Familiar Book", $"{owned} of {all} Familiars found.", Theme?.iconBook);
+            Button("Open", book, "Open", 32, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 110f), onBook, ButtonStyle.Blue);
+
+            if (keep.HasWorkshop)
+            {
+                var workshop = Room(p, X(), "Workshop", "Spend Gems on Keeper upgrades.", Theme?.iconWorkshop);
+                Button("Open", workshop, "Open", 32, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 110f), onWorkshop, ButtonStyle.Teal);
+            }
+            if (keep.HasWatchtower)
+            {
+                var tower = Room(p, X(), "Watchtower", "Choose the Difficulty tier.", Theme?.iconTower);
+                Button("Open", tower, "Open", 32, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 110f), onWatchtower, ButtonStyle.Purple);
+            }
+
+            if (canContinue) Label("Warn", p, "Starting a new Run replaces the one in progress.", 24, TextAnchor.MiddleCenter, Bottom, new Vector2(0f, 30f), new Vector2(1000f, 40f));
             Toast(p, notice);
         }
 
-        public void ShowStarterChoice(Action<string> onPick, Action onBack)
+        RectTransform Room(RectTransform p, float x, string title, string body, Sprite icon)
+        {
+            var card = Panel(title, p, Center, new Vector2(x, -60f), new Vector2(400f, 620f));
+            Icon("Icon", card, icon, Top, new Vector2(0f, -60f), 150f);
+            Label("Title", card, title, 40, TextAnchor.MiddleCenter, Top, new Vector2(0f, -230f), new Vector2(360f, 60f), TextGold);
+            Label("Body", card, body, 26, TextAnchor.UpperCenter, Top, new Vector2(0f, -330f), new Vector2(340f, 120f));
+            return card;
+        }
+
+        /// X position of item i in a centred row of n items.
+        static float Row(int i, int n, float w, float gap) => -(n * w + (n - 1) * gap) * 0.5f + w * 0.5f + i * (w + gap);
+
+        RectTransform GemCounter(RectTransform p, KeepProgress keep)
+        {
+            var gems = Panel("Gems", p, TopRight, new Vector2(-20f, -20f), new Vector2(300f, 100f));
+            Icon("Icon", gems, Theme?.iconGem, new Vector2(0f, 0.5f), new Vector2(26f, 2f), 64f);
+            Label("Value", gems, $"{keep.Gems}", 40, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(100f, 2f), new Vector2(180f, 70f), TextGold);
+            return gems;
+        }
+
+        static readonly Color LockedTint = new Color(0.55f, 0.55f, 0.6f, 0.8f);
+
+        public void ShowStarterChoice(IList<FighterAsset> owned, Action<string> onPick, Action onBack)
         {
             var p = NewPage();
             Title("Title", p, "Who comes with you?", Top, new Vector2(0f, -90f), 900f);
-            var starters = content.Source.starters.Where(s => s != null).ToList();
-            float w = 480f, gap = 50f, total = starters.Count * w + (starters.Count - 1) * gap;
-            for (int i = 0; i < starters.Count; i++)
+            float w = Mathf.Min(480f, (1700f - (owned.Count - 1) * 30f) / Mathf.Max(1, owned.Count)), gap = 30f, total = owned.Count * w + (owned.Count - 1) * gap;
+            for (int i = 0; i < owned.Count; i++)
             {
-                var s = starters[i];
+                var s = owned[i];
                 var card = FighterCard(p, s, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -20f), new Vector2(w, 640f));
-                Button("Pick", card, "Choose " + s.def.Name, 34, Bottom, new Vector2(0f, 40f), new Vector2(w - 80f, 110f), () => onPick(s.def.Id), ButtonStyle.Green);
+                Button("Pick", card, "Choose " + s.def.Name, 32, Bottom, new Vector2(0f, 40f), new Vector2(w - 60f, 110f), () => onPick(s.def.Id), ButtonStyle.Green);
             }
             Button("Back", p, "Back", 32, BottomLeft, new Vector2(170f, 80f), new Vector2(260f, 100f), onBack, ButtonStyle.Brown, Theme?.iconHome);
         }
 
+        /// Every Familiar: owned ones as they look, the rest as silhouettes with how to earn them.
+        public void ShowBook(KeepProgress keep, Action onBack)
+        {
+            var p = NewPage();
+            Title("Title", p, "Familiar Book", Top, new Vector2(0f, -70f), 900f);
+            var list = keep.Content.Familiars;
+            int columns = 3;
+            float w = 520f, h = 340f, gap = 24f;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var unlock = list[i];
+                var asset = content.FighterAsset(unlock.Id);
+                bool have = keep.Owns(unlock.Id);
+                int col = i % columns, row = i / columns;
+                var pos = new Vector2(-(columns - 1) * (w + gap) * 0.5f + col * (w + gap), 160f - row * (h + gap));
+                var card = Card("Entry", p, Center, pos, new Vector2(w, h), !have);
+                var portrait = Portrait(card, asset, new Vector2(0f, 0.5f), new Vector2(110f, 20f), 200f);
+                if (!have) portrait.color = new Color(0f, 0f, 0f, 0.85f);
+                Label("Name", card, have ? asset?.def.Name : "???", 36, TextAnchor.MiddleLeft, TopLeft, new Vector2(220f, -40f), new Vector2(w - 240f, 50f), have ? TextGold : TextColor);
+                string body;
+                if (have) body = asset != null ? string.Join("\n", asset.skills.Where(x => x != null).Select(x => x.def.Name + ": " + x.description)) : "";
+                else
+                {
+                    body = asset?.unlockHint ?? "";
+                    if (unlock.Kind == UnlockKind.Bond) body += $"\n<color=#FFD15A>Bond {keep.BondProgress(unlock.Id)}/{unlock.BondSize}</color>";
+                }
+                Label("Body", card, body, 22, TextAnchor.UpperLeft, TopLeft, new Vector2(220f, -90f), new Vector2(w - 240f, h - 110f));
+                if (unlock.Kind == UnlockKind.Bond && !have)
+                {
+                    var bar = Bar("Bond", card, Theme != null ? Theme.rally : Palette.Rally, Bottom, new Vector2(110f, 30f), new Vector2(w - 260f, 26f));
+                    bar.Value = keep.BondProgress(unlock.Id) / (float)Mathf.Max(1, unlock.BondSize);
+                }
+            }
+            Button("Back", p, "Back", 32, BottomLeft, new Vector2(170f, 60f), new Vector2(260f, 100f), onBack, ButtonStyle.Brown, Theme?.iconHome);
+        }
+
+        public void ShowWorkshop(KeepProgress keep, Action<string> onBuy, Action onBack)
+        {
+            var p = NewPage();
+            Title("Title", p, "Workshop", Top, new Vector2(0f, -70f), 900f);
+            GemCounter(p, keep);
+            var ups = keep.Content.Upgrades;
+            float w = 400f, gap = 28f, total = ups.Count * w + (ups.Count - 1) * gap;
+            for (int i = 0; i < ups.Count; i++)
+            {
+                var u = ups[i];
+                int level = keep.UpgradeLevel(u.Id), cost = keep.NextCost(u.Id);
+                var card = Panel(u.Name, p, Center, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -40f), new Vector2(w, 600f));
+                Icon("Icon", card, Theme?.iconWorkshop, Top, new Vector2(0f, -50f), 110f);
+                Label("Name", card, u.Name, 38, TextAnchor.MiddleCenter, Top, new Vector2(0f, -190f), new Vector2(w - 40f, 56f), TextGold);
+                Label("Desc", card, u.Description, 26, TextAnchor.UpperCenter, Top, new Vector2(0f, -250f), new Vector2(w - 60f, 90f));
+                for (int l = 0; l < u.Costs.Count; l++)
+                    Img("Pip", card, l < level ? (Theme != null ? Theme.textGold : Color.yellow) : UiKit.Shade, Top, new Vector2(-(u.Costs.Count - 1) * 22f + l * 44f, -360f), new Vector2(34f, 34f), Shapes.Circle);
+                Label("Level", card, $"Level {level} of {u.Costs.Count}", 24, TextAnchor.MiddleCenter, Top, new Vector2(0f, -410f), new Vector2(w - 40f, 40f));
+                var buy = Button("Buy", card, cost < 0 ? "Complete" : $"{cost}", 34, Bottom, new Vector2(0f, 40f), new Vector2(w - 80f, 100f), () => onBuy(u.Id), ButtonStyle.Green, cost < 0 ? null : Theme?.iconGem);
+                SetEnabled(buy, cost >= 0 && keep.Gems >= cost);
+            }
+            Button("Back", p, "Back", 32, BottomLeft, new Vector2(170f, 60f), new Vector2(260f, 100f), onBack, ButtonStyle.Brown, Theme?.iconHome);
+        }
+
+        public void ShowWatchtower(KeepProgress keep, int selected, Action<int> onSelect, Action onBack)
+        {
+            var p = NewPage();
+            Title("Title", p, "Watchtower", Top, new Vector2(0f, -70f), 900f);
+            var tiers = keep.Content.Tiers;
+            float w = 480f, gap = 40f, total = tiers.Count * w + (tiers.Count - 1) * gap;
+            for (int i = 0; i < tiers.Count; i++)
+            {
+                var t = tiers[i];
+                int index = i;
+                bool open = keep.IsTierUnlocked(i);
+                var card = Panel(t.Name, p, Center, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -40f), new Vector2(w, 560f));
+                if (!open) card.GetComponent<Image>().color = LockedTint;
+                Icon("Icon", card, open ? Theme?.iconTower : Theme?.iconLock, Top, new Vector2(0f, -50f), 110f);
+                Label("Name", card, t.Name, 44, TextAnchor.MiddleCenter, Top, new Vector2(0f, -190f), new Vector2(w - 40f, 60f), TextGold);
+                Label("Desc", card, open ? t.Description : $"Win a Run on {tiers[Mathf.Max(0, i - 1)].Name} to open.", 26, TextAnchor.UpperCenter, Top, new Vector2(0f, -250f), new Vector2(w - 60f, 120f));
+                if (open)
+                {
+                    var b = Button("Choose", card, i == selected ? "Chosen" : "Choose", 32, Bottom, new Vector2(0f, 40f), new Vector2(w - 80f, 100f), () => onSelect(index), i == selected ? ButtonStyle.Green : ButtonStyle.Brown);
+                    SetEnabled(b, i != selected);
+                }
+            }
+            Button("Back", p, "Back", 32, BottomLeft, new Vector2(170f, 60f), new Vector2(260f, 100f), onBack, ButtonStyle.Brown, Theme?.iconHome);
+        }
+
         // --- Trail ---------------------------------------------------------------------
 
-        public void ShowTrail(Run run, Action<int> onChoose, Action onSquad, Action onQuit)
+        public void ShowTrail(Run run, Action<int> onChoose, Action onSquad, Action onQuit, string notice = "")
         {
             var p = NewPage();
             TopBar(p, run, onSquad, onQuit);
@@ -101,6 +237,7 @@ namespace LittleKeep.Game
             Label("BossLabel", p, bossText, 32, TextAnchor.MiddleCenter, Center, new Vector2(800f, -110f), new Vector2(340f, 80f), TextGold);
 
             Toast(p, run.Message);
+            Toast(p, notice);
         }
 
         void TopBar(RectTransform p, Run run, Action onSquad, Action onQuit)
@@ -112,7 +249,7 @@ namespace LittleKeep.Game
             hp.Value = run.KeepHp / run.KeepMaxHp;
             Label("HpText", hp.Back, $"{Mathf.CeilToInt(run.KeepHp)}/{Mathf.CeilToInt(run.KeepMaxHp)}", 24, TextAnchor.MiddleCenter, Center, new Vector2(0f, 2f), new Vector2(300f, 38f));
             Icon("GoldIcon", bar, Theme?.iconGold, new Vector2(0f, 0.5f), new Vector2(870f, 2f), 60f);
-            Label("Gold", bar, $"{run.Gold} gold", 32, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(940f, 2f), new Vector2(220f, 60f), TextGold);
+            Label("Gold", bar, $"{run.Gold} Gold", 32, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(940f, 2f), new Vector2(220f, 60f), TextGold);
             if (onSquad != null) Button("Squad", p, "Squad", 32, TopRight, new Vector2(onQuit != null ? -170f : -20f, -14f), new Vector2(240f, 104f), onSquad, ButtonStyle.Blue, Theme?.iconSquad);
             if (onQuit != null) RoundButton("Quit", p, Theme?.iconHome, "Title", TopRight, new Vector2(-20f, -10f), 110f, onQuit);
         }
@@ -178,7 +315,7 @@ namespace LittleKeep.Game
                 if (o.MakesMaster && o.Skill.Base.MasterForm != null)
                 {
                     var skillAsset = content.SkillAsset(o.Skill.Base.Id);
-                    Label("Master", card, $"★ Becomes {o.Skill.Base.MasterForm.Name}!\n<size=22>{skillAsset?.masterDescription}</size>", 28, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -410f), new Vector2(w - 80f, 120f), TextGold);
+                    Label("Master", card, $"Becomes {o.Skill.Base.MasterForm.Name}!\n<size=22>{skillAsset?.masterDescription}</size>", 28, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -410f), new Vector2(w - 80f, 120f), TextGold);
                 }
             }
             Button("Skip", p, "Skip", 30, Bottom, new Vector2(0f, 30f), new Vector2(260f, 90f), onSkip, ButtonStyle.Brown);
@@ -259,7 +396,7 @@ namespace LittleKeep.Game
                 bool repair = item.Kind == ShopItemKind.Repair;
                 string title = repair ? "Repairs" : item.Upgrade.Upgrade.Name;
                 string who = repair ? "For the Keep" : $"{item.Upgrade.Member.Def.Name} · {item.Upgrade.Skill.Base.Name}";
-                string body = repair ? $"Repair the Keep by {run.Tuning.ShopRepairAmount:0}." : item.Upgrade.Upgrade.Description + (item.Upgrade.Skill.NextMakesMaster && !item.Sold ? $"\n<color=#FFD15A>★ Becomes {item.Upgrade.Skill.Base.MasterForm.Name}!</color>" : "");
+                string body = repair ? $"Repair the Keep by {run.Tuning.ShopRepairAmount:0}." : item.Upgrade.Upgrade.Description + (item.Upgrade.Skill.NextMakesMaster && !item.Sold ? $"\n<color=#FFD15A>Becomes {item.Upgrade.Skill.Base.MasterForm.Name}!</color>" : "");
                 if (repair) Icon("Icon", card, Theme?.iconRest, Top, new Vector2(0f, -40f), 100f);
                 else Portrait(card, content.FighterAsset(item.Upgrade.Member.Def.Id), Top, new Vector2(0f, -75f), 260f);
                 Label("Who", card, who, 24, TextAnchor.UpperCenter, Top, new Vector2(0f, -150f), new Vector2(w - 60f, 40f), TextColor.WithAlpha(0.8f));
@@ -313,7 +450,7 @@ namespace LittleKeep.Game
                 Label("Name", card, m.Def.Name, 38, TextAnchor.MiddleCenter, Top, new Vector2(0f, -170f), new Vector2(w - 30f, 50f), TextGold);
                 var lines = m.Skills.Select(s =>
                 {
-                    string name = s.IsMaster ? $"<color=#FFD15A>★ {s.Base.MasterForm.Name}</color>" : $"<b>{s.Base.Name}</b>";
+                    string name = s.IsMaster ? $"<color=#FFD15A>{s.Base.MasterForm.Name} (Master)</color>" : $"<b>{s.Base.Name}</b>";
                     string ups = s.Taken.Count == 0 ? "  no upgrades yet" : string.Join("\n", s.Taken.Select(u => "  + " + u.Name));
                     return $"{name}\n{ups}";
                 });
@@ -322,28 +459,47 @@ namespace LittleKeep.Game
             Button("Close", overlay.rectTransform, "Close", 34, Bottom, new Vector2(0f, 50f), new Vector2(300f, 100f), () => { Destroy(overlay.gameObject); onClose?.Invoke(); }, ButtonStyle.Green);
         }
 
-        public void ShowSummary(Run run, Action onDone)
+        public void ShowSummary(Run run, RunRewards rewards, KeepProgress keep, Action onDone)
         {
             var p = NewPage();
             var r = run.Result;
-            Title("Title", p, r.Won ? "The Keep is safe!" : "The Keep has fallen", Top, new Vector2(0f, -100f), 1200f, 64);
+            Title("Title", p, r.Won ? "The Keep is safe!" : "The Keep has fallen", Top, new Vector2(0f, -90f), 1200f, 64);
             string body = r.Won
                 ? $"You saw off every Hero across all {run.ChapterCount} Chapters."
                 : $"Your Run ended in {run.ChapterName} (Chapter {r.ChapterReached} of {run.ChapterCount}).";
-            body += $"\nBattles won: {r.BattlesWon}    Gold left: {r.Gold}";
-            Label("Body", p, body, 36, TextAnchor.MiddleCenter, Top, new Vector2(0f, -260f), new Vector2(1600f, 120f));
+            body += $"   Battles won: {r.BattlesWon}";
+            Label("Body", p, body, 32, TextAnchor.MiddleCenter, Top, new Vector2(0f, -230f), new Vector2(1600f, 60f));
+
+            var lines = new List<string> { $"<color=#FFD15A>+{rewards?.Gems ?? 0} Gems</color>  (you have {keep.Gems})" };
+            if (rewards != null)
+            {
+                foreach (var id in rewards.NewFamiliars) lines.Add($"{content.FighterAsset(id)?.def.Name ?? id} joins your Familiars for good!");
+                foreach (var id in rewards.Deeds) lines.Add($"Deed complete: {keep.Content.Deeds.Find(d => d.Id == id)?.Name}");
+                if (rewards.TierUnlocked >= 0) lines.Add($"New Difficulty tier in the Watchtower: {keep.Content.Tiers[rewards.TierUnlocked].Name}");
+                var bonds = (r.Befriended ?? new List<string>()).Distinct()
+                    .Where(id => !keep.Owns(id) && keep.Content.Familiars.Exists(f => f.Id == id && f.Kind == UnlockKind.Bond))
+                    .Select(id => $"{content.FighterAsset(id)?.def.Name} {keep.BondProgress(id)}/{keep.Content.Familiars.Find(f => f.Id == id).BondSize}");
+                var bondText = string.Join(",  ", bonds);
+                if (bondText.Length > 0) lines.Add("Bonds: " + bondText);
+            }
+            float earnedH = 50f + lines.Count * 42f;
+            var earned = Panel("Earned", p, Top, new Vector2(0f, -275f), new Vector2(1000f, earnedH));
+            Icon("Gem", earned, Theme?.iconGem, new Vector2(0f, 0.5f), new Vector2(70f, 0f), 80f);
+            Label("Lines", earned, string.Join("\n", lines), 28, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(140f, 0f), new Vector2(830f, earnedH - 20f));
+            float cardsY = -275f - earnedH - 30f;
+
             var members = new List<SquadMember> { run.Keeper };
             members.AddRange(run.Familiars);
             float w = 300f, gap = 24f, total = members.Count * w + (members.Count - 1) * gap;
             for (int i = 0; i < members.Count; i++)
             {
                 var m = members[i];
-                var card = Card("Member", p, Center, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -60f), new Vector2(w, 300f));
+                var card = Card("Member", p, Top, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), cardsY), new Vector2(w, 300f));
                 Portrait(card, content.FighterAsset(m.Def.Id), Top, new Vector2(0f, -70f), 280f);
-                string skills = string.Join("\n", m.Skills.Select(s => s.IsMaster ? "★ " + s.Base.MasterForm.Name : $"{s.Base.Name} +{s.Taken.Count}"));
+                string skills = string.Join("\n", m.Skills.Select(s => s.IsMaster ? s.Base.MasterForm.Name + " (Master)" : $"{s.Base.Name} +{s.Taken.Count}"));
                 Label("Name", card, $"<b>{m.Def.Name}</b>\n<size=22>{skills}</size>", 30, TextAnchor.UpperCenter, Top, new Vector2(0f, -150f), new Vector2(w - 30f, 140f));
             }
-            Button("Done", p, "Back to title", 38, Bottom, new Vector2(0f, 70f), new Vector2(460f, 120f), onDone, ButtonStyle.Green, Theme?.iconHome);
+            Button("Done", p, "Back to the Keep", 36, Bottom, new Vector2(0f, 50f), new Vector2(500f, 110f), onDone, ButtonStyle.Green, Theme?.iconHome);
         }
 
         // --- Bits --------------------------------------------------------------------------

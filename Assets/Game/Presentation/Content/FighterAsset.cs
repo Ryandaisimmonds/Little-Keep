@@ -15,5 +15,10 @@ namespace LittleKeep.Game
         [Tooltip("Grey-box colour until real art arrives")] public Color color = Color.white;
         [Tooltip("Colour of this fighter's Skill effects")] public Color skillColor = new Color(1f, 0.85f, 0.3f);
         [Tooltip("Animated look; falls back to a grey-box circle when empty")] public CharacterArt art;
+        [Header("Familiars only: how the Player earns it")]
+        public UnlockKind unlock = UnlockKind.Start;
+        [Tooltip("Bond: Befriendings needed")] public int bondSize = 3;
+        [Tooltip("Deed: id of the Deed that grants it")] public string deedId = "";
+        [Tooltip("Shown in the Familiar book while it is not owned")] public string unlockHint = "";
     }
 }

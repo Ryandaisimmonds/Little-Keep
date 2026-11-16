@@ -24,3 +24,8 @@ crashlytics-build.properties
 .vs/
 .vscode/
 .DS_Store
+
+# MCP screenshots
+/Assets/Screenshots/
+/Assets/Screenshots.meta
+/.scratch/review/

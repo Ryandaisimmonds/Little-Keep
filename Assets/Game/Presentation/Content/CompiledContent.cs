@@ -8,6 +8,7 @@ namespace LittleKeep.Game
     public sealed class CompiledContent
     {
         public RunContent Run { get; } = new RunContent();
+        public ProgressContent Progress { get; } = new ProgressContent();
         public GameContent Source { get; }
         readonly Dictionary<FighterAsset, FighterDef> fighters = new Dictionary<FighterAsset, FighterDef>();
         readonly Dictionary<HeroAsset, HeroDef> heroes = new Dictionary<HeroAsset, HeroDef>();
@@ -21,7 +22,17 @@ namespace LittleKeep.Game
         {
             Source = source;
             Run.Keeper = Fighter(source.keeper);
-            foreach (var f in source.familiars) if (f != null) Run.Familiars.Add(Fighter(f));
+            foreach (var f in source.familiars)
+            {
+                if (f == null) continue;
+                Run.Familiars.Add(Fighter(f));
+                Progress.Familiars.Add(new FamiliarUnlock { Id = f.def.Id, Kind = f.unlock, BondSize = f.bondSize, DeedId = f.deedId });
+            }
+            Progress.Deeds.AddRange(source.deeds);
+            Progress.Upgrades.AddRange(source.keeperUpgrades);
+            Progress.Tiers.AddRange(source.tiers);
+            Progress.Rewards = source.rewards;
+            Run.WildCreatures.AddRange(Progress.WildCreatures);
             foreach (var c in source.chapters)
             {
                 if (c == null) continue;

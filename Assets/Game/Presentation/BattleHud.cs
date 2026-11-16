@@ -122,7 +122,7 @@ namespace LittleKeep.Game
                 var def = f.Skills[i].Def;
                 var bar = Bar("Skill", root, def.Tier == 2 ? Color.Lerp(skillColor, Color.white, 0.35f) : skillColor, new Vector2(0f, 1f), new Vector2(16f, -116f - i * 34f), new Vector2(192f, 28f));
                 card.skills.Add(bar);
-                string stars = def.Tier == 2 ? " ★" : def.Tier == 1 ? " +" : "";
+                string stars = def.Tier == 2 ? " ++" : def.Tier == 1 ? " +" : "";
                 Label("SkillName", bar.Back, def.Name + stars, 18, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0f, 1f), new Vector2(188f, 28f));
             }
             card.koText = Label("KO", root, "Zzz", 44, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(180f, 80f));

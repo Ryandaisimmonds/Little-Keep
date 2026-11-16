@@ -36,8 +36,6 @@ namespace LittleKeep.Rules
         WinBattles,
         /// Befriend Target creatures in total.
         Befriend,
-        /// Win a Run on difficulty tier Target (0-based) or harder.
-        WinOnTier,
     }
 
     /// A named achievement. Completing it can grant a Familiar.
@@ -72,7 +70,7 @@ namespace LittleKeep.Rules
         public string Description = "";
         public KeeperStat Stat;
         public float PerLevel = 1f;
-        /// Acorns for each level, in order. Its length is the number of levels.
+        /// Gems for each level, in order. Its length is the number of levels.
         public List<int> Costs = new List<int>();
     }
 
@@ -84,7 +82,7 @@ namespace LittleKeep.Rules
         public string Description = "";
         public float HeroHp = 1f;
         public float HeroCount = 1f;
-        /// Multiplies the Acorns a Run pays.
+        /// Multiplies the Gems a Run pays.
         public float Reward = 1f;
     }
 
@@ -94,6 +92,8 @@ namespace LittleKeep.Rules
         public int PerBattle = 3;
         public int PerChapter = 10;
         public int ForWin = 25;
+        /// Paid even for a Run lost in its first Battle.
+        public int Minimum = 5;
     }
 
     /// Everything permanent progress is built from.
@@ -101,6 +101,9 @@ namespace LittleKeep.Rules
     {
         public List<FamiliarUnlock> Familiars = new List<FamiliarUnlock>();
         public List<DeedDef> Deeds = new List<DeedDef>();
+
+        /// Familiars that can turn up on the Trail to be befriended: the ones earned through a Bond.
+        public List<string> WildCreatures => Familiars.Where(f => f.Kind == UnlockKind.Bond).Select(f => f.Id).ToList();
         public List<KeeperUpgradeDef> Upgrades = new List<KeeperUpgradeDef>();
         public List<DifficultyDef> Tiers = new List<DifficultyDef>();
         public RewardTuning Rewards = new RewardTuning();
@@ -109,7 +112,7 @@ namespace LittleKeep.Rules
     /// What one finished Run gave the Keep.
     public sealed class RunRewards
     {
-        public int Acorns;
+        public int Gems;
         public List<string> NewFamiliars = new List<string>();
         public List<string> Deeds = new List<string>();
         /// The tier this Run unlocked, or -1.
@@ -127,16 +130,19 @@ namespace LittleKeep.Rules
     {
         public const int CurrentVersion = 1;
         public int Version = CurrentVersion;
-        public int Acorns;
+        public int Gems;
         public int RunsPlayed, RunsWon, BattlesWon, Befriended, BestChapters;
         public int HighestTier;
+        public int ChosenTier;
+        /// The number of the last Run paid for, so a Run replayed after a crash is never paid twice.
+        public int LastRunNumber;
         public List<string> Owned = new List<string>();
         public List<CountEntry> Bonds = new List<CountEntry>();
         public List<CountEntry> Upgrades = new List<CountEntry>();
         public List<string> Deeds = new List<string>();
     }
 
-    /// Permanent progress: Acorns, Keeper upgrades, owned Familiars, Bonds, Deeds and difficulty tiers.
+    /// Permanent progress: Gems, Keeper upgrades, owned Familiars, Bonds, Deeds and difficulty tiers.
     /// Feed it finished Runs and purchases; ask it what is owned and unlocked.
     public sealed class KeepProgress
     {
@@ -145,9 +151,9 @@ namespace LittleKeep.Rules
         readonly Dictionary<string, int> bonds = new Dictionary<string, int>();
         readonly Dictionary<string, int> levels = new Dictionary<string, int>();
         readonly HashSet<string> deeds = new HashSet<string>();
-        int highestTier;
+        int highestTier, chosenTier, lastRunNumber;
 
-        public int Acorns { get; private set; }
+        public int Gems { get; private set; }
         public int RunsPlayed { get; private set; }
         public int RunsWon { get; private set; }
         public int BattlesWon { get; private set; }
@@ -172,6 +178,19 @@ namespace LittleKeep.Rules
         public bool IsTierUnlocked(int tier) => tier >= 0 && tier <= highestTier && tier < Math.Max(1, content.Tiers.Count);
         public int HighestTierUnlocked => highestTier;
 
+        /// The Difficulty tier the next Run starts on; falls back to the hardest open one.
+        public int ChosenTier => IsTierUnlocked(chosenTier) ? chosenTier : highestTier;
+
+        public bool ChooseTier(int tier)
+        {
+            if (!IsTierUnlocked(tier)) return false;
+            chosenTier = tier;
+            return true;
+        }
+
+        /// Read from a file written by a newer version of the game: it must not be saved over.
+        public bool FromNewerVersion { get; private set; }
+
         /// The Keeper's workshop opens after the first Run, the watchtower (difficulty) after the first win.
         public bool HasWorkshop => RunsPlayed > 0;
         public bool HasWatchtower => RunsWon > 0;
@@ -184,7 +203,6 @@ namespace LittleKeep.Rules
                 case DeedKind.WinRuns: return RunsWon;
                 case DeedKind.WinBattles: return BattlesWon;
                 case DeedKind.Befriend: return TotalBefriended;
-                case DeedKind.WinOnTier: return deeds.Contains(d.Id) ? d.Target : 0;
             }
             return 0;
         }
@@ -201,8 +219,8 @@ namespace LittleKeep.Rules
         public bool TryBuy(string upgradeId)
         {
             int cost = NextCost(upgradeId);
-            if (cost < 0 || Acorns < cost) return false;
-            Acorns -= cost;
+            if (cost < 0 || Gems < cost) return false;
+            Gems -= cost;
             levels[upgradeId] = UpgradeLevel(upgradeId) + 1;
             return true;
         }
@@ -210,7 +228,7 @@ namespace LittleKeep.Rules
         /// What permanent progress adds to a Run started on this tier.
         public RunBonuses BonusesFor(int tier)
         {
-            var b = new RunBonuses { Tier = tier };
+            var b = new RunBonuses { Tier = tier, RunNumber = lastRunNumber + 1 };
             foreach (var u in content.Upgrades)
             {
                 float total = u.PerLevel * UpgradeLevel(u.Id);
@@ -231,13 +249,18 @@ namespace LittleKeep.Rules
         }
 
         /// Pays for a finished Run and applies its Bonds, Deeds and tier unlocks.
+        /// A Run already paid for (same Run number) pays nothing.
         public RunRewards RecordRun(RunResult result)
         {
             var rewards = new RunRewards();
+            if (result.RunNumber > 0 && result.RunNumber <= lastRunNumber) return rewards;
+            lastRunNumber = Math.Max(lastRunNumber, result.RunNumber);
+
             var r = content.Rewards;
             float reward = result.Tier >= 0 && result.Tier < content.Tiers.Count ? content.Tiers[result.Tier].Reward : 1f;
-            rewards.Acorns = (int)Math.Round((result.BattlesWon * r.PerBattle + result.ChaptersCleared * r.PerChapter + (result.Won ? r.ForWin : 0)) * reward);
-            Acorns += rewards.Acorns;
+            int earned = (int)Math.Round((result.BattlesWon * r.PerBattle + result.ChaptersCleared * r.PerChapter + (result.Won ? r.ForWin : 0)) * reward);
+            rewards.Gems = Math.Max(r.Minimum, earned);
+            Gems += rewards.Gems;
             RunsPlayed++;
             if (result.Won) RunsWon++;
             BattlesWon += result.BattlesWon;
@@ -252,16 +275,7 @@ namespace LittleKeep.Rules
                 if (bonds[id] >= unlock.BondSize) Grant(id, rewards);
             }
 
-            foreach (var d in content.Deeds)
-            {
-                if (deeds.Contains(d.Id)) continue;
-                bool done = d.Kind == DeedKind.WinOnTier ? result.Won && result.Tier >= d.Target : DeedProgress(d) >= d.Target;
-                if (!done) continue;
-                deeds.Add(d.Id);
-                rewards.Deeds.Add(d.Id);
-                foreach (var f in content.Familiars)
-                    if (f.Kind == UnlockKind.Deed && f.DeedId == d.Id) Grant(f.Id, rewards);
-            }
+            CompleteDeeds(rewards);
 
             if (result.Won && result.Tier == highestTier && highestTier + 1 < content.Tiers.Count)
             {
@@ -269,6 +283,27 @@ namespace LittleKeep.Rules
                 rewards.TierUnlocked = highestTier;
             }
             return rewards;
+        }
+
+        /// Called as a Run goes: completes any Deed the Chapters cleared so far satisfy, granting its Familiar now.
+        public RunRewards NoteChaptersCleared(int chaptersCleared)
+        {
+            var rewards = new RunRewards();
+            BestChapters = Math.Max(BestChapters, chaptersCleared);
+            CompleteDeeds(rewards);
+            return rewards;
+        }
+
+        void CompleteDeeds(RunRewards rewards)
+        {
+            foreach (var d in content.Deeds)
+            {
+                if (deeds.Contains(d.Id) || DeedProgress(d) < d.Target) continue;
+                deeds.Add(d.Id);
+                rewards.Deeds.Add(d.Id);
+                foreach (var f in content.Familiars)
+                    if (f.Kind == UnlockKind.Deed && f.DeedId == d.Id) Grant(f.Id, rewards);
+            }
         }
 
         void Grant(string id, RunRewards rewards)
@@ -281,13 +316,15 @@ namespace LittleKeep.Rules
         public ProgressData ToData() => new ProgressData
         {
             Version = ProgressData.CurrentVersion,
-            Acorns = Acorns,
+            Gems = Gems,
             RunsPlayed = RunsPlayed,
             RunsWon = RunsWon,
             BattlesWon = BattlesWon,
             Befriended = TotalBefriended,
             BestChapters = BestChapters,
             HighestTier = highestTier,
+            ChosenTier = chosenTier,
+            LastRunNumber = lastRunNumber,
             Owned = owned.ToList(),
             Bonds = bonds.Select(kv => new CountEntry { Id = kv.Key, Count = kv.Value }).ToList(),
             Upgrades = levels.Select(kv => new CountEntry { Id = kv.Key, Count = kv.Value }).ToList(),
@@ -298,13 +335,16 @@ namespace LittleKeep.Rules
         void Read(ProgressData d)
         {
             // Version 0 (before versioning) had the same fields, possibly missing; every list may be null.
-            Acorns = Math.Max(0, d.Acorns);
+            Gems = Math.Max(0, d.Gems);
             RunsPlayed = Math.Max(0, d.RunsPlayed);
             RunsWon = Math.Max(0, d.RunsWon);
             BattlesWon = Math.Max(0, d.BattlesWon);
             TotalBefriended = Math.Max(0, d.Befriended);
             BestChapters = Math.Max(0, d.BestChapters);
+            FromNewerVersion = d.Version > ProgressData.CurrentVersion;
             highestTier = Math.Max(0, Math.Min(d.HighestTier, Math.Max(0, content.Tiers.Count - 1)));
+            chosenTier = Math.Max(0, d.ChosenTier);
+            lastRunNumber = Math.Max(0, d.LastRunNumber);
             foreach (var id in d.Owned ?? new List<string>())
                 if (content.Familiars.Exists(f => f.Id == id)) owned.Add(id);
             foreach (var e in d.Bonds ?? new List<CountEntry>())
@@ -333,14 +373,16 @@ namespace LittleKeep.Rules
         /// Multiplies Hero numbers (difficulty).
         public float HeroCount = 1f;
         public int Tier;
+        /// Which Run this is, counted by the Keep; lets a Run be paid for only once.
+        public int RunNumber;
 
-        internal string Encode() => string.Join(",", new[] { KeepMaxHpBonus, StartGold, KeeperDamage, RallyCooldown, HeroHp, HeroCount, Tier }
+        internal string Encode() => string.Join(",", new[] { KeepMaxHpBonus, StartGold, KeeperDamage, RallyCooldown, HeroHp, HeroCount, Tier, RunNumber }
             .Select(v => Convert.ToSingle(v).ToString("G9", System.Globalization.CultureInfo.InvariantCulture)));
 
         internal static RunBonuses Decode(string s)
         {
             var p = s.Split(',').Select(x => float.Parse(x, System.Globalization.CultureInfo.InvariantCulture)).ToArray();
-            return new RunBonuses { KeepMaxHpBonus = p[0], StartGold = (int)p[1], KeeperDamage = p[2], RallyCooldown = p[3], HeroHp = p[4], HeroCount = p[5], Tier = (int)p[6] };
+            return new RunBonuses { KeepMaxHpBonus = p[0], StartGold = (int)p[1], KeeperDamage = p[2], RallyCooldown = p[3], HeroHp = p[4], HeroCount = p[5], Tier = (int)p[6], RunNumber = p.Length > 7 ? (int)p[7] : 0 };
         }
     }
 }

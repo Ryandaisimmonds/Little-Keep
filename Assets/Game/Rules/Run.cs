@@ -531,7 +531,7 @@ namespace LittleKeep.Rules
                 ChapterReached = Chapter + 1,
                 Gold = Gold,
                 Tier = bonuses.Tier,
-                StartingFamiliar = starterId ?? "",
+                RunNumber = bonuses.RunNumber,
                 Befriended = new List<string>(befriended),
             };
         }

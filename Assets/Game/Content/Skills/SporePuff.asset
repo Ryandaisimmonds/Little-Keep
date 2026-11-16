@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5db4ae07af5c042309e0106dfe6a12f8, type: 3}
+  m_Name: SporePuff
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.SkillAsset
+  def:
+    Id: spore_puff
+    Name: Spore Puff
+    Shape: 1
+    Cooldown: 6.5
+    Damage: 14
+    Count: 1
+    Spread: 20
+    Radius: 1.9
+    ProjectileSpeed: 18
+  description: A soft cloud of spores that hits every Hero around the target.
+  upgrades:
+  - Id: spore_puff_thick
+    Name: Thick Spores
+    Description: Spores hit 35% harder.
+    Mods:
+    - Stat: 0
+      Op: 1
+      Value: 1.35
+  - Id: spore_puff_quick
+    Name: Quick Puff
+    Description: Recharges 20% faster.
+    Mods:
+    - Stat: 1
+      Op: 1
+      Value: 0.8
+  - Id: spore_puff_big
+    Name: Big Puff
+    Description: The cloud spreads 30% wider.
+    Mods:
+    - Stat: 3
+      Op: 1
+      Value: 1.3
+  hasMasterForm: 1
+  masterForm:
+    Id: spore_puff_master
+    Name: Spore Cloud
+    Shape: 1
+    Cooldown: 5.5
+    Damage: 26
+    Count: 1
+    Spread: 20
+    Radius: 2.8
+    ProjectileSpeed: 18
+  masterDescription: A great drifting cloud that blankets the lane.
