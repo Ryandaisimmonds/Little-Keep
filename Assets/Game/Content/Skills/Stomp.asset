@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.SkillAsset
   def:
     Id: stomp
-    Name: Stomp
+    Name: Bark Blast
     Shape: 1
     Cooldown: 7
     Damage: 16
@@ -22,25 +22,25 @@ MonoBehaviour:
     Spread: 20
     Radius: 1.4
     ProjectileSpeed: 18
-  description: Stamps down hard, shaking every Hero nearby.
+  description: A huge bark that knocks every Hero nearby.
   upgrades:
   - Id: stomp_heavy
-    Name: Heavy Hooves
-    Description: Stomps hit 35% harder.
+    Name: Big Bark
+    Description: Barks hit 35% harder.
     Mods:
     - Stat: 0
       Op: 1
       Value: 1.35
   - Id: stomp_trot
-    Name: Trot
+    Name: Quick Bark
     Description: Recharges 20% faster.
     Mods:
     - Stat: 1
       Op: 1
       Value: 0.8
   - Id: stomp_big
-    Name: Big Stomp
-    Description: The stomp reaches 30% wider.
+    Name: Echoing Bark
+    Description: The bark reaches 30% wider.
     Mods:
     - Stat: 3
       Op: 1
@@ -48,7 +48,7 @@ MonoBehaviour:
   hasMasterForm: 1
   masterForm:
     Id: stomp_master
-    Name: Thunder Hooves
+    Name: Howling Blast
     Shape: 1
     Cooldown: 6
     Damage: 30
@@ -56,4 +56,4 @@ MonoBehaviour:
     Spread: 20
     Radius: 2.3
     ProjectileSpeed: 18
-  masterDescription: A thundering stomp that rattles half the lane.
+  masterDescription: A howl that rattles half the lane.

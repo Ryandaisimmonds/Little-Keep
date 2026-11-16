@@ -4,6 +4,8 @@
 
 **Blocked by:** 05 Full cast and balance, 06 Theme, illustration and sound. Also needs the free asset packs from the developer, with licences that allow commercial use.
 
+**Done early (art packs added on 2026-11-16):** every Keeper, Familiar and Hero has animated pixel art from "100 Top Down Monsters Vol 1" (idle, move and attack, facing left or right), sized by each character's measured visible height; art is swappable per asset (Little Keep > Apply Art Packs rebuilds it). Still to do here: three-tier Skill effects, Combo and Rally effects, and the performance pass.
+
 **Status:** ready-for-agent
 
 - [ ] Keeper, Familiars, creatures, Heroes and bosses use single-view sprites from the supplied packs

@@ -22,6 +22,7 @@ MonoBehaviour:
     Skills: []
   skills:
   - {fileID: 11400000, guid: 98c13cad37eff4cd6ab480d521e92a1d, type: 2}
-  description: The Player on the battlefield. Hold a finger on the lane to aim.
+  description: 'You: a little dragon who keeps the Keep. Hold a finger on the lane to aim.'
   color: {r: 1, g: 0.93, b: 0.75, a: 1}
   skillColor: {r: 1, g: 0.86, b: 0.35, a: 1}
+  art: {fileID: 11400000, guid: 0f14769bcf04748ceadd0deee0160044, type: 2}

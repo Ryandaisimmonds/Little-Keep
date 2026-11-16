@@ -22,6 +22,7 @@ MonoBehaviour:
     Skills: []
   skills:
   - {fileID: 11400000, guid: 03b45edce48de4ca2aa6d84ab87e184b, type: 2}
-  description: A mossy hedgehog. Sprays a wide fan of thorns.
+  description: A prickly little plant. Sprays a wide fan of thorns.
   color: {r: 0.55, g: 0.75, b: 0.45, a: 1}
   skillColor: {r: 0.45, g: 0.95, b: 0.5, a: 1}
+  art: {fileID: 11400000, guid: ea64eb692682646b9a49637c4be16515, type: 2}

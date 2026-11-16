@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
   def:
     Id: falconer
-    Name: Falconer
+    Name: Huntsman
     Hp: 32
     Speed: 1.4
     KeepDamage: 5
@@ -31,8 +31,9 @@ MonoBehaviour:
     IsBoss: 0
     SummonInterval: 8
     SummonCount: 2
-  description: Shoots from afar with an owl on one arm. Beat the falconer and the owl is free.
+  description: Shoots from afar with a horned rabbit in tow. Beat the huntsman and the rabbit is free.
   color: {r: 0.55, g: 0.7, b: 0.85, a: 1}
   look: 2
+  art: {fileID: 11400000, guid: 6108cecec6a5d4adb9e1e745b81a51ad, type: 2}
   creature: {fileID: 11400000, guid: 3cf5aea1cb80d44378e0bd6aad473bcc, type: 2}
   summon: {fileID: 0}

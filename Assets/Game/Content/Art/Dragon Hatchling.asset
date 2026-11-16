@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab8ceab340bf8429e8947823d7678273, type: 3}
+  m_Name: Dragon Hatchling
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.CharacterArt
+  idleLeft:
+  - {fileID: 533711604, guid: 55dd2305c0c64d7458bd7025395f2c8e, type: 3}
+  - {fileID: 524829275, guid: 55dd2305c0c64d7458bd7025395f2c8e, type: 3}
+  - {fileID: 1696426464, guid: 55dd2305c0c64d7458bd7025395f2c8e, type: 3}
+  - {fileID: -1238273870, guid: 55dd2305c0c64d7458bd7025395f2c8e, type: 3}
+  idleRight:
+  - {fileID: -845855159, guid: 55dd2305c0c64d7458bd7025395f2c8e, type: 3}
+  - {fileID: -1023472561, guid: 55dd2305c0c64d7458bd7025395f2c8e, type: 3}
+  - {fileID: -1266311531, guid: 55dd2305c0c64d7458bd7025395f2c8e, type: 3}
+  - {fileID: -1205903918, guid: 55dd2305c0c64d7458bd7025395f2c8e, type: 3}
+  moveLeft: []
+  moveRight: []
+  attackLeft:
+  - {fileID: -1756671512, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: 787498727, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: -1959218093, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: 1816190934, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: 179488055, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: -2121849949, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  attackRight:
+  - {fileID: -362343880, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: 654048266, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: -1441272254, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: -740190355, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: 329894473, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  - {fileID: 521893003, guid: a138dd15c4dd7d4418e9221caedffbac, type: 3}
+  framesPerSecond: 8
+  scale: 1.2
+  footOffset: 0
+  visibleSize: {x: 0.24, y: 0.32}
+  visibleCenter: {x: 0, y: -0.020000003}

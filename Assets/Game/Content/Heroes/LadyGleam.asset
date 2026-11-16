@@ -34,5 +34,6 @@ MonoBehaviour:
   description: Boss. Polished armour, polished knights.
   color: {r: 0.85, g: 0.85, b: 0.95, a: 1}
   look: 1
+  art: {fileID: 11400000, guid: 46df42141b29b4c3aaa14dd69c8595db, type: 2}
   creature: {fileID: 0}
   summon: {fileID: 11400000, guid: 0e80d6a23cabd427b998b916ee819df7, type: 2}

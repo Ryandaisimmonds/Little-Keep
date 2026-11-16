@@ -34,5 +34,6 @@ MonoBehaviour:
   description: Boss. The most heroic Hero there ever was, apparently.
   color: {r: 1, g: 0.95, b: 0.7, a: 1}
   look: 2
+  art: {fileID: 11400000, guid: c40307d3cc67a42729075517fe18e797, type: 2}
   creature: {fileID: 0}
   summon: {fileID: 11400000, guid: 8c7e87a97b92f4ddcabd7ffb3166537b, type: 2}

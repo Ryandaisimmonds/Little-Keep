@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.FighterAsset
   def:
     Id: pony
-    Name: Pony
+    Name: Biscuit
     Hp: 90
     AttackDamage: 5
     AttackInterval: 0.7
@@ -22,6 +22,7 @@ MonoBehaviour:
     Skills: []
   skills:
   - {fileID: 11400000, guid: b30d1a3a83ea84c8e9f1bdc9387775ec, type: 2}
-  description: A knight's overworked pony, glad of a quieter job. Sturdy and stompy.
+  description: A knight's hound, glad of a quieter job. Bounds in with a big bark.
   color: {r: 0.85, g: 0.72, b: 0.55, a: 1}
   skillColor: {r: 1, g: 0.92, b: 0.45, a: 1}
+  art: {fileID: 11400000, guid: 6961a8ea93be94613803679e2ac3eeb7, type: 2}

@@ -31,8 +31,9 @@ MonoBehaviour:
     IsBoss: 0
     SummonInterval: 8
     SummonCount: 2
-  description: Rides in on a tired pony. Beat the knight and the pony is free.
+  description: Rides in with a hound at heel. Beat the knight and the hound is free.
   color: {r: 0.85, g: 0.6, b: 0.55, a: 1}
   look: 1
+  art: {fileID: 11400000, guid: 79b0b8c8eea3042d8849a517ba6a91f4, type: 2}
   creature: {fileID: 11400000, guid: f11775d1b01fb4e1a9b0591f3ff50de0, type: 2}
   summon: {fileID: 0}

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.SkillAsset
   def:
     Id: feather_flurry
-    Name: Feather Flurry
+    Name: Clover Flurry
     Shape: 0
     Cooldown: 6
     Damage: 5
@@ -22,25 +22,25 @@ MonoBehaviour:
     Spread: 40
     Radius: 1.5
     ProjectileSpeed: 22
-  description: A quick flurry of sharp feathers.
+  description: A quick flurry of sharp, lucky clovers.
   upgrades:
   - Id: feather_flurry_sharp
-    Name: Sharp Quills
-    Description: Feathers hit 40% harder.
+    Name: Four-Leaf
+    Description: Clovers hit 40% harder.
     Mods:
     - Stat: 0
       Op: 1
       Value: 1.4
   - Id: feather_flurry_swift
-    Name: Swift Wings
+    Name: Quick Paws
     Description: Recharges 20% faster.
     Mods:
     - Stat: 1
       Op: 1
       Value: 0.8
   - Id: feather_flurry_more
-    Name: Flurry
-    Description: Three more feathers per flurry.
+    Name: Clover Patch
+    Description: Three more clovers per flurry.
     Mods:
     - Stat: 2
       Op: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
   hasMasterForm: 1
   masterForm:
     Id: feather_flurry_master
-    Name: Night Gale
+    Name: Lucky Gale
     Shape: 0
     Cooldown: 5
     Damage: 7
@@ -56,4 +56,4 @@ MonoBehaviour:
     Spread: 90
     Radius: 1.5
     ProjectileSpeed: 24
-  masterDescription: A gale of midnight feathers.
+  masterDescription: A gale of four-leaf clovers.

@@ -27,6 +27,13 @@ MonoBehaviour:
     ShotRange: 6
     ShotSpeed: 9
     AttackBlock: 0.7
+    CreatureId: 
+    IsBoss: 0
+    SummonInterval: 8
+    SummonCount: 2
   description: Hides behind an enormous shield. Ordinary attacks barely scratch it; Skills hit in full.
   color: {r: 0.55, g: 0.65, b: 0.85, a: 1}
   look: 1
+  art: {fileID: 11400000, guid: 561409a57133e4b9a84ea4d3a243c701, type: 2}
+  creature: {fileID: 0}
+  summon: {fileID: 0}

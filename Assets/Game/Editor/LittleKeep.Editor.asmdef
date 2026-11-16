@@ -1,7 +1,7 @@
 {
     "name": "LittleKeep.Editor",
     "rootNamespace": "LittleKeep.Editor",
-    "references": ["LittleKeep.Rules", "LittleKeep.Game"],
+    "references": ["LittleKeep.Rules", "LittleKeep.Game", "Unity.TextMeshPro"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

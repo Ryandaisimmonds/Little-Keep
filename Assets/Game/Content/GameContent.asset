@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa89f722b7b3a4e7495362df0dc508e2, type: 3}
   m_Name: GameContent
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.GameContent
+  theme: {fileID: 11400000, guid: 0a0bf2731e7eb474eb0fefcedede371a, type: 2}
   keeper: {fileID: 11400000, guid: 31481cfcb68314e67a7d2f8d9d63d943, type: 2}
   starters:
   - {fileID: 11400000, guid: be835fa8ab3bd4cf587ccaeaf485015d, type: 2}

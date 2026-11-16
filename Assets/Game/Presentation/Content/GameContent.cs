@@ -8,6 +8,7 @@ namespace LittleKeep.Game
     [CreateAssetMenu(menuName = "Little Keep/Game Content", fileName = "GameContent")]
     public sealed class GameContent : ScriptableObject
     {
+        public UiTheme theme;
         public FighterAsset keeper;
         [Tooltip("Familiars the Player can start a Run with")] public List<FighterAsset> starters = new List<FighterAsset>();
         [Tooltip("Every creature that can become a Familiar, starters included")] public List<FighterAsset> familiars = new List<FighterAsset>();

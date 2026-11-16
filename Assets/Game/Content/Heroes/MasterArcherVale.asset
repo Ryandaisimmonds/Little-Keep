@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
   def:
     Id: master_archer_vale
-    Name: Master Archer Vale
+    Name: Archmage Vale
     Hp: 380
     Speed: 0.9
     KeepDamage: 25
@@ -34,5 +34,6 @@ MonoBehaviour:
   description: Mid-boss. Never misses, never stops talking about it.
   color: {r: 0.45, g: 0.75, b: 0.5, a: 1}
   look: 2
+  art: {fileID: 11400000, guid: 4415771c6708143f8969306711aba36e, type: 2}
   creature: {fileID: 0}
   summon: {fileID: 0}

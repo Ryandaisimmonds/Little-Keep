@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf260901a66ac4622b405ebc5fb0ead0, type: 3}
+  m_Name: UiTheme
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.UiTheme
+  font: {fileID: 11400000, guid: fa08fff1716a04db18700207b6c202e5, type: 2}
+  fontOutlined: {fileID: 11400000, guid: aa2f3c655b3634b2b852b64fd197fd58, type: 2}
+  background: {fileID: 21300000, guid: 26f4dc9d84a7e4952bd204475e44b7fe, type: 3}
+  panel: {fileID: 21300000, guid: 05635dc0b2e38494a8926bc193d12085, type: 3}
+  card: {fileID: 21300000, guid: 9cec25c03b6b34cb69a72aed6d6bbc92, type: 3}
+  cardDim: {fileID: 21300000, guid: 90fd9a140a3854a52b6f13ef3ea72012, type: 3}
+  topBar: {fileID: 21300000, guid: aca272b9b5bd04227bd473b2fab855e7, type: 3}
+  ribbon: {fileID: 21300000, guid: e0eaa9e4258c74cf6a447b1e27561562, type: 3}
+  tag: {fileID: 21300000, guid: ffe7523fb84f34effb77d9337bf10ea8, type: 3}
+  ring: {fileID: 0}
+  buttonBrown: {fileID: 21300000, guid: 9f50362e3fa90440b8caef63181d40de, type: 3}
+  buttonGreen: {fileID: 21300000, guid: cbb338b33765f40d2b04b54d803786bd, type: 3}
+  buttonBlue: {fileID: 21300000, guid: 643ab1e74021d434ca614b50ac4ce844, type: 3}
+  buttonRed: {fileID: 21300000, guid: 4f27cdb744c7b4f4aba46139d40a63f1, type: 3}
+  buttonPurple: {fileID: 21300000, guid: 36267bcf5b2d343cdadf8a4766598974, type: 3}
+  buttonTeal: {fileID: 21300000, guid: f139613dc3ca24233a05524c5162cdd8, type: 3}
+  buttonRound: {fileID: 21300000, guid: b66b96c6acb4f456898d981f7bc06784, type: 3}
+  buttonSquare: {fileID: 21300000, guid: a214a84d2524d402c9fcc2676ba0900e, type: 3}
+  barBack: {fileID: 21300000, guid: 37f1aa954abed473d87e4483a6c3f0ac, type: 3}
+  barFill: {fileID: 21300000, guid: 69286042345c44c95b00119f1a95a651, type: 3}
+  iconPause: {fileID: 21300000, guid: 64d380e3fd43240929c6d0699cd54310, type: 3}
+  iconPlay: {fileID: 21300000, guid: 3c653bd835bc44d97b36cc1b939cbcd0, type: 3}
+  iconHome: {fileID: 21300000, guid: 9053445df0b864a4886993c297314d08, type: 3}
+  iconSpeed: {fileID: 21300000, guid: c3434df6a8c9544a2a6fd7e611444324, type: 3}
+  iconGold: {fileID: 21300000, guid: 0f68375e832c24ba4bd82108141e73ba, type: 3}
+  iconHeart: {fileID: 21300000, guid: ab232f1be853f4e438d595f4aba9f0bc, type: 3}
+  iconCrown: {fileID: 21300000, guid: 2cbd03f981f664e32bd4718196ef18ae, type: 3}
+  iconSkull: {fileID: 21300000, guid: b1040937aeadb4cf390883fa5f29518a, type: 3}
+  iconBattle: {fileID: 21300000, guid: 7db6b0a5206d1429c9d01ee4bfd8f361, type: 3}
+  iconShop: {fileID: 21300000, guid: 155adf1b81333418b83c6b937fb1001a, type: 3}
+  iconRest: {fileID: 21300000, guid: 1a483130af32d45729d558badc1083f2, type: 3}
+  iconEvent: {fileID: 21300000, guid: 818d1bdbd7bc346469c5f3e87099658b, type: 3}
+  iconWild: {fileID: 21300000, guid: 39d033a1c909b44b0924abd4a3dcdf55, type: 3}
+  iconStar: {fileID: 21300000, guid: 90fe65d71ca8246639fcc61ef096be84, type: 3}
+  iconSquad: {fileID: 21300000, guid: 2e16bcf578e914aee8af6b28749c9e2a, type: 3}
+  iconLock: {fileID: 21300000, guid: 30d2b5af77e7e490e8ab379683b468ee, type: 3}
+  iconSparkle: {fileID: 21300000, guid: eba04c4e1a7864491ae7f789b2064113, type: 3}
+  text: {r: 0.98, g: 0.93, b: 0.82, a: 1}
+  textDark: {r: 0.27, g: 0.21, b: 0.18, a: 1}
+  textGold: {r: 1, g: 0.82, b: 0.35, a: 1}
+  backdrop: {r: 0.2, g: 0.17, b: 0.14, a: 1}
+  health: {r: 0.55, g: 0.85, b: 0.35, a: 1}
+  healthLow: {r: 0.95, g: 0.4, b: 0.3, a: 1}
+  rally: {r: 1, g: 0.55, b: 0.8, a: 1}

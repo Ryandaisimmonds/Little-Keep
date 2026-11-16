@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.FighterAsset
   def:
     Id: owl
-    Name: Owl
+    Name: Bun
     Hp: 40
     AttackDamage: 3
     AttackInterval: 0.3
@@ -22,6 +22,7 @@ MonoBehaviour:
     Skills: []
   skills:
   - {fileID: 11400000, guid: 610cf615abfae45e4bcc20b809cd4103, type: 2}
-  description: A falconer's owl who never liked the falconer. Quick and sharp-eyed.
+  description: A huntsman's horned rabbit who never liked the huntsman. Quick and fierce.
   color: {r: 0.75, g: 0.68, b: 0.85, a: 1}
   skillColor: {r: 0.8, g: 0.7, b: 1, a: 1}
+  art: {fileID: 11400000, guid: ae377b2fa3fc24907a3714267684f085, type: 2}

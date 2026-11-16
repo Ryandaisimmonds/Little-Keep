@@ -22,6 +22,7 @@ MonoBehaviour:
     Skills: []
   skills:
   - {fileID: 11400000, guid: 88bb887c6d8154e4898305af1a644def, type: 2}
-  description: A little ember sprite. Pops Heroes in a bright burst.
+  description: A little fire spirit. Pops Heroes in a bright burst.
   color: {r: 1, g: 0.62, b: 0.45, a: 1}
   skillColor: {r: 1, g: 0.5, b: 0.2, a: 1}
+  art: {fileID: 11400000, guid: 155aaeefd65874653a56e348d2c501d5, type: 2}

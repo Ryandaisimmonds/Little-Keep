@@ -27,6 +27,13 @@ MonoBehaviour:
     ShotRange: 6
     ShotSpeed: 9
     AttackBlock: 0
+    CreatureId: 
+    IsBoss: 0
+    SummonInterval: 8
+    SummonCount: 2
   description: Eager and underpaid. Walks straight at the Keep and swings at anyone in the way.
   color: {r: 0.93, g: 0.8, b: 0.55, a: 1}
   look: 0
+  art: {fileID: 11400000, guid: 256899adc25064725bc8235b30f067a3, type: 2}
+  creature: {fileID: 0}
+  summon: {fileID: 0}

@@ -25,6 +25,7 @@ namespace LittleKeep.Game
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            UiKit.Theme = content.theme;
 
             var cam = Camera.main != null ? Camera.main : new GameObject("Main Camera", typeof(Camera)).GetComponent<Camera>();
             cam.tag = "MainCamera";

@@ -14,5 +14,6 @@ namespace LittleKeep.Game
         [TextArea(2, 4)] public string description;
         [Tooltip("Grey-box colour until real art arrives")] public Color color = Color.white;
         [Tooltip("Colour of this fighter's Skill effects")] public Color skillColor = new Color(1f, 0.85f, 0.3f);
+        [Tooltip("Animated look; falls back to a grey-box circle when empty")] public CharacterArt art;
     }
 }

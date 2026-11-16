@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: hill_mid
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EncounterAsset
   id: hill_mid
-  displayName: Master Archer Vale
+  displayName: Archmage Vale
   gold: 45
   waves:
   - entries:

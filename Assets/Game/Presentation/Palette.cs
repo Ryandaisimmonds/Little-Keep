@@ -6,9 +6,10 @@ namespace LittleKeep.Game
     /// Replaced by the UI theme asset in ticket 06.
     public static class Palette
     {
-        public static readonly Color Sky = new Color(0.98f, 0.91f, 0.82f);
-        public static readonly Color Lane = new Color(0.72f, 0.80f, 0.60f);
-        public static readonly Color LaneEdge = new Color(0.60f, 0.70f, 0.50f);
+        // Darkened to sit with the stone UI pack; the lane stays the brightest part of the world.
+        public static readonly Color Sky = new Color(0.22f, 0.19f, 0.16f);
+        public static readonly Color Lane = new Color(0.47f, 0.60f, 0.33f);
+        public static readonly Color LaneEdge = new Color(0.36f, 0.47f, 0.26f);
         public static readonly Color Keep = new Color(0.80f, 0.62f, 0.48f);
         public static readonly Color KeepRoof = new Color(0.66f, 0.42f, 0.38f);
         public static readonly Color Panel = new Color(0.27f, 0.21f, 0.24f, 0.82f);

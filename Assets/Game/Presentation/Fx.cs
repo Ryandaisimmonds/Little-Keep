@@ -26,10 +26,10 @@ namespace LittleKeep.Game
         }
 
         public void Ring(Vector2 pos, float radius, Color color, float life = 0.35f, float startFraction = 0.2f) =>
-            Spawn(Shapes.Ring, pos, radius * 2f * startFraction, radius * 2f, color, life, 20);
+            Spawn(Shapes.Ring, pos, radius * 2f * startFraction, radius * 2f, color, life, 1001);
 
         public void Blob(Vector2 pos, float size, Color color, float life = 0.25f) =>
-            Spawn(Shapes.Circle, pos, size, size * 1.6f, color, life, 19);
+            Spawn(Shapes.Circle, pos, size, size * 1.6f, color, life, 1000);
 
         public void Shake(float amount) => shake = Mathf.Max(shake, amount);
 

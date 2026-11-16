@@ -4,7 +4,9 @@ using UnityEngine;
 
 namespace LittleKeep.Game
 {
-    /// Draws a Battle in grey-box shapes and turns its events into effects. Reads rule state; never changes it.
+    /// Draws a Battle and turns its events into effects. Reads rule state; never changes it.
+    /// Characters with CharacterArt are animated sprites (the squad faces right, Heroes face left);
+    /// anything without art falls back to a grey-box shape.
     public sealed class BattleView : MonoBehaviour
     {
         sealed class UnitView
@@ -13,10 +15,17 @@ namespace LittleKeep.Game
             public SpriteRenderer body;
             public SpriteRenderer barBack, barFill;
             public Color color;
-            public float baseScale;
-            public float aspect = 1f;
+            public float baseScale, aspect = 1f;
             public float flash, squash;
+            public CharacterArt art;
+            public bool faceRight;
+            public float animTime, attackTime;
         }
+
+        const float AttackPoseSeconds = 0.4f;
+        /// Standard on-screen height of a character with art, in lane units.
+        const float CharacterHeight = 1.05f;
+        static readonly Color HitTint = new Color(1f, 0.55f, 0.55f);
 
         Battle battle;
         CompiledContent content;
@@ -27,8 +36,7 @@ namespace LittleKeep.Game
         readonly Stack<SpriteRenderer> shotPool = new Stack<SpriteRenderer>();
         readonly HashSet<int> seen = new HashSet<int>();
         Transform world;
-        SpriteRenderer aimMarker;
-        SpriteRenderer keepBody;
+        SpriteRenderer aimMarker, keepBody;
         float keepFlash;
 
         public void Show(Battle battle, CompiledContent content, Fx fx)
@@ -43,11 +51,12 @@ namespace LittleKeep.Game
             foreach (var f in battle.Squad)
             {
                 var asset = content.FighterAsset(f.Def.Id);
-                var color = asset != null ? asset.color : Color.white;
                 float size = f.IsKeeper ? 0.95f : 0.75f;
-                fighters[f.Id] = MakeUnit(f.IsKeeper ? "Keeper" : f.Def.Name, Shapes.Circle, color, size, new Vector2(f.Position.X, f.Position.Y), 10);
+                var v = MakeUnit(f.Def.Name, Shapes.Circle, asset != null ? asset.color : Color.white, size, asset?.art, true, 1f);
+                v.root.position = new Vector3(f.Position.X, f.Position.Y, 0f);
+                fighters[f.Id] = v;
             }
-            aimMarker = MakeSprite("Aim", Shapes.Ring, new Color(1f, 1f, 1f, 0.8f), 0.6f, 15, world);
+            aimMarker = MakeSprite("Aim", Shapes.Ring, new Color(1f, 1f, 1f, 0.8f), 0.6f, 900, world);
             aimMarker.gameObject.SetActive(false);
         }
 
@@ -62,35 +71,51 @@ namespace LittleKeep.Game
 
         void BuildLane(BattleTuning t)
         {
-            var bg = MakeSprite("Ground", Shapes.Square, Palette.LaneEdge, 1f, -10, world);
+            var bg = MakeSprite("Ground", Shapes.Square, Palette.LaneEdge, 1f, -1000, world);
             bg.transform.position = new Vector3(t.LaneLength * 0.5f, 0f, 0f);
             bg.transform.localScale = new Vector3(t.LaneLength + 40f, t.LaneHalfHeight * 2f + 0.6f, 1f);
-            var lane = MakeSprite("Lane", Shapes.Square, Palette.Lane, 1f, -9, world);
+            var lane = MakeSprite("Lane", Shapes.Square, Palette.Lane, 1f, -999, world);
             lane.transform.position = new Vector3(t.LaneLength * 0.5f, 0f, 0f);
             lane.transform.localScale = new Vector3(t.LaneLength + 40f, t.LaneHalfHeight * 2f, 1f);
 
-            keepBody = MakeSprite("Keep", Shapes.Square, Palette.Keep, 1f, -5, world);
+            keepBody = MakeSprite("Keep", Shapes.Square, Palette.Keep, 1f, -900, world);
             keepBody.transform.position = new Vector3(t.KeepX - 0.9f, 0f, 0f);
             keepBody.transform.localScale = new Vector3(1.8f, t.LaneHalfHeight * 2f + 0.5f, 1f);
-            var roof = MakeSprite("Roof", Shapes.Diamond, Palette.KeepRoof, 1f, -4, world);
+            var roof = MakeSprite("Roof", Shapes.Diamond, Palette.KeepRoof, 1f, -899, world);
             roof.transform.position = new Vector3(t.KeepX - 0.9f, t.LaneHalfHeight + 0.35f, 0f);
             roof.transform.localScale = new Vector3(2.4f, 1.0f, 1f);
         }
 
-        UnitView MakeUnit(string name, Sprite sprite, Color color, float size, Vector2 pos, int order)
+        /// A character: an animated sprite when it has art, otherwise a grey-box shape; plus a small health bar.
+        UnitView MakeUnit(string name, Sprite shape, Color color, float size, CharacterArt art, bool faceRight, float artScale)
         {
             var root = new GameObject(name).transform;
             root.SetParent(world, false);
-            root.position = pos;
-            var body = MakeSprite("Body", sprite, color, 1f, order, root);
-            body.transform.localScale = Vector3.one * size;
-            var back = MakeSprite("HpBack", Shapes.Square, new Color(0f, 0f, 0f, 0.35f), 1f, order + 1, root);
-            back.transform.localPosition = new Vector3(0f, size * 0.5f + 0.18f, 0f);
-            back.transform.localScale = new Vector3(0.8f, 0.09f, 1f);
-            var fill = MakeSprite("HpFill", Shapes.Square, Palette.Health, 1f, order + 2, root);
-            fill.transform.localPosition = back.transform.localPosition;
-            fill.transform.localScale = back.transform.localScale;
-            return new UnitView { root = root, body = body, barBack = back, barFill = fill, color = color, baseScale = size };
+            var v = new UnitView { root = root, color = color, art = art, faceRight = faceRight };
+            if (art != null)
+            {
+                // Pack characters sit small and off-centre in big frames: scale by the measured visible height and
+                // shift so the visible character is centred on its lane position.
+                float height = CharacterHeight * artScale;
+                v.body = MakeSprite("Body", art.Frames(CharacterPose.Idle, faceRight)[0], Color.white, 1f, 0, root);
+                v.baseScale = art.ScaleFor(height);
+                v.body.transform.localPosition = new Vector3(0f, -art.visibleCenter.y * v.baseScale + art.footOffset * height, 0f);
+                v.color = Color.white;
+            }
+            else
+            {
+                v.body = MakeSprite("Body", shape, color, 1f, 0, root);
+                v.baseScale = size;
+            }
+            v.body.transform.localScale = Vector3.one * v.baseScale;
+            float barY = art != null ? CharacterHeight * artScale * 0.5f + 0.2f : size * 0.5f + 0.18f;
+            v.barBack = MakeSprite("HpBack", Shapes.Square, new Color(0f, 0f, 0f, 0.45f), 1f, 0, root);
+            v.barBack.transform.localPosition = new Vector3(0f, barY, 0f);
+            v.barBack.transform.localScale = new Vector3(0.8f, 0.09f, 1f);
+            v.barFill = MakeSprite("HpFill", Shapes.Square, Palette.Health, 1f, 0, root);
+            v.barFill.transform.localPosition = v.barBack.transform.localPosition;
+            v.barFill.transform.localScale = v.barBack.transform.localScale;
+            return v;
         }
 
         static SpriteRenderer MakeSprite(string name, Sprite sprite, Color color, float scale, int order, Transform parent)
@@ -112,6 +137,12 @@ namespace LittleKeep.Game
                 var pos = new Vector2(e.Position.X, e.Position.Y);
                 switch (e.Kind)
                 {
+                    case BattleEventKind.Attack:
+                        if (fighters.TryGetValue(e.SourceId, out var shooter)) shooter.attackTime = AttackPoseSeconds;
+                        break;
+                    case BattleEventKind.HeroAttack:
+                        if (heroes.TryGetValue(e.SourceId, out var striker)) striker.attackTime = AttackPoseSeconds;
+                        break;
                     case BattleEventKind.Hit:
                         if (heroes.TryGetValue(e.TargetId, out var hv)) { hv.flash = 0.08f; hv.squash = 0.12f; }
                         else if (fighters.TryGetValue(e.TargetId, out var fv)) { fv.flash = 0.1f; fv.squash = 0.15f; }
@@ -124,6 +155,7 @@ namespace LittleKeep.Game
                         if (fighters.TryGetValue(e.SourceId, out var caster))
                         {
                             caster.squash = 0.25f;
+                            caster.attackTime = AttackPoseSeconds;
                             if (tier > 0) fx.Ring(caster.root.position, 0.6f * loud, col, 0.3f);
                         }
                         if (e.Amount > 0f)
@@ -189,9 +221,8 @@ namespace LittleKeep.Game
             foreach (var f in battle.Squad)
             {
                 var v = fighters[f.Id];
-                float ko = f.IsKnockedOut ? 1f : 0f;
-                var c = Color.Lerp(v.color, new Color(0.55f, 0.55f, 0.6f, 0.55f), ko);
-                Animate(v, c, dt, f.IsKnockedOut ? 0.75f : 1f);
+                var tint = f.IsKnockedOut ? new Color(0.5f, 0.5f, 0.6f, 0.6f) : v.color;
+                Animate(v, tint, dt, f.IsKnockedOut ? 0.8f : 1f, CharacterPose.Idle, f.Position.Y);
                 SetBar(v, f.IsKnockedOut ? 1f - f.KnockoutRemaining / battle.Tuning.KnockoutSeconds : f.Hp / f.MaxHp,
                     f.IsKnockedOut ? new Color(0.7f, 0.7f, 0.8f) : Palette.Health, f.IsKnockedOut || f.Hp < f.MaxHp);
             }
@@ -204,20 +235,21 @@ namespace LittleKeep.Game
                 {
                     var asset = content.HeroAsset(h.Def.Id);
                     var look = asset != null ? asset.look : HeroLook.Square;
-                    var sprite = look == HeroLook.Diamond ? Shapes.Diamond : Shapes.Square;
-                    v = MakeUnit(h.Def.Name, sprite, asset != null ? asset.color : Color.yellow, h.Def.Size * 2f, Vector2.zero, 5);
-                    if (look == HeroLook.Tall) { v.baseScale = h.Def.Size * 2.6f; v.aspect = 1.8f / 2.6f; }
+                    var shape = look == HeroLook.Diamond ? Shapes.Diamond : Shapes.Square;
+                    float bigness = Mathf.Clamp(h.Def.Size / 0.4f, 0.8f, 2.2f);
+                    v = MakeUnit(h.Def.Name, shape, asset != null ? asset.color : Color.yellow, h.Def.Size * 2f, asset?.art, false, bigness);
+                    if (asset?.art == null && look == HeroLook.Tall) { v.baseScale = h.Def.Size * 2.6f; v.aspect = 1.8f / 2.6f; }
                     if (h.Def.IsBoss)
                     {
-                        MakeSprite("Crown", Shapes.Ring, new Color(1f, 0.85f, 0.35f), h.Def.Size * 2.6f, 4, v.root);
+                        MakeSprite("Crown", Shapes.Ring, new Color(1f, 0.85f, 0.35f, 0.7f), h.Def.Size * 2.6f, 0, v.root).sortingOrder = -1;
                         v.barBack.transform.localScale = new Vector3(1.6f, 0.14f, 1f);
                     }
                     heroes[h.Id] = v;
                 }
                 v.root.position = new Vector3(h.Position.X, h.Position.Y, 0f);
-                Animate(v, v.color, dt, 1f);
+                Animate(v, v.color, dt, 1f, h.IsEngaged ? CharacterPose.Idle : CharacterPose.Move, h.Position.Y);
                 SetBar(v, h.Hp / h.MaxHp, Palette.HeroHealth, h.Hp < h.MaxHp);
-                if (!h.IsEngaged) v.body.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * 10f + h.Id) * 4f);
+                if (v.art == null && !h.IsEngaged) v.body.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * 10f + h.Id) * 4f);
             }
             RemoveMissing(heroes);
 
@@ -227,7 +259,7 @@ namespace LittleKeep.Game
                 seen.Add(p.Id);
                 if (!shots.TryGetValue(p.Id, out var sr))
                 {
-                    sr = shotPool.Count > 0 ? shotPool.Pop() : MakeSprite("Shot", Shapes.Circle, Color.white, 1f, 12, world);
+                    sr = shotPool.Count > 0 ? shotPool.Pop() : MakeSprite("Shot", Shapes.Circle, Color.white, 1f, 800, world);
                     sr.gameObject.SetActive(true);
                     sr.color = p.FromSquad ? (p.FromSkill ? SkillColorOf(p.SourceId) : new Color(1f, 0.98f, 0.85f)) : Palette.HeroShot;
                     sr.transform.localScale = Vector3.one * (p.FromSkill ? 0.32f + p.Tier * 0.1f : 0.2f);
@@ -258,11 +290,26 @@ namespace LittleKeep.Game
             foreach (var id in gone) { Destroy(map[id].root.gameObject); map.Remove(id); }
         }
 
-        static void Animate(UnitView v, Color color, float dt, float sizeMul)
+        static void Animate(UnitView v, Color tint, float dt, float sizeMul, CharacterPose pose, float laneY)
         {
             v.flash = Mathf.Max(0f, v.flash - dt);
             v.squash = Mathf.Max(0f, v.squash - dt);
-            v.body.color = v.flash > 0f ? Color.white : color;
+            v.attackTime = Mathf.Max(0f, v.attackTime - dt);
+            v.animTime += dt;
+            if (v.art != null)
+            {
+                var frames = v.art.Frames(v.attackTime > 0f ? CharacterPose.Attack : pose, v.faceRight);
+                if (frames.Length > 0) v.body.sprite = frames[(int)(v.animTime * v.art.framesPerSecond) % frames.Length];
+                v.body.color = v.flash > 0f ? HitTint : tint;
+            }
+            else v.body.color = v.flash > 0f ? Color.white : tint;
+
+            // Lower on the lane draws in front.
+            int order = Mathf.RoundToInt(-laneY * 100f);
+            v.body.sortingOrder = order;
+            v.barBack.sortingOrder = order + 1;
+            v.barFill.sortingOrder = order + 2;
+
             float s = v.squash * 2.2f;
             float height = v.baseScale * sizeMul * (1f - s * 0.3f);
             float width = v.baseScale * v.aspect * sizeMul * (1f + s * 0.3f);

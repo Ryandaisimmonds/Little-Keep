@@ -34,5 +34,6 @@ MonoBehaviour:
   description: Mid-boss. A loud captain who swings first and thinks never.
   color: {r: 0.95, g: 0.7, b: 0.4, a: 1}
   look: 0
+  art: {fileID: 11400000, guid: 1cf7a2a3f05eb4b01bacdaeba1a5623c, type: 2}
   creature: {fileID: 0}
   summon: {fileID: 0}

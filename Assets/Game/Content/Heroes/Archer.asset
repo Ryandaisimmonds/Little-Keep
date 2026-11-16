@@ -27,6 +27,13 @@ MonoBehaviour:
     ShotRange: 7
     ShotSpeed: 9
     AttackBlock: 0
+    CreatureId: 
+    IsBoss: 0
+    SummonInterval: 8
+    SummonCount: 2
   description: Stops at a distance and shoots at the squad.
   color: {r: 0.6, g: 0.8, b: 0.55, a: 1}
   look: 2
+  art: {fileID: 11400000, guid: d695e6a8561b743908361d8edbf48eb4, type: 2}
+  creature: {fileID: 0}
+  summon: {fileID: 0}

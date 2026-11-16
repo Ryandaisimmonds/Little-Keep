@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab8ceab340bf8429e8947823d7678273, type: 3}
+  m_Name: Rabbit Horned
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.CharacterArt
+  idleLeft:
+  - {fileID: 816324909, guid: 39319be6a0efa704a8d393090efb11f5, type: 3}
+  - {fileID: 292677568, guid: 39319be6a0efa704a8d393090efb11f5, type: 3}
+  - {fileID: -1402898451, guid: 39319be6a0efa704a8d393090efb11f5, type: 3}
+  - {fileID: 1429507601, guid: 39319be6a0efa704a8d393090efb11f5, type: 3}
+  idleRight:
+  - {fileID: 1179791630, guid: 39319be6a0efa704a8d393090efb11f5, type: 3}
+  - {fileID: -163794036, guid: 39319be6a0efa704a8d393090efb11f5, type: 3}
+  - {fileID: -1322113622, guid: 39319be6a0efa704a8d393090efb11f5, type: 3}
+  - {fileID: -323522641, guid: 39319be6a0efa704a8d393090efb11f5, type: 3}
+  moveLeft:
+  - {fileID: -1984083093, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: 1852782562, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: 853881958, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: -1562540847, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: 1524630130, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: -2039226869, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  moveRight:
+  - {fileID: 563794066, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: 702903623, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: -2005521929, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: 1134326444, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: 1007824399, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  - {fileID: 1419267657, guid: e8957ed1a9164194393bc55eed673a81, type: 3}
+  attackLeft:
+  - {fileID: 2043643532, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: 30140817, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: -578931317, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: 198676711, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: -1923020577, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: -1417297544, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  attackRight:
+  - {fileID: 1361458603, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: 1280739864, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: -420005571, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: 1090622289, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: -1107394951, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  - {fileID: -409048590, guid: c1fe9e96020f03840add8a1c8e9198d3, type: 3}
+  framesPerSecond: 8
+  scale: 1
+  footOffset: 0
+  visibleSize: {x: 0.28, y: 0.22}
+  visibleCenter: {x: 0, y: -0.07000001}

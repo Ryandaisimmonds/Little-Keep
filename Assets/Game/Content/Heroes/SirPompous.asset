@@ -34,5 +34,6 @@ MonoBehaviour:
   description: Boss. Brings his squires and his speeches.
   color: {r: 1, g: 0.82, b: 0.45, a: 1}
   look: 0
+  art: {fileID: 11400000, guid: 4a9f03d13e4ce492b94459d3c14a0f6c, type: 2}
   creature: {fileID: 0}
   summon: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}

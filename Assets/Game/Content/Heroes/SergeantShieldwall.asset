@@ -34,5 +34,6 @@ MonoBehaviour:
   description: Mid-boss. An unstoppable wall of shield.
   color: {r: 0.45, g: 0.55, b: 0.85, a: 1}
   look: 1
+  art: {fileID: 11400000, guid: fe31ad4a0113f4077b8e9cdc3d6194a1, type: 2}
   creature: {fileID: 0}
   summon: {fileID: 0}

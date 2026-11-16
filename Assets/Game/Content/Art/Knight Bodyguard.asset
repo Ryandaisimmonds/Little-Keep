@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab8ceab340bf8429e8947823d7678273, type: 3}
+  m_Name: Knight Bodyguard
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.CharacterArt
+  idleLeft:
+  - {fileID: -201524332, guid: 5e8e14928b2e034428de3e640cb7836c, type: 3}
+  - {fileID: -625978964, guid: 5e8e14928b2e034428de3e640cb7836c, type: 3}
+  - {fileID: 229578749, guid: 5e8e14928b2e034428de3e640cb7836c, type: 3}
+  - {fileID: 862657003, guid: 5e8e14928b2e034428de3e640cb7836c, type: 3}
+  idleRight:
+  - {fileID: -1900967399, guid: 5e8e14928b2e034428de3e640cb7836c, type: 3}
+  - {fileID: -941305866, guid: 5e8e14928b2e034428de3e640cb7836c, type: 3}
+  - {fileID: 49277984, guid: 5e8e14928b2e034428de3e640cb7836c, type: 3}
+  - {fileID: 165434472, guid: 5e8e14928b2e034428de3e640cb7836c, type: 3}
+  moveLeft:
+  - {fileID: 1482142985, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: 609662586, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: -1779827592, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: 198459536, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: -1839228466, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: -699422835, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  moveRight:
+  - {fileID: 1631459034, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: 328374339, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: 1675139852, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: 363986166, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: 252264726, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  - {fileID: -29462173, guid: 359baa01dcaa783458b6b504c13d4427, type: 3}
+  attackLeft:
+  - {fileID: -1602713709, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: -1274001613, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: 975745143, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: 968564515, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: -2125580635, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: -1562609906, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  attackRight:
+  - {fileID: 993671719, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: -159918727, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: 1253986370, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: 399149350, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: -888652102, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  - {fileID: -852834376, guid: 8f23cc809bc09ee49b5ee78b7e62034e, type: 3}
+  framesPerSecond: 8
+  scale: 1
+  footOffset: 0
+  visibleSize: {x: 0.46, y: 0.35000002}
+  visibleCenter: {x: 0, y: -0.0050000027}

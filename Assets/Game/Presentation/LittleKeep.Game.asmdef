@@ -1,7 +1,7 @@
 {
     "name": "LittleKeep.Game",
     "rootNamespace": "LittleKeep.Game",
-    "references": ["LittleKeep.Rules", "Unity.InputSystem", "UnityEngine.UI"],
+    "references": ["LittleKeep.Rules", "Unity.InputSystem", "UnityEngine.UI", "Unity.TextMeshPro"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
