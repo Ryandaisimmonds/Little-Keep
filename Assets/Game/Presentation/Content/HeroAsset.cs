@@ -13,5 +13,7 @@ namespace LittleKeep.Game
         [TextArea(2, 4)] public string description;
         [Tooltip("Grey-box colour until real art arrives")] public Color color = new Color(0.9f, 0.75f, 0.4f);
         public HeroLook look;
+        [Tooltip("Creature this Hero brings along and frees when defeated (optional)")] public FighterAsset creature;
+        [Tooltip("Bosses only: the Hero type this boss calls in (optional)")] public HeroAsset summon;
     }
 }

@@ -24,6 +24,60 @@ namespace LittleKeep.Rules
         public float Spread = 20f;
         public float Radius = 1.5f;
         public float ProjectileSpeed = 18f;
+
+        /// The evolved version this Skill becomes after three Skill Upgrades (null = none). Filled from content, not serialized here.
+        [NonSerialized] public SkillDef MasterForm;
+        /// This Skill's own pool of Skill Upgrades. Filled from content, not serialized here.
+        [NonSerialized] public List<SkillUpgradeDef> Upgrades = new List<SkillUpgradeDef>();
+        /// Visual loudness: 0 = base, 1 = upgraded, 2 = Master Form. Set by the Run.
+        [NonSerialized] public int Tier;
+
+        public SkillDef Clone()
+        {
+            var c = (SkillDef)MemberwiseClone();
+            c.Upgrades = new List<SkillUpgradeDef>(Upgrades);
+            return c;
+        }
+    }
+
+    public enum SkillStat { Damage, Cooldown, Count, Radius, Spread, ProjectileSpeed }
+    public enum ModOp { Add, Multiply }
+
+    [Serializable]
+    public struct SkillMod
+    {
+        public SkillStat Stat;
+        public ModOp Op;
+        public float Value;
+
+        public SkillMod(SkillStat stat, ModOp op, float value) { Stat = stat; Op = op; Value = value; }
+
+        public void ApplyTo(SkillDef s)
+        {
+            switch (Stat)
+            {
+                case SkillStat.Damage: s.Damage = Apply(s.Damage); break;
+                case SkillStat.Cooldown: s.Cooldown = Math.Max(0.5f, Apply(s.Cooldown)); break;
+                case SkillStat.Count: s.Count = Math.Max(1, (int)Math.Round(Apply(s.Count))); break;
+                case SkillStat.Radius: s.Radius = Apply(s.Radius); break;
+                case SkillStat.Spread: s.Spread = Apply(s.Spread); break;
+                case SkillStat.ProjectileSpeed: s.ProjectileSpeed = Apply(s.ProjectileSpeed); break;
+            }
+        }
+
+        float Apply(float v) => Op == ModOp.Add ? v + Value : v * Value;
+    }
+
+    /// A change to one Skill, offered after a Battle. Belongs to that Skill's pool and targets it by id.
+    [Serializable]
+    public sealed class SkillUpgradeDef
+    {
+        public string Id = "upgrade";
+        public string Name = "Upgrade";
+        public string Description = "";
+        public List<SkillMod> Mods = new List<SkillMod>();
+        /// The Skill this upgrades. Filled from content.
+        [NonSerialized] public string SkillId;
     }
 
     /// The Keeper or a Familiar.
@@ -65,6 +119,18 @@ namespace LittleKeep.Rules
 
         /// Fraction of damage from ordinary attacks that is blocked (0 to 1). Skills always hit in full.
         public float AttackBlock;
+
+        /// Id of the creature this Hero brought along, freed when the Hero is defeated ("" = none).
+        public string CreatureId = "";
+
+        /// Bosses get a big health bar and may call in more Heroes.
+        public bool IsBoss;
+        /// Hero type a boss calls in (null = none). Filled from content, not serialized here.
+        [NonSerialized] public HeroDef Summon;
+        public float SummonInterval = 8f;
+        public int SummonCount = 2;
+
+        public HeroDef Clone() => (HeroDef)MemberwiseClone();
     }
 
     [Serializable]

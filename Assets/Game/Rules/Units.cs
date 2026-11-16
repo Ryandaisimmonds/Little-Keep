@@ -52,6 +52,7 @@ namespace LittleKeep.Rules
         /// True while stopped to fight a Keeper or Familiar.
         public bool IsEngaged { get; internal set; }
         internal float attackTimer;
+        internal float summonTimer;
 
         internal Hero(int id, HeroDef def, Vec2 position)
         {
@@ -59,6 +60,7 @@ namespace LittleKeep.Rules
             Def = def;
             Position = position;
             Hp = def.Hp;
+            summonTimer = def.SummonInterval;
         }
     }
 
@@ -71,10 +73,13 @@ namespace LittleKeep.Rules
         public bool FromSquad { get; }
         public bool FromSkill { get; }
         public int SourceId { get; }
+        /// Visual loudness of the Skill that fired it (0 for ordinary attacks).
+        public int Tier { get; }
         internal readonly float damage;
 
-        internal Projectile(int id, int sourceId, Vec2 position, Vec2 velocity, float damage, bool fromSquad, bool fromSkill)
+        internal Projectile(int id, int sourceId, Vec2 position, Vec2 velocity, float damage, bool fromSquad, bool fromSkill, int tier = 0)
         {
+            Tier = tier;
             Id = id;
             SourceId = sourceId;
             Position = position;

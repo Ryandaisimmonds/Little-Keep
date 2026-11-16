@@ -15,6 +15,7 @@ namespace LittleKeep.Rules
         readonly List<Hero> heroes = new List<Hero>();
         readonly List<Fighter> squad = new List<Fighter>();
         readonly List<Projectile> projectiles = new List<Projectile>();
+        readonly List<string> freedCreatures = new List<string>();
         readonly Queue<HeroDef> spawnQueue = new Queue<HeroDef>();
         int nextId = 1;
         float accumulator;
@@ -33,6 +34,8 @@ namespace LittleKeep.Rules
         public IReadOnlyList<Fighter> Squad => squad;
         public Fighter Keeper => squad[0];
         public IReadOnlyList<Projectile> Projectiles => projectiles;
+        /// Creatures freed from defeated Heroes this Battle, in order.
+        public IReadOnlyList<string> FreedCreatures => freedCreatures;
         /// 1-based number of the wave currently in play (0 before the first wave).
         public int WaveNumber => waveIndex + 1;
         public int WaveCount => setup.Waves.Count;
@@ -148,7 +151,11 @@ namespace LittleKeep.Rules
         void Spawn(HeroDef def)
         {
             float margin = def.Size;
-            var pos = new Vec2(t.LaneLength, rng.Range(-t.LaneHalfHeight + margin, t.LaneHalfHeight - margin));
+            Spawn(def, new Vec2(t.LaneLength, rng.Range(-t.LaneHalfHeight + margin, t.LaneHalfHeight - margin)));
+        }
+
+        void Spawn(HeroDef def, Vec2 pos)
+        {
             var hero = new Hero(nextId++, def, pos);
             heroes.Add(hero);
             Emit(new BattleEvent { Kind = BattleEventKind.HeroSpawned, TargetId = hero.Id, Position = pos, Tag = def.Id });
@@ -159,6 +166,19 @@ namespace LittleKeep.Rules
             for (int i = heroes.Count - 1; i >= 0; i--)
             {
                 var h = heroes[i];
+                if (h.Def.Summon != null && h.Def.SummonCount > 0)
+                {
+                    h.summonTimer -= dt;
+                    if (h.summonTimer <= 0f)
+                    {
+                        h.summonTimer = h.Def.SummonInterval;
+                        for (int k = 0; k < h.Def.SummonCount; k++)
+                        {
+                            float y = Math.Max(-t.LaneHalfHeight + 0.4f, Math.Min(t.LaneHalfHeight - 0.4f, h.Position.Y + rng.Range(-1.2f, 1.2f)));
+                            Spawn(h.Def.Summon, new Vec2(Math.Min(t.LaneLength, h.Position.X + 0.6f + k * 0.4f), y));
+                        }
+                    }
+                }
                 var target = EngageTarget(h);
                 if (target != null)
                 {
@@ -270,7 +290,7 @@ namespace LittleKeep.Rules
             for (int i = 0; i < count; i++)
             {
                 float angle = count == 1 ? 0f : -skill.Spread * 0.5f + skill.Spread * i / (count - 1);
-                projectiles.Add(new Projectile(nextId++, f.Id, f.Position, dir.Rotated(angle) * skill.ProjectileSpeed, skill.Damage, true, true));
+                projectiles.Add(new Projectile(nextId++, f.Id, f.Position, dir.Rotated(angle) * skill.ProjectileSpeed, skill.Damage, true, true, skill.Tier));
             }
         }
 
@@ -344,8 +364,11 @@ namespace LittleKeep.Rules
             if (!fromSkill) amount *= 1f - h.Def.AttackBlock;
             h.Hp -= amount;
             Emit(new BattleEvent { Kind = BattleEventKind.Hit, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Amount = amount, FromSkill = fromSkill });
-            if (h.Hp <= 0f)
-                Emit(new BattleEvent { Kind = BattleEventKind.HeroDefeated, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Tag = h.Def.Id });
+            if (h.Hp > 0f) return;
+            Emit(new BattleEvent { Kind = BattleEventKind.HeroDefeated, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Tag = h.Def.Id });
+            if (string.IsNullOrEmpty(h.Def.CreatureId)) return;
+            freedCreatures.Add(h.Def.CreatureId);
+            Emit(new BattleEvent { Kind = BattleEventKind.CreatureFreed, TargetId = h.Id, Position = h.Position, Tag = h.Def.CreatureId });
         }
 
         void CheckOutcome()

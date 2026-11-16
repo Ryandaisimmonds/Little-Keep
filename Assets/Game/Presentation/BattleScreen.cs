@@ -1,70 +1,80 @@
+using System;
 using LittleKeep.Rules;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.UI;
 
 namespace LittleKeep.Game
 {
-    /// Runs one Battle on screen: feeds Player input into the rules, advances them, and hands state to the view and HUD.
-    public sealed class BattleRunner : MonoBehaviour
+    /// Plays one Battle on screen: feeds Player input into the rules, advances them, and hands state to the view and HUD.
+    /// When the Player presses Continue on the end panel, reports the result.
+    public sealed class BattleScreen : MonoBehaviour
     {
-        [SerializeField] BattleAsset content;
-        [SerializeField, Tooltip("0 = new seed every Battle")] int fixedSeed;
-
         static readonly float[] Speeds = { 1f, 2f };
 
         Battle battle;
+        CompiledContent content;
         Camera cam;
         Fx fx;
         BattleView view;
         BattleHud hud;
         AimInput aim;
+        string header;
+        Action<BattleReport> onFinished;
+        Action onQuit;
         int speedIndex;
         bool paused, ended;
         float lastAspect;
         Rect lastSafeArea;
 
-        void Awake()
+        public bool IsRunning => battle != null;
+
+        public void Init(Camera camera)
         {
-            Application.targetFrameRate = 60;
-            QualitySettings.vSyncCount = 0;
-            Screen.sleepTimeout = SleepTimeout.NeverSleep;
-
-            cam = Camera.main != null ? Camera.main : new GameObject("Main Camera", typeof(Camera)).GetComponent<Camera>();
-            cam.tag = "MainCamera";
-            cam.orthographic = true;
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = Palette.Sky;
-
-            if (EventSystem.current == null)
-                new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
-
+            cam = camera;
             fx = new GameObject("Fx").AddComponent<Fx>();
+            fx.transform.SetParent(transform, false);
             view = new GameObject("BattleView").AddComponent<BattleView>();
+            view.transform.SetParent(transform, false);
             hud = new GameObject("Hud", typeof(RectTransform)).AddComponent<BattleHud>();
+            hud.transform.SetParent(transform, false);
             aim = new AimInput(cam);
 
-            hud.RallyPressed += () => { if (!paused) battle.TryRally(); };
+            hud.RallyPressed += () => { if (!paused && !ended) battle.TryRally(); };
             hud.PausePressed += () => SetPaused(true);
             hud.ResumePressed += () => SetPaused(false);
             hud.SpeedPressed += () => speedIndex = (speedIndex + 1) % Speeds.Length;
-            hud.RestartPressed += Begin;
+            hud.QuitPressed += () => { Stop(); onQuit?.Invoke(); };
+            hud.ContinuePressed += () =>
+            {
+                var report = BattleReport.From(battle);
+                Stop();
+                onFinished?.Invoke(report);
+            };
+            gameObject.SetActive(false);
         }
 
-        void Start() => Begin();
-
-        void Begin()
+        public void Begin(BattleSetup setup, CompiledContent content, string header, Action<BattleReport> onFinished, Action onQuit)
         {
-            int seed = fixedSeed != 0 ? fixedSeed : System.Environment.TickCount;
-            battle = new Battle(content.ToSetup(seed));
+            gameObject.SetActive(true);
+            this.content = content;
+            this.header = header;
+            this.onFinished = onFinished;
+            this.onQuit = onQuit;
+            battle = new Battle(setup);
             FitCamera(force: true);
             view.Show(battle, content, fx);
             hud.Build(battle, content);
             paused = ended = false;
         }
 
+        void Stop()
+        {
+            battle = null;
+            gameObject.SetActive(false);
+        }
+
         void Update()
         {
+            if (battle == null) return;
             FitCamera(force: false);
             if (!paused && !ended)
             {
@@ -75,12 +85,12 @@ namespace LittleKeep.Game
             else battle.SetAim(null);
 
             view.Handle(battle.TakeEvents());
-            hud.Refresh(battle, Speeds[speedIndex]);
+            hud.Refresh(battle, Speeds[speedIndex], header);
 
             if (!ended && battle.Outcome != BattleOutcome.Ongoing)
             {
                 ended = true;
-                hud.ShowEnd(battle.Outcome, battle);
+                hud.ShowEnd(battle);
             }
         }
 
@@ -111,8 +121,7 @@ namespace LittleKeep.Game
             float leftInset = Screen.width > 0 ? safe.xMin / Screen.width : 0f;
             float fullWidth = Mathf.Max((right - left) / safeFraction, (t.LaneHalfHeight + 1.6f) * 2f * aspect);
             cam.orthographicSize = fullWidth / aspect * 0.5f;
-            float x = left - leftInset * fullWidth + fullWidth * 0.5f;
-            cam.transform.position = new Vector3(x, -0.35f, -10f);
+            cam.transform.position = new Vector3(left - leftInset * fullWidth + fullWidth * 0.5f, -0.35f, -10f);
             fx.Init(cam);
         }
 

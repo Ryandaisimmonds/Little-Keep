@@ -64,5 +64,35 @@ namespace LittleKeep.Rules.Tests
             Assert.That(Play(42), Is.EqualTo(Play(42)));
             Assert.That(Play(42), Is.Not.EqualTo(Play(7)));
         }
+
+        [Test]
+        public void A_Hero_that_brought_a_creature_frees_it_when_defeated()
+        {
+            var rider = Walker(hp: 10f, speed: 1f);
+            rider.CreatureId = "pony";
+            var battle = new Battle(Setup(Keeper(damage: 10f), waves: new[] { Wave(rider, 1), Wave(Walker(hp: 10f, speed: 1f), 1) }));
+
+            var events = RunToEnd(battle);
+
+            Assert.That(battle.Outcome, Is.EqualTo(BattleOutcome.Won));
+            Assert.That(events.Where(e => e.Kind == BattleEventKind.CreatureFreed).Select(e => e.Tag), Is.EqualTo(new[] { "pony" }));
+            Assert.That(battle.FreedCreatures, Is.EqualTo(new[] { "pony" }));
+        }
+
+        [Test]
+        public void A_boss_calls_in_more_Heroes_and_the_wave_only_ends_when_they_are_beaten_too()
+        {
+            var minion = Walker(hp: 5f, speed: 0.5f, keepDamage: 0f);
+            var boss = new HeroDef { Id = "boss", Hp = 400f, Speed = 0.3f, Size = 0.7f, KeepDamage = 50f, IsBoss = true, Summon = minion, SummonInterval = 3f, SummonCount = 2 };
+            var battle = new Battle(Setup(Keeper(damage: 10f, interval: 0.25f), waves: Wave(boss, 1)));
+
+            var events = RunToEnd(battle);
+
+            int spawned = events.Count(e => e.Kind == BattleEventKind.HeroSpawned && e.Tag == "walker");
+            Assert.That(spawned, Is.GreaterThanOrEqualTo(2));
+            Assert.That(spawned % 2, Is.EqualTo(0), "summons arrive in groups of SummonCount");
+            Assert.That(events.Count(e => e.Kind == BattleEventKind.HeroDefeated), Is.EqualTo(spawned + 1));
+            Assert.That(battle.Outcome, Is.EqualTo(BattleOutcome.Won));
+        }
     }
 }

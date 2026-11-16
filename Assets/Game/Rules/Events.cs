@@ -17,6 +17,8 @@ namespace LittleKeep.Rules
         HeroDefeated,
         HeroReachedKeep,
         HeroAttack,
+        /// A defeated Hero's creature is free. Tag is the creature id.
+        CreatureFreed,
         Won,
         Lost,
     }
@@ -31,7 +33,7 @@ namespace LittleKeep.Rules
         public int TargetId;
         public Vec2 Position;
         public float Amount;
-        /// Skill id for SkillCast; Hero id for HeroSpawned.
+        /// Skill id for SkillCast; Hero type id for HeroSpawned and HeroDefeated; creature id for CreatureFreed.
         public string Tag;
         /// For Hit: true if the damage came from a Skill.
         public bool FromSkill;

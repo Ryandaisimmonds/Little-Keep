@@ -19,7 +19,7 @@ namespace LittleKeep.Game
         }
 
         Battle battle;
-        BattleAsset content;
+        CompiledContent content;
         Fx fx;
         readonly Dictionary<int, UnitView> fighters = new Dictionary<int, UnitView>();
         readonly Dictionary<int, UnitView> heroes = new Dictionary<int, UnitView>();
@@ -31,7 +31,7 @@ namespace LittleKeep.Game
         SpriteRenderer keepBody;
         float keepFlash;
 
-        public void Show(Battle battle, BattleAsset content, Fx fx)
+        public void Show(Battle battle, CompiledContent content, Fx fx)
         {
             Clear();
             this.battle = battle;
@@ -42,7 +42,7 @@ namespace LittleKeep.Game
             BuildLane(battle.Tuning);
             foreach (var f in battle.Squad)
             {
-                var asset = content.FighterFor(f.Def);
+                var asset = content.FighterAsset(f.Def.Id);
                 var color = asset != null ? asset.color : Color.white;
                 float size = f.IsKeeper ? 0.95f : 0.75f;
                 fighters[f.Id] = MakeUnit(f.IsKeeper ? "Keeper" : f.Def.Name, Shapes.Circle, color, size, new Vector2(f.Position.X, f.Position.Y), 10);
@@ -119,8 +119,20 @@ namespace LittleKeep.Game
                         break;
                     case BattleEventKind.SkillCast:
                         var col = SkillColorOf(e.SourceId);
-                        if (fighters.TryGetValue(e.SourceId, out var caster)) caster.squash = 0.25f;
-                        if (e.Amount > 0f) { fx.Ring(pos, e.Amount, col, 0.45f); fx.Blob(pos, e.Amount * 1.2f, new Color(col.r, col.g, col.b, 0.35f), 0.3f); fx.Shake(0.05f); }
+                        int tier = SkillTier(e.SourceId, e.Tag);
+                        float loud = 1f + tier * 0.35f;
+                        if (fighters.TryGetValue(e.SourceId, out var caster))
+                        {
+                            caster.squash = 0.25f;
+                            if (tier > 0) fx.Ring(caster.root.position, 0.6f * loud, col, 0.3f);
+                        }
+                        if (e.Amount > 0f)
+                        {
+                            fx.Ring(pos, e.Amount, col, 0.45f * loud);
+                            fx.Blob(pos, e.Amount * 1.2f, col.WithAlpha(0.3f + tier * 0.15f), 0.3f * loud);
+                            if (tier == 2) fx.Ring(pos, e.Amount * 1.4f, Color.white, 0.6f, 0.5f);
+                            fx.Shake(0.05f * loud);
+                        }
                         break;
                     case BattleEventKind.Rally:
                         var keeper = battle.Keeper.Position;
@@ -129,6 +141,10 @@ namespace LittleKeep.Game
                         break;
                     case BattleEventKind.HeroDefeated:
                         fx.Ring(pos, 0.6f, Color.white, 0.3f);
+                        break;
+                    case BattleEventKind.CreatureFreed:
+                        fx.Ring(pos, 1.2f, new Color(1f, 0.9f, 0.5f), 0.8f, 0.1f);
+                        fx.Blob(pos, 0.9f, new Color(1f, 0.95f, 0.7f, 0.6f), 0.6f);
                         break;
                     case BattleEventKind.HeroReachedKeep:
                         keepFlash = 0.25f;
@@ -145,12 +161,21 @@ namespace LittleKeep.Game
             }
         }
 
+        int SkillTier(int fighterId, string skillId)
+        {
+            foreach (var f in battle.Squad)
+                if (f.Id == fighterId)
+                    foreach (var s in f.Skills)
+                        if (s.Def.Id == skillId) return s.Def.Tier;
+            return 0;
+        }
+
         Color SkillColorOf(int fighterId)
         {
             foreach (var f in battle.Squad)
                 if (f.Id == fighterId)
                 {
-                    var a = content.FighterFor(f.Def);
+                    var a = content.FighterAsset(f.Def.Id);
                     return a != null ? a.skillColor : Color.white;
                 }
             return Color.white;
@@ -177,11 +202,16 @@ namespace LittleKeep.Game
                 seen.Add(h.Id);
                 if (!heroes.TryGetValue(h.Id, out var v))
                 {
-                    var asset = content.HeroFor(h.Def);
+                    var asset = content.HeroAsset(h.Def.Id);
                     var look = asset != null ? asset.look : HeroLook.Square;
                     var sprite = look == HeroLook.Diamond ? Shapes.Diamond : Shapes.Square;
                     v = MakeUnit(h.Def.Name, sprite, asset != null ? asset.color : Color.yellow, h.Def.Size * 2f, Vector2.zero, 5);
                     if (look == HeroLook.Tall) { v.baseScale = h.Def.Size * 2.6f; v.aspect = 1.8f / 2.6f; }
+                    if (h.Def.IsBoss)
+                    {
+                        MakeSprite("Crown", Shapes.Ring, new Color(1f, 0.85f, 0.35f), h.Def.Size * 2.6f, 4, v.root);
+                        v.barBack.transform.localScale = new Vector3(1.6f, 0.14f, 1f);
+                    }
                     heroes[h.Id] = v;
                 }
                 v.root.position = new Vector3(h.Position.X, h.Position.Y, 0f);
@@ -200,7 +230,7 @@ namespace LittleKeep.Game
                     sr = shotPool.Count > 0 ? shotPool.Pop() : MakeSprite("Shot", Shapes.Circle, Color.white, 1f, 12, world);
                     sr.gameObject.SetActive(true);
                     sr.color = p.FromSquad ? (p.FromSkill ? SkillColorOf(p.SourceId) : new Color(1f, 0.98f, 0.85f)) : Palette.HeroShot;
-                    sr.transform.localScale = Vector3.one * (p.FromSkill ? 0.32f : 0.2f);
+                    sr.transform.localScale = Vector3.one * (p.FromSkill ? 0.32f + p.Tier * 0.1f : 0.2f);
                     shots[p.Id] = sr;
                 }
                 sr.transform.position = new Vector3(p.Position.X, p.Position.Y, 0f);
