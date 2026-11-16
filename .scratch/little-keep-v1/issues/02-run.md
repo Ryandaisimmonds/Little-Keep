@@ -4,6 +4,13 @@
 
 **Blocked by:** 01 Battle
 
+**Carried over from the ticket 01 review:**
+- Prefactor first: make Skills their own data assets with stable ids (today a Skill's definition sits inside its Fighter), so Skill Upgrades can target a Skill by id. Waves become part of encounter data at the same time.
+- The top-centre readout shows only wave progress; add Chapter progress once Chapters exist.
+- Auto-aim picks the Hero nearest the Keep, not a weighted "greatest threat". Decide whether that is good enough once bosses and faster Heroes exist.
+- Heroes that bring a creature (story 16) and mid-bosses and bosses (story 17) land here.
+- Hit flashes, squash and screen shake already exist in grey-box form; ticket 07 replaces them.
+
 **Status:** ready-for-agent
 
 - [ ] The Run module takes a seed, a starting Familiar and a sequence of choices, and the same seed and choices give the same Run

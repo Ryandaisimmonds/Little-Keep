@@ -71,10 +71,10 @@ namespace LittleKeep.Game
 
             keepBody = MakeSprite("Keep", Shapes.Square, Palette.Keep, 1f, -5, world);
             keepBody.transform.position = new Vector3(t.KeepX - 0.9f, 0f, 0f);
-            keepBody.transform.localScale = new Vector3(1.8f, t.LaneHalfHeight * 2f + 1.2f, 1f);
+            keepBody.transform.localScale = new Vector3(1.8f, t.LaneHalfHeight * 2f + 0.5f, 1f);
             var roof = MakeSprite("Roof", Shapes.Diamond, Palette.KeepRoof, 1f, -4, world);
-            roof.transform.position = new Vector3(t.KeepX - 0.9f, t.LaneHalfHeight + 0.7f, 0f);
-            roof.transform.localScale = new Vector3(2.4f, 1.4f, 1f);
+            roof.transform.position = new Vector3(t.KeepX - 0.9f, t.LaneHalfHeight + 0.35f, 0f);
+            roof.transform.localScale = new Vector3(2.4f, 1.0f, 1f);
         }
 
         UnitView MakeUnit(string name, Sprite sprite, Color color, float size, Vector2 pos, int order)

@@ -18,6 +18,7 @@ namespace LittleKeep.Rules
         /// 0 (inclusive) to 1 (exclusive).
         public float NextFloat() => (NextUInt() >> 8) * (1f / 16777216f);
         public float Range(float min, float max) => min + (max - min) * NextFloat();
-        public int Range(int minInclusive, int maxExclusive) => minInclusive + (int)(NextUInt() % (uint)(maxExclusive - minInclusive));
+        public int Range(int minInclusive, int maxExclusive) =>
+            maxExclusive <= minInclusive ? minInclusive : minInclusive + (int)(NextUInt() % (uint)(maxExclusive - minInclusive));
     }
 }

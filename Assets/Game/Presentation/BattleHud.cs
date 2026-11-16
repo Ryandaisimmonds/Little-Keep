@@ -16,6 +16,7 @@ namespace LittleKeep.Game
         {
             public Fighter fighter;
             public Image hpFill, dot;
+            public Color color;
             public Text koText;
             public readonly List<Image> skillFills = new List<Image>();
         }
@@ -105,7 +106,7 @@ namespace LittleKeep.Game
 
         Card BuildCard(Fighter f, FighterAsset asset)
         {
-            var card = new Card { fighter = f };
+            var card = new Card { fighter = f, color = asset != null ? asset.color : Color.white };
             int skills = f.Skills.Count;
             var root = Panel(f.Def.Name, squadRow, Vector2.zero, Vector2.zero, new Vector2(180f, 120f + skills * 30f));
             var le = root.gameObject.AddComponent<LayoutElement>();
@@ -149,7 +150,7 @@ namespace LittleKeep.Game
                 var f = c.fighter;
                 c.hpFill.fillAmount = f.IsKnockedOut ? 0f : f.Hp / f.MaxHp;
                 c.koText.enabled = f.IsKnockedOut;
-                c.dot.color = f.IsKnockedOut ? new Color(0.5f, 0.5f, 0.55f) : c.dot.color.WithAlpha(1f);
+                c.dot.color = f.IsKnockedOut ? new Color(0.5f, 0.5f, 0.55f) : c.color;
                 for (int i = 0; i < c.skillFills.Count; i++) c.skillFills[i].fillAmount = f.Skills[i].Charge;
             }
 

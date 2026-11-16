@@ -18,6 +18,10 @@ _Avoid_: Hero, main monster, avatar, commander
 A small monster that fights alongside the Keeper as part of the squad.
 _Avoid_: Monster, minion, unit, hero, apostle
 
+**Fighter**:
+The Keeper or a Familiar: anyone on the Player's side in a Battle.
+_Avoid_: Unit, ally, squad member
+
 **Hero**:
 An invading attacker; always the enemy.
 _Avoid_: Enemy, mob, adventurer; never use for the Player's own characters
@@ -67,7 +71,7 @@ The burst triggered when a second Element hits a Hero already carrying another E
 _Avoid_: Reaction, synergy
 
 **Rally**:
-The Keeper's one hand-triggered ability, which makes every Skill in the squad cast at once.
+The Keeper's one hand-triggered ability, which makes every Skill of every Fighter not knocked out cast at once.
 _Avoid_: Ultimate, panic button, pulse
 
 ### Growth within a Run

@@ -22,6 +22,7 @@ namespace LittleKeep.Game
         int speedIndex;
         bool paused, ended;
         float lastAspect;
+        Rect lastSafeArea;
 
         void Awake()
         {
@@ -68,7 +69,7 @@ namespace LittleKeep.Game
             if (!paused && !ended)
             {
                 var held = aim.Read();
-                battle.SetAim(held.HasValue ? new Vec2(held.Value.x, held.Value.y) : (Vec2?)null);
+                battle.SetAim(held.HasValue ? ClampToLane(held.Value) : (Vec2?)null);
                 battle.Advance(Mathf.Min(Time.deltaTime, 0.1f) * Speeds[speedIndex]);
             }
             else battle.SetAim(null);
@@ -95,17 +96,29 @@ namespace LittleKeep.Game
             if (pausing) SetPaused(true);
         }
 
-        /// Fit the whole lane across the screen width, leaving room above and below for the HUD.
+        /// Fit the Keep and the whole lane inside the safe area's width, leaving room above and below for the HUD.
         void FitCamera(bool force)
         {
             float aspect = cam.aspect;
-            if (!force && Mathf.Approximately(aspect, lastAspect)) return;
+            var safe = Screen.safeArea;
+            if (!force && Mathf.Approximately(aspect, lastAspect) && safe == lastSafeArea) return;
             lastAspect = aspect;
+            lastSafeArea = safe;
             var t = battle.Tuning;
-            float width = t.LaneLength + 3.2f;
-            cam.orthographicSize = Mathf.Max(width / aspect * 0.5f, t.LaneHalfHeight + 1.6f);
-            cam.transform.position = new Vector3(t.LaneLength * 0.5f - 0.9f, -0.35f, -10f);
+            float left = t.KeepX - 2.3f, right = t.LaneLength + 0.9f;
+            float safeFraction = Screen.width > 0 ? Mathf.Clamp(safe.width / Screen.width, 0.5f, 1f) : 1f;
+            float leftInset = Screen.width > 0 ? safe.xMin / Screen.width : 0f;
+            float fullWidth = Mathf.Max((right - left) / safeFraction, (t.LaneHalfHeight + 1.6f) * 2f * aspect);
+            cam.orthographicSize = fullWidth / aspect * 0.5f;
+            float x = left - leftInset * fullWidth + fullWidth * 0.5f;
+            cam.transform.position = new Vector3(x, -0.35f, -10f);
             fx.Init(cam);
+        }
+
+        Vec2 ClampToLane(Vector2 p)
+        {
+            var t = battle.Tuning;
+            return new Vec2(Mathf.Clamp(p.x, t.KeepX, t.LaneLength), Mathf.Clamp(p.y, -t.LaneHalfHeight, t.LaneHalfHeight));
         }
     }
 }

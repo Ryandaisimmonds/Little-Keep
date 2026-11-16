@@ -59,7 +59,7 @@ namespace LittleKeep.Rules
 
         public void SetAim(Vec2? point) => aimPoint = point;
 
-        /// Rally: every Keeper and Familiar who is up casts every Skill at once. Needs a Hero on the lane and a full charge.
+        /// Rally: the Keeper and every Familiar who is not knocked out casts every Skill at once. Needs a Hero on the lane and a full charge.
         public bool TryRally()
         {
             if (Outcome != BattleOutcome.Ongoing || rallyRemaining > 0f || ClosestToKeep() == null) return false;
@@ -295,7 +295,7 @@ namespace LittleKeep.Rules
         {
             Hero best = null;
             foreach (var h in heroes)
-                if (h.Position.X <= t.LaneLength && (best == null || h.Position.X < best.Position.X)) best = h;
+                if (h.Hp > 0f && h.Position.X <= t.LaneLength && (best == null || h.Position.X < best.Position.X)) best = h;
             return best;
         }
 
@@ -355,7 +355,7 @@ namespace LittleKeep.Rules
                 Outcome = BattleOutcome.Lost;
                 Emit(new BattleEvent { Kind = BattleEventKind.Lost });
             }
-            else if (waveIndex == setup.Waves.Count - 1 && spawnQueue.Count == 0 && heroes.Count == 0)
+            else if (setup.Waves.Count > 0 && waveIndex == setup.Waves.Count - 1 && spawnQueue.Count == 0 && heroes.Count == 0)
             {
                 Outcome = BattleOutcome.Won;
                 Emit(new BattleEvent { Kind = BattleEventKind.Won });

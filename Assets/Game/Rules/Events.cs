@@ -10,7 +10,7 @@ namespace LittleKeep.Rules
         Attack,
         SkillCast,
         Rally,
-        /// Damage landed. TargetId is the unit hit, Amount the damage after blocking.
+        /// Damage landed. TargetId is who was hit, Amount the damage after blocking.
         Hit,
         KnockedOut,
         Recovered,
@@ -25,9 +25,9 @@ namespace LittleKeep.Rules
     public struct BattleEvent
     {
         public BattleEventKind Kind;
-        /// Unit that caused it (0 = none).
+        /// Id of the Keeper, Familiar or Hero that caused it (0 = none).
         public int SourceId;
-        /// Unit it happened to (0 = none).
+        /// Id of the Keeper, Familiar or Hero it happened to (0 = none).
         public int TargetId;
         public Vec2 Position;
         public float Amount;

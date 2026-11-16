@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace LittleKeep.Editor
 {
-    /// Creates the milestone 1 content and Battle scene. Safe to re-run: existing assets are kept, so Inspector edits survive.
+    /// Creates the milestone 1 content and Battle scene. Safe to re-run: existing assets and the scene are kept, so edits survive.
     public static class ContentBuilder
     {
         const string Dir = "Assets/Game/Content";
@@ -16,7 +16,10 @@ namespace LittleKeep.Editor
         [MenuItem("Little Keep/Create Missing Content and Scene")]
         public static void Build()
         {
-            var keeper = Fighter("Keeper", "The Player on the battlefield. Hold a finger on the lane to aim.",
+            System.IO.Directory.CreateDirectory(Dir);
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(ScenePath));
+            AssetDatabase.Refresh();
+            var keeper = Fighter("Keeper", "Your own character on the battlefield. Hold a finger on the lane to aim.",
                 new Color(1f, 0.93f, 0.75f), new Color(1f, 0.86f, 0.35f),
                 new FighterDef { Id = "keeper", Name = "Keeper", Hp = 80f, AttackDamage = 6f, AttackInterval = 0.3f, ProjectileSpeed = 18f,
                     Skills = { new SkillDef { Id = "star_volley", Name = "Star Volley", Shape = SkillShape.Volley, Cooldown = 7f, Damage = 8f, Count = 5, Spread = 24f, ProjectileSpeed = 20f } } });
@@ -62,6 +65,7 @@ namespace LittleKeep.Editor
 
         static void BuildScene(BattleAsset battle)
         {
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) != null) return;
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var cam = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener)) { tag = "MainCamera" };
             cam.transform.position = new Vector3(7f, 0f, -10f);
