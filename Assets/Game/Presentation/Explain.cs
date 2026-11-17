@@ -53,6 +53,36 @@ namespace LittleKeep.Game
             return On(target, s.Name, body, ElementLook.Icon(s.Element), ElementLook.IconTint(s.Element));
         }
 
+        /// A small tappable chip showing a Skill's Element that explains the whole Skill. For cards that are buttons,
+        /// where the rest of the card must stay free to press.
+        public static Image SkillChip(RectTransform parent, SkillDef s, string description, Vector2 anchor, Vector2 pos, float size)
+        {
+            var img = UiKit.Icon("Skill", parent, ElementLook.Icon(s.Element), anchor, pos, size);
+            img.color = ElementLook.IconTint(s.Element);
+            return Skill(img, s, description);
+        }
+
+        /// What a Keeper upgrade gives at a level, in plain words ("+20 Keep health").
+        public static string UpgradeEffect(KeeperUpgradeDef u, int level)
+        {
+            float v = u.PerLevel * level;
+            switch (u.Stat)
+            {
+                case KeeperStat.KeepMaxHp: return $"+{v:0} Keep health";
+                case KeeperStat.KeeperDamage: return $"+{v * 100f:0}% Keeper damage";
+                case KeeperStat.StartGold: return $"+{v:0} Gold at the start of each Run";
+                case KeeperStat.RallyCooldown: return $"Rally recharges {-v * 100f:0}% faster";
+            }
+            return "";
+        }
+
+        public static string Upgrade(KeeperUpgradeDef u, int level, int nextCost)
+        {
+            string now = level == 0 ? "Not bought yet." : $"Now: {UpgradeEffect(u, level)}.";
+            string next = nextCost < 0 ? "Fully upgraded." : $"Next level: {UpgradeEffect(u, level + 1)}, for {nextCost} Gems.";
+            return $"{u.Description}\n\n{now}\n{next}\n\nKeeper upgrades last forever and apply from your next Run.";
+        }
+
         /// A small tappable Element chip (icon) that explains its Element.
         public static Image Chip(RectTransform parent, Element e, Vector2 anchor, Vector2 pos, float size)
         {
