@@ -50,6 +50,10 @@ namespace LittleKeep.Rules
         /// 0-based.
         public int Chapter { get; private set; }
         public int ChapterCount => content.Chapters.Count;
+        /// Every creature befriended so far this Run, in order (repeats included).
+        public IReadOnlyList<string> Befriended => befriended;
+        /// Which Run this is, as the Keep counted it when the Run began (0 if not started from the Keep).
+        public int RunNumber => bonuses.RunNumber;
         public string ChapterName => content.Chapters[Chapter].Name;
         public Stop CurrentStop { get; private set; }
         public float KeepHp { get; private set; }
@@ -290,7 +294,7 @@ namespace LittleKeep.Rules
             }
             BattlesWon++;
             Gold += encounter.Gold;
-            pendingUpgrades = CurrentStop.Kind == StopKind.Battle ? 1 : 2;
+            pendingUpgrades = UpgradesFor(CurrentStop.Kind);
             foreach (var id in freed)
             {
                 var def = content.FindFamiliar(id);
@@ -305,6 +309,12 @@ namespace LittleKeep.Rules
         /// Moves to whatever the finished Stop still owes (upgrade picks, a creature), then back to the Trail.
         void Advance()
         {
+            if (BeatFinalBoss)
+            {
+                // The Run is won: nothing left to grow or befriend for.
+                pendingUpgrades = 0;
+                pendingCreatures.Clear();
+            }
             while (pendingUpgrades > 0)
             {
                 offer = BuildOffer(t.UpgradeOfferSize);
@@ -315,7 +325,7 @@ namespace LittleKeep.Rules
                 }
                 pendingUpgrades--;
                 Gold += t.ConsolationGold;
-                Message = $"Every Skill is fully grown, so you take {t.ConsolationGold} gold instead.";
+                Message = $"Every Skill is fully grown, so you take {t.ConsolationGold} Gold instead.";
             }
             while (pendingCreatures.Count > 0)
             {
@@ -334,6 +344,19 @@ namespace LittleKeep.Rules
                 return;
             }
             Phase = RunPhase.Trail;
+        }
+
+        /// How many Skill Upgrades winning a Battle Stop of this kind earns: tough Battles and bosses earn two.
+        public static int UpgradesFor(StopKind kind) => kind == StopKind.Battle ? 1 : 2;
+
+        bool BeatFinalBoss => Phase != RunPhase.Ended && CurrentStop != null && CurrentStop.Kind == StopKind.Boss
+                              && position >= steps.Count - 1 && Chapter + 1 >= content.Chapters.Count;
+
+        /// The Player gives up on this Run: it ends as a loss, keeping what it earned so far.
+        public void Abandon()
+        {
+            if (Phase == RunPhase.Ended) return;
+            End(false);
         }
 
         List<UpgradeChoice> BuildOffer(int size)

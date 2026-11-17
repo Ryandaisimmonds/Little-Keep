@@ -42,7 +42,7 @@ namespace LittleKeep.Rules.Tests
             var fighter = fighterId == "keeper" ? setup.Keeper : setup.Familiars.Single(f => f.Id == fighterId);
             var skill = fighter.Skills.Single(s => s.Id == skillId);
             Assert.That(skill.Damage, Is.EqualTo(15f), "base 10 + 5");
-            Assert.That(skill.Tier, Is.EqualTo(1));
+            Assert.That(skill.Growth, Is.EqualTo(SkillGrowth.Upgraded));
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace LittleKeep.Rules.Tests
             Assert.That(skill.Id, Is.EqualTo("keeper_skill_master"));
             Assert.That(skill.Shape, Is.EqualTo(SkillShape.Burst));
             Assert.That(skill.Damage, Is.EqualTo(65f), "Master Form 50 + three upgrades of 5");
-            Assert.That(skill.Tier, Is.EqualTo(2));
+            Assert.That(skill.Growth, Is.EqualTo(SkillGrowth.Master));
         }
 
         [Test]
@@ -359,6 +359,36 @@ namespace LittleKeep.Rules.Tests
                 Assert.That(content.Fingerprint(), Is.EqualTo(RunTestContent.Make().Fingerprint()));
             }
             finally { System.Globalization.CultureInfo.CurrentCulture = before; }
+        }
+
+        [Test]
+        public void Beating_the_final_boss_ends_the_Run_at_once()
+        {
+            var run = new Run(Make(), 3, "pip");
+            int last = run.ChapterCount - 1;
+            for (int guard = 0; guard < 400 && !(run.Phase == RunPhase.Battle && run.Chapter == last && run.CurrentStop.Kind == StopKind.Boss); guard++)
+                Autoplay(run, 1);
+
+            run.FinishBattle(Win(run, -1f, "pony"));
+
+            Assert.That(run.Phase, Is.EqualTo(RunPhase.Ended));
+            Assert.That(run.Result.Won, Is.True);
+        }
+
+        [Test]
+        public void Abandoning_a_Run_ends_it_as_a_loss_that_keeps_what_was_befriended()
+        {
+            var run = AfterFirstBattle(1, "pony");
+            run.SkipUpgrade();
+            run.Befriend();
+
+            run.Abandon();
+
+            Assert.That(run.Phase, Is.EqualTo(RunPhase.Ended));
+            Assert.That(run.Result.Won, Is.False);
+            Assert.That(run.Result.BattlesWon, Is.EqualTo(1));
+            Assert.That(run.Result.Befriended, Is.EqualTo(new[] { "pony" }));
+            Assert.That(run.Befriended, Is.EqualTo(new[] { "pony" }));
         }
     }
 }

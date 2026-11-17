@@ -64,7 +64,7 @@ MonoBehaviour:
     PerLevel: 0.08
     Costs: 280000005000000082000000be000000i
   - Id: purse
-    Name: Pocket Money
+    Name: Gold Purse
     Description: Start each Run with 15 more Gold per level.
     Stat: 2
     PerLevel: 15

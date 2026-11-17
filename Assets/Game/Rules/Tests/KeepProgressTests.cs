@@ -263,5 +263,38 @@ namespace LittleKeep.Rules.Tests
             Assert.That(new KeepProgress(Make(), data).FromNewerVersion, Is.True);
             Assert.That(new KeepProgress(Make(), new KeepProgress(Make()).ToData()).FromNewerVersion, Is.False);
         }
+
+        [Test]
+        public void A_Bond_fills_as_you_befriend_and_is_not_counted_again_when_the_Run_ends()
+        {
+            var keep = new KeepProgress(Make());
+            var befriended = new List<string> { "biscuit" };
+
+            keep.NoteBefriended(1, befriended);
+            keep.NoteBefriended(1, befriended); // the same Befriending noted twice counts once
+            befriended.Add("biscuit");
+            befriended.Add("biscuit");
+            var full = keep.NoteBefriended(1, befriended);
+            var reloaded = new KeepProgress(Make(), keep.ToData());
+            var atEnd = reloaded.RecordRun(new RunResult { RunNumber = 1, Befriended = befriended });
+
+            Assert.That(full.NewFamiliars, Is.EquivalentTo(new[] { "biscuit" }));
+            Assert.That(keep.Owns("biscuit"), Is.True);
+            Assert.That(atEnd.NewFamiliars, Is.Empty);
+            Assert.That(reloaded.BondProgress("bun"), Is.EqualTo(0));
+            Assert.That(reloaded.TotalBefriended, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void Befriendings_a_Run_did_not_note_still_count_when_it_ends()
+        {
+            var keep = new KeepProgress(Make());
+            keep.NoteBefriended(1, new List<string> { "bun" });
+
+            keep.RecordRun(new RunResult { RunNumber = 1, Befriended = new List<string> { "bun", "bun" } });
+
+            Assert.That(keep.BondProgress("bun"), Is.EqualTo(2));
+            Assert.That(keep.TotalBefriended, Is.EqualTo(2));
+        }
     }
 }

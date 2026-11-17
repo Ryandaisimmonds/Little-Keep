@@ -180,6 +180,19 @@ Little Keep: a cute, cozy lane-defence roguelite for Android, played in landscap
 4. **Content:** full cast, Elements and Combos across all Skills, events, balance with the Run bot.
 5. **Look and sound:** themed UI, character art from free packs, three-tier Skill effects, audio. Theme work may start alongside milestone 2.
 
+### Decided during the build
+
+Behaviour that grew during tickets 01 to 04 and is kept on purpose:
+
+- Harder Difficulty tiers pay more Gems (Brisk 1.5x, Fierce 2x).
+- Tough Battles, mid-bosses and bosses each earn two Skill Upgrades.
+- Beating the final boss ends the Run at once: no Skill Upgrades or Befriending after it.
+- Rally starts each Battle half charged and can't be used before a Hero is on the lane.
+- Events can cost Gold, and one can raise the Keep's maximum health.
+- A progress file saved by a newer version of the game is never saved over; the Player is told to update.
+- Bonds fill as the Player befriends, not when the Run ends.
+- Starting a new Run over one in progress ends the old one as a loss and pays for it.
+
 ## Testing Decisions
 
 - A good test drives a rule module through its interface with a seed and inputs and checks only what comes out (state and events). It never inspects private state, scenes or frame timing, and it survives any internal rewrite.

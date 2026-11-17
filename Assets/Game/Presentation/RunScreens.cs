@@ -75,7 +75,7 @@ namespace LittleKeep.Game
                 Button("Open", tower, "Open", 32, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 110f), onWatchtower, ButtonStyle.Purple);
             }
 
-            if (canContinue) Label("Warn", p, "Starting a new Run replaces the one in progress.", 24, TextAnchor.MiddleCenter, Bottom, new Vector2(0f, 30f), new Vector2(1000f, 40f));
+            if (canContinue) Label("Warn", p, "Starting a new Run ends the one in progress (it still pays its Gems).", 24, TextAnchor.MiddleCenter, Bottom, new Vector2(0f, 30f), new Vector2(1000f, 40f));
             Toast(p, notice);
         }
 
@@ -147,7 +147,8 @@ namespace LittleKeep.Game
                 else
                 {
                     body = asset?.unlockHint ?? "";
-                    if (unlock.Kind == UnlockKind.Bond) body += $"\n<color=#FFD15A>Bond {keep.BondProgress(unlock.Id)}/{unlock.BondSize}</color>";
+                    if (unlock.Kind == UnlockKind.Bond)
+                        body = $"Befriend {asset?.def.Name} {unlock.BondSize} times. {body}\n<color=#FFD15A>Bond {keep.BondProgress(unlock.Id)}/{unlock.BondSize}</color>";
                 }
                 Label("Body", card, body, 22, TextAnchor.UpperLeft, TopLeft, new Vector2(220f, -90f), new Vector2(w - 240f, h - 110f));
                 if (unlock.Kind == UnlockKind.Bond && !have)
@@ -290,15 +291,21 @@ namespace LittleKeep.Game
             switch (s.Kind)
             {
                 case StopKind.Battle: return ("Battle", "Hold off a band of Heroes, then pick a Skill Upgrade.", ButtonStyle.Brown, t?.iconBattle);
-                case StopKind.ToughBattle: return ("Tough Battle", "Stronger Heroes. Two Skill Upgrades and more gold.", ButtonStyle.Red, t?.iconSkull);
-                case StopKind.MidBoss: return ("Mid-boss", "A champion blocks the Trail. Two Skill Upgrades.", ButtonStyle.Red, t?.iconCrown);
+                case StopKind.ToughBattle: return ("Tough Battle", $"Stronger Heroes. {Upgrades(s.Kind)} and more Gold.", ButtonStyle.Red, t?.iconSkull);
+                case StopKind.MidBoss: return ("Mid-boss", $"A champion blocks the Trail. {Upgrades(s.Kind)}.", ButtonStyle.Red, t?.iconCrown);
                 case StopKind.Boss: return ("Boss", "Win to finish the Chapter.", ButtonStyle.Purple, t?.iconCrown);
                 case StopKind.Rest: return ("Rest", "Patch up the Keep.", ButtonStyle.Green, t?.iconRest);
-                case StopKind.Shop: return ("Shop", "Spend gold on Skill Upgrades and repairs.", ButtonStyle.Teal, t?.iconShop);
+                case StopKind.Shop: return ("Shop", "Spend Gold on Skill Upgrades and repairs.", ButtonStyle.Teal, t?.iconShop);
                 case StopKind.Event: return ("Something curious", "Who knows? Choices await.", ButtonStyle.Blue, t?.iconEvent);
                 case StopKind.Wild: return ("Wild creature", "Someone might want to join the squad.", ButtonStyle.Green, t?.iconWild);
             }
             return (s.Kind.ToString(), "", ButtonStyle.Brown, null);
+        }
+
+        static string Upgrades(StopKind kind)
+        {
+            int n = Run.UpgradesFor(kind);
+            return n == 1 ? "One Skill Upgrade" : n == 2 ? "Two Skill Upgrades" : $"{n} Skill Upgrades";
         }
 
         // --- After a Battle ----------------------------------------------------------------

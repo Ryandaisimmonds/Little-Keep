@@ -45,8 +45,8 @@ namespace LittleKeep.Editor
             Unlock("Pip", UnlockKind.Start, "");
             Unlock("Bramble", UnlockKind.Start, "");
             Unlock("Puff", UnlockKind.Start, "");
-            Unlock("Pony", UnlockKind.Bond, "Befriend Biscuit 3 times. Knights bring him into Battle, and he turns up in the wild.");
-            Unlock("Owl", UnlockKind.Bond, "Befriend Bun 3 times. Huntsmen bring her into Battle, and she turns up in the wild.");
+            Unlock("Pony", UnlockKind.Bond, "Knights bring him into Battle, and he turns up in the wild.");
+            Unlock("Owl", UnlockKind.Bond, "Huntsmen bring her into Battle, and she turns up in the wild.");
             Unlock("Tide", UnlockKind.Deed, "Deed: beat the Meadow Road boss.", "clear_meadow");
 
             foreach (var f in new[] { "Pip", "Bramble", "Puff", "Pony", "Owl", "Tide" })
@@ -62,7 +62,7 @@ namespace LittleKeep.Editor
             {
                 game.keeperUpgrades.Add(new KeeperUpgradeDef { Id = "walls", Name = "Sturdy Walls", Description = "+10 Keep health per level.", Stat = KeeperStat.KeepMaxHp, PerLevel = 10f, Costs = { 30, 60, 100, 150, 220 } });
                 game.keeperUpgrades.Add(new KeeperUpgradeDef { Id = "claws", Name = "Sharp Claws", Description = "The Keeper hits 8% harder per level.", Stat = KeeperStat.KeeperDamage, PerLevel = 0.08f, Costs = { 40, 80, 130, 190 } });
-                game.keeperUpgrades.Add(new KeeperUpgradeDef { Id = "purse", Name = "Pocket Money", Description = "Start each Run with 15 more Gold per level.", Stat = KeeperStat.StartGold, PerLevel = 15f, Costs = { 25, 50, 90 } });
+                game.keeperUpgrades.Add(new KeeperUpgradeDef { Id = "purse", Name = "Gold Purse", Description = "Start each Run with 15 more Gold per level.", Stat = KeeperStat.StartGold, PerLevel = 15f, Costs = { 25, 50, 90 } });
                 game.keeperUpgrades.Add(new KeeperUpgradeDef { Id = "horn", Name = "Rally Horn", Description = "Rally recharges 8% faster per level.", Stat = KeeperStat.RallyCooldown, PerLevel = -0.08f, Costs = { 50, 100, 160 } });
             }
 

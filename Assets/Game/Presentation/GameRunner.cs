@@ -53,7 +53,9 @@ namespace LittleKeep.Game
             keep = ProgressStore.Load(compiled.Progress);
         }
 
-        void Start() => ShowKeep();
+        void Start() => ShowKeep(keep.FromNewerVersion
+            ? "Your progress was saved by a newer version of Little Keep, so this one won't save over it. Update the game to keep your progress growing."
+            : "");
 
         void ShowKeep() => ShowKeep("");
 
@@ -90,10 +92,37 @@ namespace LittleKeep.Game
         void StartRun(string starterId)
         {
             int seed = fixedSeed != 0 ? fixedSeed : Environment.TickCount & 0x7fffffff;
+            string paid = AbandonSavedRun();
             run = new Run(compiled.Run, seed, starterId, keep.BonusesFor(keep.ChosenTier));
             lastRewards = null;
             SetRunNews("");
+            trailNotice = paid;
             SaveAndShow();
+        }
+
+        /// A new Run replaces the one in progress: that one ends as a loss and is paid for like any other.
+        /// Returns a line saying what it earned ("" if there was none, or it can't be read any more).
+        string AbandonSavedRun()
+        {
+            if (!HasSave) return "";
+            try
+            {
+                var old = Run.Load(compiled.Run, PlayerPrefs.GetString(SaveKey));
+                old.Abandon();
+                var rewards = keep.RecordRun(old.Result);
+                ProgressStore.Save(keep);
+                return rewards.Gems > 0 ? $"Your last Run earned {rewards.Gems} Gems." : "";
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("Could not pay for the abandoned Run: " + e.Message);
+                return "";
+            }
+            finally
+            {
+                PlayerPrefs.DeleteKey(SaveKey);
+                PlayerPrefs.DeleteKey(NewsKey);
+            }
         }
 
         void ContinueRun()
@@ -164,7 +193,12 @@ namespace LittleKeep.Game
             else
             {
                 var news = keep.NoteChaptersCleared(run.Chapter);
-                if (news.Deeds.Count > 0)
+                int befriendedBefore = keep.TotalBefriended;
+                var bonds = keep.NoteBefriended(run.RunNumber, run.Befriended);
+                news.Deeds.AddRange(bonds.Deeds);
+                news.NewFamiliars.AddRange(bonds.NewFamiliars);
+                if (keep.TotalBefriended != befriendedBefore) ProgressStore.Save(keep);
+                if (news.Deeds.Count > 0 || news.NewFamiliars.Count > 0)
                 {
                     runDeeds.AddRange(news.Deeds);
                     runFamiliars.AddRange(news.NewFamiliars);

@@ -317,7 +317,7 @@ namespace LittleKeep.Rules
             for (int i = 0; i < count; i++)
             {
                 float angle = count == 1 ? 0f : -skill.Spread * 0.5f + skill.Spread * i / (count - 1);
-                projectiles.Add(new Projectile(nextId++, f.Id, f.Position, dir.Rotated(angle) * skill.ProjectileSpeed, skill.Damage, true, true, skill.Tier, skill.Element));
+                projectiles.Add(new Projectile(nextId++, f.Id, f.Position, dir.Rotated(angle) * skill.ProjectileSpeed, skill.Damage, true, true, skill.Growth, skill.Element));
             }
         }
 

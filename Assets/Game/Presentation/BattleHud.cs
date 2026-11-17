@@ -133,13 +133,13 @@ namespace LittleKeep.Game
             {
                 var def = f.Skills[i].Def;
                 var barColor = def.Element != Element.None ? ElementLook.Color(def.Element) : skillColor;
-                var bar = Bar("Skill", root, def.Tier == 2 ? Color.Lerp(barColor, Color.white, 0.35f) : barColor, new Vector2(0f, 1f), new Vector2(50f, -116f - i * 34f), new Vector2(158f, 28f));
+                var bar = Bar("Skill", root, def.Growth == SkillGrowth.Master ? Color.Lerp(barColor, Color.white, 0.35f) : barColor, new Vector2(0f, 1f), new Vector2(50f, -116f - i * 34f), new Vector2(158f, 28f));
                 card.skills.Add(bar);
                 Explain.Chip(root, def.Element, new Vector2(0f, 1f), new Vector2(14f, -114f - i * 34f), 30f);
                 var skillAsset = content.SkillAsset(def.Id);
-                string desc = (def.Tier == 2 ? skillAsset?.masterDescription : skillAsset?.description) ?? "";
+                string desc = (def.Growth == SkillGrowth.Master ? skillAsset?.masterDescription : skillAsset?.description) ?? "";
                 Explain.Skill(bar.Back, def, desc + "\n" + Explain.SkillCharge);
-                string stars = def.Tier == 2 ? " ++" : def.Tier == 1 ? " +" : "";
+                string stars = def.Growth == SkillGrowth.Master ? " ++" : def.Growth == SkillGrowth.Upgraded ? " +" : "";
                 var skillName = Label("SkillName", bar.Back, def.Name + stars, 18, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0f, 1f), new Vector2(154f, 28f));
                 skillName.enableAutoSizing = true;
                 skillName.fontSizeMax = 18;

@@ -9,7 +9,7 @@ namespace LittleKeep.Game
     /// anything without art falls back to a grey-box shape.
     public sealed class BattleView : MonoBehaviour
     {
-        sealed class UnitView
+        sealed class CharacterView
         {
             public Transform root;
             public SpriteRenderer body;
@@ -30,8 +30,8 @@ namespace LittleKeep.Game
         Battle battle;
         CompiledContent content;
         Fx fx;
-        readonly Dictionary<int, UnitView> fighters = new Dictionary<int, UnitView>();
-        readonly Dictionary<int, UnitView> heroes = new Dictionary<int, UnitView>();
+        readonly Dictionary<int, CharacterView> fighters = new Dictionary<int, CharacterView>();
+        readonly Dictionary<int, CharacterView> heroes = new Dictionary<int, CharacterView>();
         readonly Dictionary<int, SpriteRenderer> shots = new Dictionary<int, SpriteRenderer>();
         readonly Stack<SpriteRenderer> shotPool = new Stack<SpriteRenderer>();
         readonly HashSet<int> seen = new HashSet<int>();
@@ -87,11 +87,11 @@ namespace LittleKeep.Game
         }
 
         /// A character: an animated sprite when it has art, otherwise a grey-box shape; plus a small health bar.
-        UnitView MakeUnit(string name, Sprite shape, Color color, float size, CharacterArt art, bool faceRight, float artScale)
+        CharacterView MakeUnit(string name, Sprite shape, Color color, float size, CharacterArt art, bool faceRight, float artScale)
         {
             var root = new GameObject(name).transform;
             root.SetParent(world, false);
-            var v = new UnitView { root = root, color = color, art = art, faceRight = faceRight };
+            var v = new CharacterView { root = root, color = color, art = art, faceRight = faceRight };
             if (art != null)
             {
                 // Pack characters sit small and off-centre in big frames: scale by the measured visible height and
@@ -171,19 +171,19 @@ namespace LittleKeep.Game
                         break;
                     case BattleEventKind.SkillCast:
                         var col = SkillColorOf(e.SourceId);
-                        int tier = SkillTier(e.SourceId, e.Tag);
-                        float loud = 1f + tier * 0.35f;
+                        int growth = SkillGrowthOf(e.SourceId, e.Tag);
+                        float loud = 1f + growth * 0.35f;
                         if (fighters.TryGetValue(e.SourceId, out var caster))
                         {
                             caster.squash = 0.25f;
                             caster.attackTime = AttackPoseSeconds;
-                            if (tier > 0) fx.Ring(caster.root.position, 0.6f * loud, col, 0.3f);
+                            if (growth > 0) fx.Ring(caster.root.position, 0.6f * loud, col, 0.3f);
                         }
                         if (e.Amount > 0f)
                         {
                             fx.Ring(pos, e.Amount, col, 0.45f * loud);
-                            fx.Blob(pos, e.Amount * 1.2f, col.WithAlpha(0.3f + tier * 0.15f), 0.3f * loud);
-                            if (tier == 2) fx.Ring(pos, e.Amount * 1.4f, Color.white, 0.6f, 0.5f);
+                            fx.Blob(pos, e.Amount * 1.2f, col.WithAlpha(0.3f + growth * 0.15f), 0.3f * loud);
+                            if (growth == (int)SkillGrowth.Master) fx.Ring(pos, e.Amount * 1.4f, Color.white, 0.6f, 0.5f);
                             fx.Shake(0.05f * loud);
                         }
                         break;
@@ -214,12 +214,12 @@ namespace LittleKeep.Game
             }
         }
 
-        int SkillTier(int fighterId, string skillId)
+        int SkillGrowthOf(int fighterId, string skillId)
         {
             foreach (var f in battle.Squad)
                 if (f.Id == fighterId)
                     foreach (var s in f.Skills)
-                        if (s.Def.Id == skillId) return s.Def.Tier;
+                        if (s.Def.Id == skillId) return (int)s.Def.Growth;
             return 0;
         }
 
@@ -296,7 +296,7 @@ namespace LittleKeep.Game
                     sr.color = !p.FromSquad ? Palette.HeroShot
                         : p.Element != Element.None ? ElementLook.Color(p.Element)
                         : p.FromSkill ? SkillColorOf(p.SourceId) : new Color(1f, 0.98f, 0.85f);
-                    sr.transform.localScale = Vector3.one * (p.FromSkill ? 0.32f + p.Tier * 0.1f : 0.2f);
+                    sr.transform.localScale = Vector3.one * (p.FromSkill ? 0.32f + (int)p.Growth * 0.1f : 0.2f);
                     shots[p.Id] = sr;
                 }
                 sr.transform.position = new Vector3(p.Position.X, p.Position.Y, 0f);
@@ -317,14 +317,14 @@ namespace LittleKeep.Game
             keepBody.color = Color.Lerp(Palette.Keep, Palette.HealthLow, keepFlash * 4f);
         }
 
-        void RemoveMissing(Dictionary<int, UnitView> map)
+        void RemoveMissing(Dictionary<int, CharacterView> map)
         {
             var gone = new List<int>();
             foreach (var kv in map) if (!seen.Contains(kv.Key)) gone.Add(kv.Key);
             foreach (var id in gone) { Destroy(map[id].root.gameObject); map.Remove(id); }
         }
 
-        static void Animate(UnitView v, Color tint, float dt, float sizeMul, CharacterPose pose, float laneY)
+        static void Animate(CharacterView v, Color tint, float dt, float sizeMul, CharacterPose pose, float laneY)
         {
             v.flash = Mathf.Max(0f, v.flash - dt);
             v.squash = Mathf.Max(0f, v.squash - dt);
@@ -358,7 +358,7 @@ namespace LittleKeep.Game
             return Color.Lerp(baseColor, ElementLook.Color(status), k);
         }
 
-        static void SetBar(UnitView v, float fraction, Color color, bool visible)
+        static void SetBar(CharacterView v, float fraction, Color color, bool visible)
         {
             v.barBack.enabled = v.barFill.enabled = visible;
             if (!visible) return;

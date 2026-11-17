@@ -136,6 +136,8 @@ namespace LittleKeep.Rules
         public int ChosenTier;
         /// The number of the last Run paid for, so a Run replayed after a crash is never paid twice.
         public int LastRunNumber;
+        /// How many of the Run in progress's Befriendings have already filled Bonds.
+        public int NotedRun, NotedBefriended;
         public List<string> Owned = new List<string>();
         public List<CountEntry> Bonds = new List<CountEntry>();
         public List<CountEntry> Upgrades = new List<CountEntry>();
@@ -151,7 +153,7 @@ namespace LittleKeep.Rules
         readonly Dictionary<string, int> bonds = new Dictionary<string, int>();
         readonly Dictionary<string, int> levels = new Dictionary<string, int>();
         readonly HashSet<string> deeds = new HashSet<string>();
-        int highestTier, chosenTier, lastRunNumber;
+        int highestTier, chosenTier, lastRunNumber, notedRun, notedBefriended;
 
         public int Gems { get; private set; }
         public int RunsPlayed { get; private set; }
@@ -256,6 +258,7 @@ namespace LittleKeep.Rules
             if (result.RunNumber > 0 && result.RunNumber <= lastRunNumber) return rewards;
             lastRunNumber = Math.Max(lastRunNumber, result.RunNumber);
 
+            int alreadyNoted = result.RunNumber > 0 && result.RunNumber == notedRun ? notedBefriended : 0;
             var r = content.Rewards;
             float reward = result.Tier >= 0 && result.Tier < content.Tiers.Count ? content.Tiers[result.Tier].Reward : 1f;
             int earned = (int)Math.Round((result.BattlesWon * r.PerBattle + result.ChaptersCleared * r.PerChapter + (result.Won ? r.ForWin : 0)) * reward);
@@ -266,14 +269,9 @@ namespace LittleKeep.Rules
             BattlesWon += result.BattlesWon;
             BestChapters = Math.Max(BestChapters, result.ChaptersCleared);
 
-            foreach (var id in result.Befriended ?? new List<string>())
-            {
-                TotalBefriended++;
-                var unlock = content.Familiars.Find(f => f.Id == id);
-                if (unlock == null || unlock.Kind != UnlockKind.Bond || owned.Contains(id)) continue;
-                bonds[id] = BondProgress(id) + 1;
-                if (bonds[id] >= unlock.BondSize) Grant(id, rewards);
-            }
+            var befriended = result.Befriended ?? new List<string>();
+            for (int i = alreadyNoted; i < befriended.Count; i++) Befriend(befriended[i], rewards);
+            notedRun = notedBefriended = 0;
 
             CompleteDeeds(rewards);
 
@@ -283,6 +281,31 @@ namespace LittleKeep.Rules
                 rewards.TierUnlocked = highestTier;
             }
             return rewards;
+        }
+
+        /// Called as a Run goes, with everything it has befriended so far: fills Bonds for the new Befriendings
+        /// (granting a Familiar the moment its Bond is full). Safe to call again with the same list.
+        public RunRewards NoteBefriended(int runNumber, IReadOnlyList<string> befriendedSoFar)
+        {
+            var rewards = new RunRewards();
+            if (runNumber != notedRun)
+            {
+                notedRun = runNumber;
+                notedBefriended = 0;
+            }
+            for (int i = notedBefriended; i < befriendedSoFar.Count; i++) Befriend(befriendedSoFar[i], rewards);
+            notedBefriended = Math.Max(notedBefriended, befriendedSoFar.Count);
+            CompleteDeeds(rewards);
+            return rewards;
+        }
+
+        void Befriend(string id, RunRewards rewards)
+        {
+            TotalBefriended++;
+            var unlock = content.Familiars.Find(f => f.Id == id);
+            if (unlock == null || unlock.Kind != UnlockKind.Bond || owned.Contains(id)) return;
+            bonds[id] = BondProgress(id) + 1;
+            if (bonds[id] >= unlock.BondSize) Grant(id, rewards);
         }
 
         /// Called as a Run goes: completes any Deed the Chapters cleared so far satisfy, granting its Familiar now.
@@ -325,6 +348,8 @@ namespace LittleKeep.Rules
             HighestTier = highestTier,
             ChosenTier = chosenTier,
             LastRunNumber = lastRunNumber,
+            NotedRun = notedRun,
+            NotedBefriended = notedBefriended,
             Owned = owned.ToList(),
             Bonds = bonds.Select(kv => new CountEntry { Id = kv.Key, Count = kv.Value }).ToList(),
             Upgrades = levels.Select(kv => new CountEntry { Id = kv.Key, Count = kv.Value }).ToList(),
@@ -345,6 +370,8 @@ namespace LittleKeep.Rules
             highestTier = Math.Max(0, Math.Min(d.HighestTier, Math.Max(0, content.Tiers.Count - 1)));
             chosenTier = Math.Max(0, d.ChosenTier);
             lastRunNumber = Math.Max(0, d.LastRunNumber);
+            notedRun = Math.Max(0, d.NotedRun);
+            notedBefriended = Math.Max(0, d.NotedBefriended);
             foreach (var id in d.Owned ?? new List<string>())
                 if (content.Familiars.Exists(f => f.Id == id)) owned.Add(id);
             foreach (var e in d.Bonds ?? new List<CountEntry>())

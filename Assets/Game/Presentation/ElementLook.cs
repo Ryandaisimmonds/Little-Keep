@@ -60,7 +60,7 @@ namespace LittleKeep.Game
                 case Element.Fire: return $"Burns the Hero: it takes another {t.BurnFraction * 100f:0}% of the hit over {t.StatusSeconds:0.#} seconds.";
                 case Element.Frost: return $"Chills the Hero: it walks {t.ChillSlow * 100f:0}% slower for {t.StatusSeconds:0.#} seconds.";
                 case Element.Spark: return $"Shocks the Hero: it takes {t.ShockBonus * 100f:0}% more damage for {t.StatusSeconds:0.#} seconds.";
-                case Element.Bloom: return $"Roots the Hero in place for {t.RootSeconds:0.#} seconds (bosses break free in half the time).";
+                case Element.Bloom: return $"Roots the Hero in place for {t.RootSeconds:0.#} seconds (bosses for {t.RootSeconds * t.BossRootFactor:0.#}).";
                 default: return "";
             }
         }

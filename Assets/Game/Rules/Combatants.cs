@@ -78,15 +78,15 @@ namespace LittleKeep.Rules
         public bool FromSquad { get; }
         public bool FromSkill { get; }
         public int SourceId { get; }
-        /// Visual loudness of the Skill that fired it (0 for ordinary attacks).
-        public int Tier { get; }
+        /// How far the Skill that fired it has grown (Base for ordinary attacks).
+        public SkillGrowth Growth { get; }
         public Element Element { get; }
         internal readonly float damage;
 
-        internal Projectile(int id, int sourceId, Vec2 position, Vec2 velocity, float damage, bool fromSquad, bool fromSkill, int tier = 0, Element element = Element.None)
+        internal Projectile(int id, int sourceId, Vec2 position, Vec2 velocity, float damage, bool fromSquad, bool fromSkill, SkillGrowth growth = SkillGrowth.Base, Element element = Element.None)
         {
             Element = element;
-            Tier = tier;
+            Growth = growth;
             Id = id;
             SourceId = sourceId;
             Position = position;

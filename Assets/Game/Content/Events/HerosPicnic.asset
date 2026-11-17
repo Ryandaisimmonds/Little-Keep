@@ -15,10 +15,10 @@ MonoBehaviour:
   def:
     Id: HerosPicnic
     Title: A Hero's picnic
-    Text: A picnic blanket, abandoned mid-sandwich. A purse of coins sits by the basket.
+    Text: A picnic blanket, abandoned mid-sandwich. A purse of Gold sits by the basket.
     Options:
     - Text: Help yourselves
-      Outcome: Crumbs and coins. Not bad.
+      Outcome: Crumbs and Gold. Not bad.
       GoldCost: 0
       Effects:
       - Kind: 0

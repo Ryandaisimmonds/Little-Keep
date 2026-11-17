@@ -6,6 +6,9 @@ namespace LittleKeep.Rules
     /// A kind of Skill damage. Each leaves its own status on a Hero: Fire burns, Frost chills, Spark shocks, Bloom roots.
     public enum Element { None, Fire, Frost, Spark, Bloom }
 
+    /// How far a Skill has grown this Run. Drives how loud it looks.
+    public enum SkillGrowth { Base, Upgraded, Master }
+
     public enum SkillShape
     {
         /// Fires Count projectiles at the target, fanned across Spread degrees.
@@ -33,8 +36,8 @@ namespace LittleKeep.Rules
         [NonSerialized] public SkillDef MasterForm;
         /// This Skill's own pool of Skill Upgrades. Filled from content, not serialized here.
         [NonSerialized] public List<SkillUpgradeDef> Upgrades = new List<SkillUpgradeDef>();
-        /// Visual loudness: 0 = base, 1 = upgraded, 2 = Master Form. Set by the Run.
-        [NonSerialized] public int Tier;
+        /// How far this Skill has grown (it looks louder as it grows). Set by the Run.
+        [NonSerialized] public SkillGrowth Growth;
 
         public SkillDef Clone()
         {

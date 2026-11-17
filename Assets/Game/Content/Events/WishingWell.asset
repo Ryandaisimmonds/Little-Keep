@@ -15,9 +15,9 @@ MonoBehaviour:
   def:
     Id: WishingWell
     Title: A wishing well
-    Text: An old stone well, its bottom glittering with coins.
+    Text: An old stone well, its bottom glittering with Gold.
     Options:
-    - Text: Toss in a coin and make a wish
+    - Text: Toss in some Gold and make a wish
       Outcome: Something about the squad feels a little stronger.
       GoldCost: 15
       Effects:

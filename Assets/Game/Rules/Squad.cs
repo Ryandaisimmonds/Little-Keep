@@ -28,7 +28,7 @@ namespace LittleKeep.Rules
             var s = IsMaster ? Base.MasterForm.Clone() : Base.Clone();
             foreach (var u in taken)
                 foreach (var m in u.Mods) m.ApplyTo(s);
-            s.Tier = IsMaster ? 2 : taken.Count > 0 ? 1 : 0;
+            s.Growth = IsMaster ? SkillGrowth.Master : taken.Count > 0 ? SkillGrowth.Upgraded : SkillGrowth.Base;
             return s;
         }
     }
