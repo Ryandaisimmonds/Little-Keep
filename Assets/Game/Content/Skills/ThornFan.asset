@@ -25,14 +25,14 @@ MonoBehaviour:
     ProjectileSpeed: 16
   description: Sprays a wide fan of thorns across the lane.
   upgrades:
-  - Id: thorn_fan_sharp
+  - Id: thorn_fan_sharp_thorns
     Name: Sharp Thorns
     Description: Thorns hit 35% harder.
     Mods:
     - Stat: 0
       Op: 1
       Value: 1.35
-  - Id: thorn_fan_quick
+  - Id: thorn_fan_quick_growth
     Name: Quick Growth
     Description: Recharges 20% faster.
     Mods:

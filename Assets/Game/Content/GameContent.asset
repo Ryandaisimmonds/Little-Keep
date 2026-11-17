@@ -17,16 +17,23 @@ MonoBehaviour:
   familiars:
   - {fileID: 11400000, guid: be835fa8ab3bd4cf587ccaeaf485015d, type: 2}
   - {fileID: 11400000, guid: 30e2159d878a441b4b988f877d4ee78c, type: 2}
+  - {fileID: 11400000, guid: 62741cb0cd55647f3ad65a45e9fb052c, type: 2}
   - {fileID: 11400000, guid: f11775d1b01fb4e1a9b0591f3ff50de0, type: 2}
   - {fileID: 11400000, guid: 3cf5aea1cb80d44378e0bd6aad473bcc, type: 2}
-  - {fileID: 11400000, guid: 62741cb0cd55647f3ad65a45e9fb052c, type: 2}
   - {fileID: 11400000, guid: bf1dcedbafc4741f2a6be1de88b99998, type: 2}
   heroes:
   - {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
-  - {fileID: 11400000, guid: 8c7e87a97b92f4ddcabd7ffb3166537b, type: 2}
+  - {fileID: 11400000, guid: 33f968e5c911d493ea2062fa35b897f0, type: 2}
+  - {fileID: 11400000, guid: b141b68911a4247fbb762c60d39a0cfd, type: 2}
   - {fileID: 11400000, guid: b53f94414e5b2490b9e54d1959c31cd0, type: 2}
+  - {fileID: 11400000, guid: 8c7e87a97b92f4ddcabd7ffb3166537b, type: 2}
   - {fileID: 11400000, guid: 0e80d6a23cabd427b998b916ee819df7, type: 2}
   - {fileID: 11400000, guid: 9eedb637f82cd46419a33f29ff715084, type: 2}
+  - {fileID: 11400000, guid: 4edd9b3afe5204aea9302c8c32fd14c4, type: 2}
+  - {fileID: 11400000, guid: 3dd7174f35aee4ff79c703e63e2ac4dc, type: 2}
+  - {fileID: 11400000, guid: b8bf6d418b79d41359b57ca042922149, type: 2}
+  - {fileID: 11400000, guid: db9b0ac53c0c149b996ac7fc0a550b0e, type: 2}
+  - {fileID: 11400000, guid: adae95758e41141ec8b5f8fd04e88f3e, type: 2}
   - {fileID: 11400000, guid: ebe7bcde408564d06af0a0f3cdb7e311, type: 2}
   - {fileID: 11400000, guid: e23773ff12dc247179ba76d28e3c0a8a, type: 2}
   - {fileID: 11400000, guid: 31a3b65e2b2504ccea8b8d703454fab7, type: 2}
@@ -44,6 +51,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fb2170ebc84b94946a2a9d71f25b60ca, type: 2}
   - {fileID: 11400000, guid: e445f65ab7fdc4b44b581aab72f417f0, type: 2}
   - {fileID: 11400000, guid: 2ec50b71c4aa04a18bfc23180d221c68, type: 2}
+  - {fileID: 11400000, guid: f294621f2f4144ba9866729d8152cda2, type: 2}
+  - {fileID: 11400000, guid: 316ea6412f4aa4f3eab1f5e78fb9942c, type: 2}
+  - {fileID: 11400000, guid: 105ea18676ddb44e8b8dc7e71608b13a, type: 2}
+  - {fileID: 11400000, guid: 5a61ba94e28804ad6906e78daac9eba6, type: 2}
+  - {fileID: 11400000, guid: 3326ce73ec9e3447fb52b69438a9ab6c, type: 2}
+  - {fileID: 11400000, guid: 1be4ecde468014fa5b7b2b8bd286c5c3, type: 2}
+  - {fileID: 11400000, guid: 21c35123b6d824a22bd06b32de700145, type: 2}
+  - {fileID: 11400000, guid: 6d58889e7634744aa97d1b14138fb781, type: 2}
   deeds:
   - Id: clear_meadow
     Name: Clear Meadow Road
@@ -88,7 +103,7 @@ MonoBehaviour:
     Reward: 1.5
   - Name: Fierce
     Description: The Heroes mean it. Double Gems.
-    HeroHp: 1.3
+    HeroHp: 1.4
     HeroCount: 1.2
     Reward: 2
   rewards:
@@ -97,7 +112,7 @@ MonoBehaviour:
     ForWin: 25
     Minimum: 5
   runTuning:
-    StepsPerChapter: 7
+    StepsPerChapter: 8
     MidBossStep: 3
     KeepMaxHp: 100
     RestHeal: 30
@@ -108,10 +123,10 @@ MonoBehaviour:
     ShopRepairAmount: 30
     ShopUpgrades: 3
     ConsolationGold: 15
-    HeroHpScale: 2.2
-    HeroCountScale: 1.6
-    HeroHpPerChapter: 0.35
-    HeroHpPerStep: 0.04
+    HeroHpScale: 2.05
+    HeroCountScale: 1.8
+    HeroHpPerChapter: 0.25
+    HeroHpPerStep: 0.06
     WeightBattle: 40
     WeightTough: 12
     WeightRest: 10

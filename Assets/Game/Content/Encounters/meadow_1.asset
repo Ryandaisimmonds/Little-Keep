@@ -22,7 +22,13 @@ MonoBehaviour:
     spawnInterval: 0.9
   - entries:
     - hero: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
+      count: 3
+    - hero: {fileID: 11400000, guid: 33f968e5c911d493ea2062fa35b897f0, type: 2}
+      count: 3
+    spawnInterval: 0.8
+  - entries:
+    - hero: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
       count: 4
     - hero: {fileID: 11400000, guid: b53f94414e5b2490b9e54d1959c31cd0, type: 2}
       count: 1
-    spawnInterval: 0.8
+    spawnInterval: 0.7

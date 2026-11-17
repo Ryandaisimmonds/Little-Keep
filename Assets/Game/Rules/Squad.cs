@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace LittleKeep.Rules
 {
-    /// One Skill's growth during a Run: the upgrades taken so far and, from the third, its Master Form.
+    /// One Skill's growth during a Run: whether it is learned yet, the upgrades taken so far and, from the third,
+    /// its Master Form.
     public sealed class SkillProgress
     {
         public SkillDef Base { get; }
@@ -11,13 +12,26 @@ namespace LittleKeep.Rules
         readonly List<SkillUpgradeDef> taken = new List<SkillUpgradeDef>();
         public const int UpgradesForMaster = 3;
 
-        public SkillProgress(SkillDef baseDef) { Base = baseDef; }
+        /// A Familiar knows its first Skill from the start and learns the others during the Run.
+        public bool IsLearned { get; private set; }
+
+        public SkillProgress(SkillDef baseDef, bool learned = true)
+        {
+            Base = baseDef;
+            IsLearned = learned;
+        }
+
+        internal void Learn() => IsLearned = true;
 
         public bool IsMaster => taken.Count >= UpgradesForMaster && Base.MasterForm != null;
         public bool NextMakesMaster => taken.Count == UpgradesForMaster - 1 && Base.MasterForm != null;
         public IEnumerable<SkillUpgradeDef> Remaining
         {
-            get { foreach (var u in Base.Upgrades) if (!taken.Contains(u)) yield return u; }
+            get
+            {
+                if (!IsLearned) yield break;
+                foreach (var u in Base.Upgrades) if (!taken.Contains(u)) yield return u;
+            }
         }
 
         internal void Take(SkillUpgradeDef u) => taken.Add(u);
@@ -43,7 +57,13 @@ namespace LittleKeep.Rules
         public SquadMember(FighterDef def)
         {
             Def = def;
-            foreach (var s in def.Skills) skills.Add(new SkillProgress(s));
+            for (int i = 0; i < def.Skills.Count; i++) skills.Add(new SkillProgress(def.Skills[i], learned: i == 0));
+        }
+
+        /// The Skill this member can learn next (Skills are learned in order), or null when it knows them all.
+        public SkillProgress NextToLearn
+        {
+            get { foreach (var s in skills) if (!s.IsLearned) return s; return null; }
         }
 
         public FighterDef Build()
@@ -53,7 +73,7 @@ namespace LittleKeep.Rules
                 Id = Def.Id, Name = Def.Name, Hp = Def.Hp, AttackDamage = Def.AttackDamage,
                 AttackInterval = Def.AttackInterval, ProjectileSpeed = Def.ProjectileSpeed,
             };
-            foreach (var s in skills) f.Skills.Add(s.Build());
+            foreach (var s in skills) if (s.IsLearned) f.Skills.Add(s.Build());
             return f;
         }
     }
@@ -62,7 +82,10 @@ namespace LittleKeep.Rules
     {
         public SquadMember Member;
         public SkillProgress Skill;
+        /// The upgrade to take; null when the choice is to learn Skill.
         public SkillUpgradeDef Upgrade;
+        /// Taking it teaches the member Skill, which then fights from the next Battle.
+        public bool Learns;
         /// Taking it turns the Skill into its Master Form.
         public bool MakesMaster;
     }

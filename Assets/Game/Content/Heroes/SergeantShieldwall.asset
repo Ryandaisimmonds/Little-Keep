@@ -28,10 +28,14 @@ MonoBehaviour:
     ShotSpeed: 9
     AttackBlock: 0.7
     CreatureId: 
+    HealAmount: 0
+    HealInterval: 2
+    HealRadius: 2.5
+    Steadfast: 1
     IsBoss: 1
     SummonInterval: 8
     SummonCount: 2
-  description: Mid-boss. An unstoppable wall of shield.
+  description: Mid-boss. An unstoppable wall of shield. Statuses don't stick.
   color: {r: 0.45, g: 0.55, b: 0.85, a: 1}
   look: 1
   art: {fileID: 11400000, guid: fe31ad4a0113f4077b8e9cdc3d6194a1, type: 2}

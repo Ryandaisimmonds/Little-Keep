@@ -10,30 +10,34 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
-  m_Name: MasterArcherVale
+  m_Name: Monk
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
   def:
-    Id: master_archer_vale
-    Name: Archmage Vale
-    Hp: 380
-    Speed: 0.9
-    KeepDamage: 25
-    Size: 0.6
-    MeleeDamage: 0
+    Id: monk
+    Name: Monk
+    Hp: 70
+    Speed: 1.2
+    KeepDamage: 8
+    Size: 0.4
+    MeleeDamage: 8
     MeleeInterval: 1
     MeleeRange: 0.9
-    ShotDamage: 9
-    ShotInterval: 1
-    ShotRange: 8.5
-    ShotSpeed: 11
+    ShotDamage: 0
+    ShotInterval: 1.5
+    ShotRange: 6
+    ShotSpeed: 9
     AttackBlock: 0
     CreatureId: 
-    IsBoss: 1
+    HealAmount: 0
+    HealInterval: 2
+    HealRadius: 2.5
+    Steadfast: 1
+    IsBoss: 0
     SummonInterval: 8
     SummonCount: 2
-  description: Mid-boss. Never misses, never stops talking about it.
-  color: {r: 0.45, g: 0.75, b: 0.5, a: 1}
-  look: 2
-  art: {fileID: 11400000, guid: 4415771c6708143f8969306711aba36e, type: 2}
+  description: So calm that burns, chills, shocks and roots slide right off. No Combos on this one.
+  color: {r: 0.9, g: 0.75, b: 0.4, a: 1}
+  look: 0
+  art: {fileID: 11400000, guid: 96de9738640bf4f9ba4c7c928dee93e5, type: 2}
   creature: {fileID: 0}
   summon: {fileID: 0}

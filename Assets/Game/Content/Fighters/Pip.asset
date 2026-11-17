@@ -22,6 +22,9 @@ MonoBehaviour:
     Skills: []
   skills:
   - {fileID: 11400000, guid: 88bb887c6d8154e4898305af1a644def, type: 2}
+  - {fileID: 11400000, guid: d2bfd8ae34ab1471ea78c553edbca345, type: 2}
+  - {fileID: 11400000, guid: 8a498d44082834d58ab6dc7d2d5243d6, type: 2}
+  - {fileID: 11400000, guid: 0d3289547858b43fcbe884e3384d160e, type: 2}
   description: A little fire spirit. Pops Heroes in a bright burst.
   color: {r: 1, g: 0.62, b: 0.45, a: 1}
   skillColor: {r: 1, g: 0.5, b: 0.2, a: 1}

@@ -25,23 +25,23 @@ MonoBehaviour:
     ProjectileSpeed: 18
   description: A bright burst that hits every Hero around the target.
   upgrades:
-  - Id: pop_burst_hot
+  - Id: pop_burst_hot_pop
     Name: Hot Pop
-    Description: The burst hits 35% harder.
+    Description: The burst hit 35% harder.
     Mods:
     - Stat: 0
       Op: 1
       Value: 1.35
-  - Id: pop_burst_quick
+  - Id: pop_burst_quick_pop
     Name: Quick Pop
     Description: Recharges 20% faster.
     Mods:
     - Stat: 1
       Op: 1
       Value: 0.8
-  - Id: pop_burst_big
+  - Id: pop_burst_big_pop
     Name: Big Pop
-    Description: The burst is 30% wider.
+    Description: The burst reaches 30% wider.
     Mods:
     - Stat: 3
       Op: 1

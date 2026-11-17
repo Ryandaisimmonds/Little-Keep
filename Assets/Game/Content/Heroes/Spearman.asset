@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
+  m_Name: Spearman
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
+  def:
+    Id: spearman
+    Name: Spearman
+    Hp: 55
+    Speed: 1.2
+    KeepDamage: 8
+    Size: 0.4
+    MeleeDamage: 8
+    MeleeInterval: 1.3
+    MeleeRange: 1.7
+    ShotDamage: 0
+    ShotInterval: 1.5
+    ShotRange: 6
+    ShotSpeed: 9
+    AttackBlock: 0
+    CreatureId: 
+    HealAmount: 0
+    HealInterval: 2
+    HealRadius: 2.5
+    Steadfast: 0
+    IsBoss: 0
+    SummonInterval: 8
+    SummonCount: 2
+  description: Pokes the squad from well out of reach of a hug.
+  color: {r: 0.9, g: 0.75, b: 0.4, a: 1}
+  look: 1
+  art: {fileID: 11400000, guid: 2c59abd31a8d14b71bb46ddf84bda7d4, type: 2}
+  creature: {fileID: 0}
+  summon: {fileID: 0}

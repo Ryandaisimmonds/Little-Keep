@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab8ceab340bf8429e8947823d7678273, type: 3}
+  m_Name: Mage Witch Doctor
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.CharacterArt
+  idleLeft:
+  - {fileID: -916539029, guid: 0cfde18c8818b3849b2271d53b8bb84f, type: 3}
+  - {fileID: -1462388248, guid: 0cfde18c8818b3849b2271d53b8bb84f, type: 3}
+  - {fileID: 684390673, guid: 0cfde18c8818b3849b2271d53b8bb84f, type: 3}
+  - {fileID: -1038253075, guid: 0cfde18c8818b3849b2271d53b8bb84f, type: 3}
+  idleRight:
+  - {fileID: 2000514514, guid: 0cfde18c8818b3849b2271d53b8bb84f, type: 3}
+  - {fileID: 165408524, guid: 0cfde18c8818b3849b2271d53b8bb84f, type: 3}
+  - {fileID: -1981346391, guid: 0cfde18c8818b3849b2271d53b8bb84f, type: 3}
+  - {fileID: 1076449359, guid: 0cfde18c8818b3849b2271d53b8bb84f, type: 3}
+  moveLeft:
+  - {fileID: -1327927149, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: 1920448448, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: 490554671, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: -1682487769, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: 885738452, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: 1492627000, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  moveRight:
+  - {fileID: 388063744, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: 558548558, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: -1126668497, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: 1763378206, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: -463030161, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  - {fileID: -1122930644, guid: 8d4e577c68198a44db66916edcf30c57, type: 3}
+  attackLeft:
+  - {fileID: 1259262927, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: -669209465, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: 1039543888, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: -1733334328, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: 1238439590, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: -1031858422, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  attackRight:
+  - {fileID: -782978880, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: -1585904461, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: -338135280, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: -1902239731, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: 1026503965, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  - {fileID: 1336322221, guid: 799a2bfc7760a5f4ea45ad156c379998, type: 3}
+  framesPerSecond: 8
+  scale: 1
+  footOffset: 0
+  visibleSize: {x: 0.58, y: 0.35000002}
+  visibleCenter: {x: 0, y: -0.0050000027}

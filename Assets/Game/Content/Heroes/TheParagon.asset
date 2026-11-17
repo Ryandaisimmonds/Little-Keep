@@ -15,7 +15,7 @@ MonoBehaviour:
   def:
     Id: the_paragon
     Name: The Paragon
-    Hp: 1050
+    Hp: 1150
     Speed: 0.4
     KeepDamage: 50
     Size: 0.85
@@ -28,9 +28,13 @@ MonoBehaviour:
     ShotSpeed: 11
     AttackBlock: 0
     CreatureId: 
+    HealAmount: 0
+    HealInterval: 2
+    HealRadius: 2.5
+    Steadfast: 0
     IsBoss: 1
-    SummonInterval: 8
-    SummonCount: 1
+    SummonInterval: 9
+    SummonCount: 2
   description: Boss. The most heroic Hero there ever was, apparently.
   color: {r: 1, g: 0.95, b: 0.7, a: 1}
   look: 2

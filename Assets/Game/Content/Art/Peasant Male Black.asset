@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab8ceab340bf8429e8947823d7678273, type: 3}
+  m_Name: Peasant Male Black
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.CharacterArt
+  idleLeft:
+  - {fileID: 533562049, guid: 69966788419efdc42bb837a861e7e5eb, type: 3}
+  - {fileID: 986986120, guid: 69966788419efdc42bb837a861e7e5eb, type: 3}
+  - {fileID: 617472249, guid: 69966788419efdc42bb837a861e7e5eb, type: 3}
+  - {fileID: -27943785, guid: 69966788419efdc42bb837a861e7e5eb, type: 3}
+  idleRight:
+  - {fileID: 1272138823, guid: 69966788419efdc42bb837a861e7e5eb, type: 3}
+  - {fileID: 453564361, guid: 69966788419efdc42bb837a861e7e5eb, type: 3}
+  - {fileID: -102785620, guid: 69966788419efdc42bb837a861e7e5eb, type: 3}
+  - {fileID: 841493136, guid: 69966788419efdc42bb837a861e7e5eb, type: 3}
+  moveLeft:
+  - {fileID: -606177864, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: -920179223, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: -588561287, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: 148341665, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: 1954510659, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: 2051049143, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  moveRight:
+  - {fileID: 607943000, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: -572829896, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: 319235035, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: -1792788010, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: -2099479376, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  - {fileID: 323382207, guid: 845cdfc8997149c4b8d599d495f22230, type: 3}
+  attackLeft:
+  - {fileID: 112251950, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: -1706973998, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: 1217781204, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: -142795892, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: -1849330302, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: 801189976, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  attackRight:
+  - {fileID: -210672433, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: 360826500, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: -1836044464, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: 425993986, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: 1304982961, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  - {fileID: -1556852826, guid: 45385942c86ae394eb314c1ed9c35235, type: 3}
+  framesPerSecond: 8
+  scale: 1
+  footOffset: 0
+  visibleSize: {x: 0.22, y: 0.37}
+  visibleCenter: {x: 0, y: 0.004999995}

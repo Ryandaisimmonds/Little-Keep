@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Stomp
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.SkillAsset
   def:
-    Id: stomp
+    Id: bark_blast
     Name: Bark Blast
     Shape: 1
     Element: 3
@@ -25,21 +25,21 @@ MonoBehaviour:
     ProjectileSpeed: 18
   description: A huge bark that knocks every Hero nearby.
   upgrades:
-  - Id: stomp_heavy
+  - Id: bark_blast_big_bark
     Name: Big Bark
     Description: Barks hit 35% harder.
     Mods:
     - Stat: 0
       Op: 1
       Value: 1.35
-  - Id: stomp_trot
+  - Id: bark_blast_quick_bark
     Name: Quick Bark
     Description: Recharges 20% faster.
     Mods:
     - Stat: 1
       Op: 1
       Value: 0.8
-  - Id: stomp_big
+  - Id: bark_blast_echoing_bark
     Name: Echoing Bark
     Description: The bark reaches 30% wider.
     Mods:
@@ -48,7 +48,7 @@ MonoBehaviour:
       Value: 1.3
   hasMasterForm: 1
   masterForm:
-    Id: stomp_master
+    Id: bark_blast_master
     Name: Howling Blast
     Shape: 1
     Element: 3

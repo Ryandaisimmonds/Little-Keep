@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab8ceab340bf8429e8947823d7678273, type: 3}
+  m_Name: Knight Spearman
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.CharacterArt
+  idleLeft:
+  - {fileID: -251560922, guid: 4db0ea0509db38a40bfef37a148effe7, type: 3}
+  - {fileID: -713033776, guid: 4db0ea0509db38a40bfef37a148effe7, type: 3}
+  - {fileID: -1557796080, guid: 4db0ea0509db38a40bfef37a148effe7, type: 3}
+  - {fileID: -927204219, guid: 4db0ea0509db38a40bfef37a148effe7, type: 3}
+  idleRight:
+  - {fileID: 547181023, guid: 4db0ea0509db38a40bfef37a148effe7, type: 3}
+  - {fileID: 1745639047, guid: 4db0ea0509db38a40bfef37a148effe7, type: 3}
+  - {fileID: 272761081, guid: 4db0ea0509db38a40bfef37a148effe7, type: 3}
+  - {fileID: 30089703, guid: 4db0ea0509db38a40bfef37a148effe7, type: 3}
+  moveLeft:
+  - {fileID: 1457141878, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: 1644302212, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: -955155661, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: 2023935196, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: 110891701, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: -1012779571, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  moveRight:
+  - {fileID: -561091475, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: 1691326903, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: 1805026855, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: 861778058, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: 1857353180, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  - {fileID: 1766561432, guid: f14824fad01802d42a65902636f7e07f, type: 3}
+  attackLeft:
+  - {fileID: -2142473499, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: 855966518, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: 1693546607, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: -1816769026, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: -1783874909, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: -1522442329, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  attackRight:
+  - {fileID: -2038869367, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: -694050626, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: -218030104, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: -493621371, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: 138210681, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  - {fileID: -598789935, guid: c749684c24dca09468579f79f1d41213, type: 3}
+  framesPerSecond: 8
+  scale: 1
+  footOffset: 0
+  visibleSize: {x: 0.46, y: 0.34}
+  visibleCenter: {x: 0, y: -0.010000005}

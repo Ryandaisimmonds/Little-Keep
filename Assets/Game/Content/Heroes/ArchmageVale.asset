@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
+  m_Name: ArchmageVale
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
+  def:
+    Id: archmage_vale
+    Name: Archmage Vale
+    Hp: 380
+    Speed: 0.9
+    KeepDamage: 25
+    Size: 0.6
+    MeleeDamage: 0
+    MeleeInterval: 1
+    MeleeRange: 0.9
+    ShotDamage: 9
+    ShotInterval: 1
+    ShotRange: 8.5
+    ShotSpeed: 11
+    AttackBlock: 0
+    CreatureId: 
+    HealAmount: 0
+    HealInterval: 2
+    HealRadius: 2.5
+    Steadfast: 0
+    IsBoss: 1
+    SummonInterval: 9
+    SummonCount: 1
+  description: Mid-boss. Never misses, never stops talking about it, and summons apprentices to listen.
+  color: {r: 0.45, g: 0.75, b: 0.5, a: 1}
+  look: 2
+  art: {fileID: 11400000, guid: 4415771c6708143f8969306711aba36e, type: 2}
+  creature: {fileID: 0}
+  summon: {fileID: 11400000, guid: b8bf6d418b79d41359b57ca042922149, type: 2}

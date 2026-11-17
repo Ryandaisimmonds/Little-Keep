@@ -73,6 +73,8 @@ namespace LittleKeep.Rules
                 if (f.IsKnockedOut) continue;
                 foreach (var skill in f.skills)
                 {
+                    // A Nova with no Hero in reach would hit nothing: keep it ready instead.
+                    if (skill.Def.Shape == SkillShape.Nova && !AnyHeroWithin(f.Position, skill.Def.Radius)) continue;
                     Cast(f, skill.Def);
                     skill.CooldownRemaining = skill.Def.Cooldown;
                 }
@@ -169,6 +171,7 @@ namespace LittleKeep.Rules
                 var h = heroes[i];
                 UpdateStatus(h, dt);
                 if (h.Hp <= 0f) continue;
+                if (h.Def.HealAmount > 0f) Heal(h, dt);
                 if (h.Def.Summon != null && h.Def.SummonCount > 0)
                 {
                     h.summonTimer -= dt;
@@ -203,6 +206,20 @@ namespace LittleKeep.Rules
                     KeepHp = Math.Max(0f, KeepHp - h.Def.KeepDamage);
                     Emit(new BattleEvent { Kind = BattleEventKind.HeroReachedKeep, SourceId = h.Id, Position = h.Position, Amount = h.Def.KeepDamage });
                 }
+            }
+        }
+
+        void Heal(Hero healer, float dt)
+        {
+            healer.healTimer -= dt;
+            if (healer.healTimer > 0f) return;
+            healer.healTimer += Math.Max(0.1f, healer.Def.HealInterval);
+            foreach (var other in heroes)
+            {
+                if (other.Hp <= 0f || other.Hp >= other.MaxHp || Vec2.Distance(other.Position, healer.Position) > healer.Def.HealRadius + other.Def.Size) continue;
+                float healed = Math.Min(healer.Def.HealAmount, other.MaxHp - other.Hp);
+                other.Hp += healed;
+                Emit(new BattleEvent { Kind = BattleEventKind.HeroHealed, SourceId = healer.Id, TargetId = other.Id, Position = other.Position, Amount = healed });
             }
         }
 
@@ -288,6 +305,7 @@ namespace LittleKeep.Rules
                 {
                     skill.CooldownRemaining = Math.Max(0f, skill.CooldownRemaining - dt);
                     if (skill.CooldownRemaining > 0f || ClosestToKeep() == null) continue;
+                    if (skill.Def.Shape == SkillShape.Nova && !AnyHeroWithin(f.Position, skill.Def.Radius)) continue;
                     Cast(f, skill.Def);
                     skill.CooldownRemaining = skill.Def.Cooldown;
                 }
@@ -301,8 +319,22 @@ namespace LittleKeep.Rules
             }
         }
 
+        bool AnyHeroWithin(Vec2 center, float radius)
+        {
+            foreach (var h in heroes)
+                if (h.Hp > 0f && Vec2.Distance(h.Position, center) <= radius + h.Def.Size) return true;
+            return false;
+        }
+
         void Cast(Fighter f, SkillDef skill)
         {
+            if (skill.Shape == SkillShape.Nova)
+            {
+                Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = f.Position, Amount = skill.Radius, Tag = skill.Id });
+                foreach (var h in heroes.ToArray())
+                    if (Vec2.Distance(h.Position, f.Position) <= skill.Radius + h.Def.Size) DamageHero(h, skill.Damage, f.Id, true, skill.Element);
+                return;
+            }
             if (!TryGetAim(f, skill.Shape == SkillShape.Volley ? skill.ProjectileSpeed : 0f, out var aim)) return;
             if (skill.Shape == SkillShape.Burst)
             {
@@ -312,6 +344,11 @@ namespace LittleKeep.Rules
                 return;
             }
             Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = aim, Tag = skill.Id });
+            if (skill.Shape == SkillShape.Chain)
+            {
+                Chain(f, skill, aim);
+                return;
+            }
             var dir = (aim - f.Position).Normalized;
             int count = Math.Max(1, skill.Count);
             for (int i = 0; i < count; i++)
@@ -319,6 +356,36 @@ namespace LittleKeep.Rules
                 float angle = count == 1 ? 0f : -skill.Spread * 0.5f + skill.Spread * i / (count - 1);
                 projectiles.Add(new Projectile(nextId++, f.Id, f.Position, dir.Rotated(angle) * skill.ProjectileSpeed, skill.Damage, true, true, skill.Growth, skill.Element));
             }
+        }
+
+        /// Strikes the Hero nearest the aim point, then keeps jumping to the closest Hero not yet struck.
+        void Chain(Fighter f, SkillDef skill, Vec2 aim)
+        {
+            var struck = new HashSet<Hero>();
+            Vec2 from = f.Position;
+            Hero next = Nearest(aim, float.MaxValue, struck);
+            for (int i = 0; i < Math.Max(1, skill.Count) && next != null; i++)
+            {
+                struck.Add(next);
+                var at = next.Position;
+                Emit(new BattleEvent { Kind = BattleEventKind.Zap, SourceId = f.Id, TargetId = next.Id, From = from, Position = at, Element = skill.Element });
+                DamageHero(next, skill.Damage, f.Id, true, skill.Element);
+                from = at;
+                next = Nearest(at, skill.Radius, struck);
+            }
+        }
+
+        Hero Nearest(Vec2 point, float reach, HashSet<Hero> skip)
+        {
+            Hero best = null;
+            float bestDist = float.MaxValue;
+            foreach (var h in heroes)
+            {
+                if (h.Hp <= 0f || skip.Contains(h)) continue;
+                float d = Vec2.Distance(h.Position, point);
+                if (d <= reach + h.Def.Size && d < bestDist) { best = h; bestDist = d; }
+            }
+            return best;
         }
 
         void RemoveDefeated() => heroes.RemoveAll(h => h.Hp <= 0f);
@@ -397,7 +464,7 @@ namespace LittleKeep.Rules
             Emit(new BattleEvent { Kind = BattleEventKind.Hit, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Amount = amount, FromSkill = fromSkill, Element = element, Combo = kind == HitKind.Combo });
             bool defeated = h.Hp <= 0f;
             if (defeated) Defeat(h, sourceId);
-            if (kind != HitKind.Normal || element == Element.None) return;
+            if (kind != HitKind.Normal || element == Element.None || h.Def.Steadfast) return;
 
             if (h.Status != Element.None && h.Status != element)
             {

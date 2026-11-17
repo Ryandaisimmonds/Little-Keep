@@ -153,6 +153,17 @@ namespace LittleKeep.Game
                         if (e.Element != Element.None) fx.Blob(pos, 0.5f, ElementLook.Color(e.Element).WithAlpha(0.8f), 0.2f);
                         else if (e.FromSkill) fx.Blob(pos, 0.5f, SkillColorOf(e.SourceId), 0.2f);
                         break;
+                    case BattleEventKind.Zap:
+                        {
+                            var c = ElementLook.Color(e.Element);
+                            fx.Line(new Vector2(e.From.X, e.From.Y), pos, c, 0.25f);
+                            fx.Blob(pos, 0.6f, c.WithAlpha(0.8f), 0.2f);
+                        }
+                        break;
+                    case BattleEventKind.HeroHealed:
+                        fx.Blob(pos, 0.7f, new Color(0.5f, 1f, 0.55f, 0.6f), 0.35f);
+                        fx.Text(pos + new Vector2(0f, 0.6f), $"+{e.Amount:0}", new Color(0.55f, 1f, 0.6f), 0.5f, 0.7f);
+                        break;
                     case BattleEventKind.StatusApplied:
                         fx.Ring(pos, 0.7f, ElementLook.Color(e.Element), 0.3f, 0.4f);
                         break;

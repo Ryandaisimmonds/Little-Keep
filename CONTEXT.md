@@ -67,7 +67,7 @@ _Avoid_: Death, kill, down
 ### Combat
 
 **Skill**:
-An attack or ability belonging to the Keeper or a Familiar that casts itself when ready.
+An attack or ability belonging to the Keeper or a Familiar that casts itself when ready. A Familiar has four; it starts each Run knowing the first and learns the others along the way.
 _Avoid_: Special, spell, ability
 
 **Element**:

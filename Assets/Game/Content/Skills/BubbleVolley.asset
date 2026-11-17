@@ -25,21 +25,21 @@ MonoBehaviour:
     ProjectileSpeed: 17
   description: Blows a spray of heavy bubbles at the Hero nearest the Keep.
   upgrades:
-  - Id: bubble_volley_big
+  - Id: bubble_volley_big_bubbles
     Name: Big Bubbles
     Description: Bubbles hit 35% harder.
     Mods:
     - Stat: 0
       Op: 1
       Value: 1.35
-  - Id: bubble_volley_quick
+  - Id: bubble_volley_quick_tide
     Name: Quick Tide
     Description: Recharges 20% faster.
     Mods:
     - Stat: 1
       Op: 1
       Value: 0.8
-  - Id: bubble_volley_stream
+  - Id: bubble_volley_bubble_stream
     Name: Bubble Stream
     Description: Two more bubbles per volley.
     Mods:

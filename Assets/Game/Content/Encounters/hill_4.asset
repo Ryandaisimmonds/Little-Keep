@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e09413cc5db254d45a122760db57e450, type: 3}
+  m_Name: hill_4
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EncounterAsset
+  id: hill_4
+  displayName: 
+  gold: 20
+  waves:
+  - entries:
+    - hero: {fileID: 11400000, guid: 33f968e5c911d493ea2062fa35b897f0, type: 2}
+      count: 6
+    - hero: {fileID: 11400000, guid: b8bf6d418b79d41359b57ca042922149, type: 2}
+      count: 1
+    spawnInterval: 0.7
+  - entries:
+    - hero: {fileID: 11400000, guid: 4edd9b3afe5204aea9302c8c32fd14c4, type: 2}
+      count: 3
+    - hero: {fileID: 11400000, guid: 3dd7174f35aee4ff79c703e63e2ac4dc, type: 2}
+      count: 1
+    - hero: {fileID: 11400000, guid: 0e80d6a23cabd427b998b916ee819df7, type: 2}
+      count: 1
+    spawnInterval: 0.6
+  - entries:
+    - hero: {fileID: 11400000, guid: adae95758e41141ec8b5f8fd04e88f3e, type: 2}
+      count: 1
+    - hero: {fileID: 11400000, guid: b53f94414e5b2490b9e54d1959c31cd0, type: 2}
+      count: 3
+    - hero: {fileID: 11400000, guid: b141b68911a4247fbb762c60d39a0cfd, type: 2}
+      count: 3
+    spawnInterval: 0.6

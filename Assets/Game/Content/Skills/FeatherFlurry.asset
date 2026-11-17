@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FeatherFlurry
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.SkillAsset
   def:
-    Id: feather_flurry
+    Id: clover_flurry
     Name: Clover Flurry
     Shape: 0
     Element: 2
@@ -25,21 +25,21 @@ MonoBehaviour:
     ProjectileSpeed: 22
   description: A quick flurry of sharp, lucky clovers.
   upgrades:
-  - Id: feather_flurry_sharp
+  - Id: clover_flurry_four_leaf
     Name: Four-Leaf
-    Description: Clovers hit 40% harder.
+    Description: Clovers hit 35% harder.
     Mods:
     - Stat: 0
       Op: 1
-      Value: 1.4
-  - Id: feather_flurry_swift
+      Value: 1.35
+  - Id: clover_flurry_quick_paws
     Name: Quick Paws
     Description: Recharges 20% faster.
     Mods:
     - Stat: 1
       Op: 1
       Value: 0.8
-  - Id: feather_flurry_more
+  - Id: clover_flurry_clover_patch
     Name: Clover Patch
     Description: Three more clovers per flurry.
     Mods:
@@ -48,7 +48,7 @@ MonoBehaviour:
       Value: 3
   hasMasterForm: 1
   masterForm:
-    Id: feather_flurry_master
+    Id: clover_flurry_master
     Name: Lucky Gale
     Shape: 0
     Element: 2

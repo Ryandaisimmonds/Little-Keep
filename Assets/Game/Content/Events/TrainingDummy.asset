@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 384e1d193a0614e1295a62643c05c901, type: 3}
+  m_Name: TrainingDummy
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EventAsset
+  def:
+    Id: TrainingDummy
+    Title: A training dummy
+    Text: A straw dummy wearing a tin hat, set up by Heroes for practice.
+    Options:
+    - Text: Practise on it
+      Outcome: The squad learns a trick or two.
+      GoldCost: 0
+      Effects:
+      - Kind: 3
+        Amount: 1
+        CreatureId: 
+      - Kind: 1
+        Amount: -6
+        CreatureId: 
+    - Text: Leave it standing
+      Outcome: 
+      GoldCost: 0
+      Effects: []

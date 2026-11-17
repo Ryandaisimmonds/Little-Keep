@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 384e1d193a0614e1295a62643c05c901, type: 3}
+  m_Name: LostBanner
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EventAsset
+  def:
+    Id: LostBanner
+    Title: A Hero's lost banner
+    Text: A grand banner lies in the mud, embroidered with someone's very long name.
+    Options:
+    - Text: Return it for the reward
+      Outcome: A squire hands over a small purse, red in the face.
+      GoldCost: 0
+      Effects:
+      - Kind: 0
+        Amount: 20
+        CreatureId: 
+    - Text: Use it to patch the Keep
+      Outcome: It makes a very fancy curtain.
+      GoldCost: 0
+      Effects:
+      - Kind: 1
+        Amount: 12
+        CreatureId: 

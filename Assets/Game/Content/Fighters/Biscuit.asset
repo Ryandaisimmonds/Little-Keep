@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cacf7eb95b504b7c9a2dbd91ab9b6f2, type: 3}
-  m_Name: Pony
+  m_Name: Biscuit
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.FighterAsset
   def:
-    Id: pony
+    Id: biscuit
     Name: Biscuit
     Hp: 90
     AttackDamage: 5
@@ -22,6 +22,9 @@ MonoBehaviour:
     Skills: []
   skills:
   - {fileID: 11400000, guid: b30d1a3a83ea84c8e9f1bdc9387775ec, type: 2}
+  - {fileID: 11400000, guid: ce7168e9a296f41a0a5bc7af57df2e2b, type: 2}
+  - {fileID: 11400000, guid: 8ffb703c11e7a46b29073d54f93c21b4, type: 2}
+  - {fileID: 11400000, guid: 179d0febe4ab546dbb3d3e4c9706d813, type: 2}
   description: A knight's hound, glad of a quieter job. Bounds in with a big bark.
   color: {r: 0.85, g: 0.72, b: 0.55, a: 1}
   skillColor: {r: 1, g: 0.92, b: 0.45, a: 1}

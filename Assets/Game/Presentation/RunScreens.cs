@@ -106,14 +106,15 @@ namespace LittleKeep.Game
         {
             var p = NewPage();
             Title("Title", p, "Who comes with you?", Top, new Vector2(0f, -90f), 900f);
-            float w = Mathf.Min(480f, (1700f - (owned.Count - 1) * 30f) / Mathf.Max(1, owned.Count)), gap = 30f, total = owned.Count * w + (owned.Count - 1) * gap;
+            float gap = 24f, w = Mathf.Min(480f, (1780f - (owned.Count - 1) * gap) / Mathf.Max(1, owned.Count));
+            bool compact = owned.Count > 3;
             for (int i = 0; i < owned.Count; i++)
             {
                 var s = owned[i];
-                var card = FighterCard(p, s, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -20f), new Vector2(w, 640f));
-                Button("Pick", card, "Choose " + s.def.Name, 32, Bottom, new Vector2(0f, 40f), new Vector2(w - 60f, 110f), () => onPick(s.def.Id), ButtonStyle.Green);
+                var card = FighterCard(p, s, new Vector2(Row(i, owned.Count, w, gap), -50f), new Vector2(w, 760f), compact);
+                Button("Pick", card, compact ? s.def.Name : "Choose " + s.def.Name, 32, Bottom, new Vector2(0f, 36f), new Vector2(w - 40f, 100f), () => onPick(s.def.Id), ButtonStyle.Green);
             }
-            Button("Back", p, "Back", 32, BottomLeft, new Vector2(170f, 80f), new Vector2(260f, 100f), onBack, ButtonStyle.Brown, Theme?.iconHome);
+            Button("Back", p, "Back", 32, TopLeft, new Vector2(150f, -70f), new Vector2(240f, 96f), onBack, ButtonStyle.Brown, Theme?.iconHome);
         }
 
         /// Every Familiar: owned ones as they look, the rest as silhouettes with how to earn them.
@@ -140,9 +141,9 @@ namespace LittleKeep.Game
                 {
                     body = "";
                     float sy = -90f;
-                    if (asset != null)
-                        foreach (var sk in asset.skills.Where(x => x != null))
-                            sy -= SkillRow(card, sk.def, sk.description, $"<color=#FFD15A>{sk.def.Name}</color>: {sk.description}", sy, w - 240f, 22, 110f) + 6f;
+                    var known = asset != null ? asset.skills.Where(x => x != null).ToList() : new List<SkillAsset>();
+                    if (known.Count > 0) sy -= SkillRow(card, known[0].def, known[0].description, $"<color=#FFD15A>{known[0].def.Name}</color>: {known[0].description}", sy, w - 240f, 22, 110f) + 6f;
+                    LaterSkills(card, known.Skip(1), sy, w - 240f, 110f);
                 }
                 else
                 {
@@ -336,14 +337,15 @@ namespace LittleKeep.Game
                 var o = offer[i];
                 int index = i;
                 var asset = content.FighterAsset(o.Member.Def.Id);
-                var card = (RectTransform)Button("Upgrade", p, "", 1, Center, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -40f), new Vector2(w, 500f), () => onPick(index),
-                    o.MakesMaster ? ButtonStyle.Purple : ButtonStyle.Brown).transform;
+                var card = (RectTransform)Button("Upgrade", p, "", 1, Center, new Vector2(Row(i, offer.Count, w, gap), -40f), new Vector2(w, 500f), () => onPick(index),
+                    o.Learns ? ButtonStyle.Teal : o.MakesMaster ? ButtonStyle.Purple : ButtonStyle.Brown).transform;
                 Portrait(card, asset, TopLeft, new Vector2(80f, -72f), 230f);
                 var who = Label("Who", card, $"{o.Member.Def.Name}\n<size=22>{o.Skill.Base.Name}</size>", 30, TextAnchor.MiddleLeft, TopLeft, new Vector2(140f, -70f), new Vector2(w - 230f, 90f));
                 Explain.SkillChip(card, o.Skill.Build(), SkillText(o.Skill), TopRight, new Vector2(-30f, -40f), 60f);
-                Label("Name", card, o.Upgrade.Name, 42, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -150f), new Vector2(w - 80f, 60f), TextGold);
-                Label("Desc", card, o.Upgrade.Description, 28, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -215f), new Vector2(w - 80f, 130f));
-                Label("Count", card, $"Upgrade {o.Skill.Taken.Count + 1} of {SkillProgress.UpgradesForMaster} towards its Master Form", 22, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -350f), new Vector2(w - 80f, 60f), TextColor.WithAlpha(0.8f));
+                Label("Name", card, o.Learns ? $"Learn {o.Skill.Base.Name}" : o.Upgrade.Name, 42, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -150f), new Vector2(w - 80f, 60f), TextGold);
+                Label("Desc", card, o.Learns ? SkillText(o.Skill) : o.Upgrade.Description, o.Learns ? 24 : 28, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, -215f), new Vector2(w - 80f, 130f));
+                Label("Count", card, o.Learns ? $"A new Skill for {o.Member.Def.Name}, ready from the next Battle."
+                    : $"Upgrade {o.Skill.Taken.Count + 1} of {SkillProgress.UpgradesForMaster} towards its Master Form", 22, TextAnchor.UpperLeft, TopLeft, new Vector2(40f, o.Learns ? -370f : -350f), new Vector2(w - 80f, 60f), TextColor.WithAlpha(0.8f));
                 if (o.MakesMaster && o.Skill.Base.MasterForm != null)
                 {
                     var skillAsset = content.SkillAsset(o.Skill.Base.Id);
@@ -375,17 +377,41 @@ namespace LittleKeep.Game
             Button("Pass", p, "Not this time", 32, Center, new Vector2(330f, -340f), new Vector2(500f, 100f), onPass, ButtonStyle.Brown);
         }
 
-        RectTransform FighterCard(RectTransform p, FighterAsset asset, Vector2 pos, Vector2 size)
+        /// A Familiar's card. Compact cards (for narrow columns) drop the description and list every Skill as a chip.
+        RectTransform FighterCard(RectTransform p, FighterAsset asset, Vector2 pos, Vector2 size, bool compact = false)
         {
             var card = Panel("Card", p, Center, pos, size);
             if (asset == null) return card;
-            Portrait(card, asset, Top, new Vector2(0f, -120f), 400f);
+            Portrait(card, asset, Top, new Vector2(0f, -120f), compact ? 320f : 400f);
+            if (compact)
+            {
+                Label("Name", card, asset.def.Name, 38, TextAnchor.MiddleCenter, Top, new Vector2(0f, -230f), new Vector2(size.x - 30f, 56f), TextGold);
+                float cy = -290f;
+                foreach (var sk in asset.skills.Where(x => x != null))
+                    cy -= SkillRow(card, sk.def, sk.description, sk == asset.skills[0] ? $"<color=#FFD15A>{sk.def.Name}</color>" : $"<alpha=#AA>{sk.def.Name}", cy, size.x - 40f, 20) + 8f;
+                Label("Hint", card, "First Skill known; the rest are learned on the way.", 18, TextAnchor.UpperCenter, Top, new Vector2(0f, cy - 6f), new Vector2(size.x - 40f, 60f), TextColor.WithAlpha(0.7f));
+                return card;
+            }
             Label("Name", card, asset.def.Name, 46, TextAnchor.MiddleCenter, Top, new Vector2(0f, -230f), new Vector2(size.x - 60f, 60f), TextGold);
             Label("Desc", card, asset.description, 26, TextAnchor.UpperCenter, Top, new Vector2(0f, -272f), new Vector2(size.x - 90f, 90f));
+            var skills = asset.skills.Where(s => s != null).ToList();
             float y = -350f;
-            foreach (var s in asset.skills.Where(s => s != null))
-                y -= SkillRow(card, s.def, s.description, $"<color=#FFD15A>{s.def.Name}</color>: {s.description}", y, size.x - 70f, 22) + 8f;
+            if (skills.Count > 0) y -= SkillRow(card, skills[0].def, skills[0].description, $"<color=#FFD15A>{skills[0].def.Name}</color>: {skills[0].description}", y, size.x - 70f, 22) + 8f;
+            LaterSkills(card, skills.Skip(1), y, size.x - 70f);
             return card;
+        }
+
+        /// The Skills a Familiar learns during a Run: a row of tappable chips with their names beneath.
+        float LaterSkills(RectTransform parent, IEnumerable<SkillAsset> later, float y, float width, float x = 0f)
+        {
+            var list = later.ToList();
+            if (list.Count == 0) return 0f;
+            var row = Rect("Later", parent, Top, Top, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(width, 64f));
+            Label("Label", row, "Learns on the way:", 20, TextAnchor.MiddleLeft, new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(200f, 36f), TextColor.WithAlpha(0.85f));
+            for (int i = 0; i < list.Count; i++)
+                Explain.SkillChip(row, list[i].def, list[i].description, new Vector2(0f, 1f), new Vector2(200f + i * 44f, 0f), 36f);
+            Label("Names", row, string.Join(", ", list.Select(s => s.def.Name)), 18, TextAnchor.UpperLeft, new Vector2(0f, 1f), new Vector2(0f, -38f), new Vector2(width, 26f), TextColor.WithAlpha(0.75f));
+            return 64f;
         }
 
         /// One Skill line: a tappable Element chip, then text that explains the Skill when tapped. Returns its height.
@@ -442,9 +468,12 @@ namespace LittleKeep.Game
                 var x = -total * 0.5f + w * 0.5f + i * (w + gap);
                 var card = Panel("Item", p, Center, new Vector2(x, -60f), new Vector2(w, 500f));
                 bool repair = item.Kind == ShopItemKind.Repair;
-                string title = repair ? "Repairs" : item.Upgrade.Upgrade.Name;
+                bool learn = !repair && item.Upgrade.Learns;
+                string title = repair ? "Repairs" : learn ? $"Learn {item.Upgrade.Skill.Base.Name}" : item.Upgrade.Upgrade.Name;
                 string who = repair ? "For the Keep" : $"{item.Upgrade.Member.Def.Name} · {item.Upgrade.Skill.Base.Name}";
-                string body = repair ? $"Repair the Keep by {run.Tuning.ShopRepairAmount:0}." : item.Upgrade.Upgrade.Description + (item.Upgrade.Skill.NextMakesMaster && !item.Sold ? $"\n<color=#FFD15A>Becomes {item.Upgrade.Skill.Base.MasterForm.Name}!</color>" : "");
+                string body = repair ? $"Repair the Keep by {run.Tuning.ShopRepairAmount:0}."
+                    : learn ? $"A new Skill: {SkillText(item.Upgrade.Skill)}"
+                    : item.Upgrade.Upgrade.Description + (item.Upgrade.Skill.NextMakesMaster && !item.Sold ? $"\n<color=#FFD15A>Becomes {item.Upgrade.Skill.Base.MasterForm.Name}!</color>" : "");
                 if (repair) Icon("Icon", card, Theme?.iconRest, Top, new Vector2(0f, -40f), 100f);
                 else
                 {
@@ -503,11 +532,11 @@ namespace LittleKeep.Game
                 float sy = -230f;
                 foreach (var s in m.Skills)
                 {
-                    string name = s.IsMaster ? $"<color=#FFD15A>{s.Base.MasterForm.Name} (Master)</color>" : $"<b>{s.Base.Name}</b>";
-                    string ups = s.Taken.Count == 0 ? "no upgrades yet" : string.Join("\n", s.Taken.Select(u => "+ " + u.Name));
+                    string name = s.IsMaster ? $"<color=#FFD15A>{s.Base.MasterForm.Name} (Master)</color>" : s.IsLearned ? $"<b>{s.Base.Name}</b>" : $"<alpha=#88>{s.Base.Name}";
+                    string ups = !s.IsLearned ? "<alpha=#88>not learned yet" : s.Taken.Count == 0 ? "no upgrades yet" : string.Join("\n", s.Taken.Select(u => "+ " + u.Name));
                     var skillAsset = content.SkillAsset(s.Base.Id);
                     string desc = s.IsMaster ? skillAsset?.masterDescription : skillAsset?.description;
-                    sy -= SkillRow(card, s.Build(), desc ?? "", $"{name}\n<size=20>{ups}</size>", sy, w - 50f, 24) + 16f;
+                    sy -= SkillRow(card, s.Build(), desc ?? "", $"{name}\n<size=20>{ups}</size>", sy, w - 50f, 22) + 10f;
                 }
             }
             Button("Close", overlay.rectTransform, "Close", 34, Bottom, new Vector2(0f, 50f), new Vector2(300f, 100f), () => { Destroy(overlay.gameObject); onClose?.Invoke(); }, ButtonStyle.Green);
@@ -552,7 +581,7 @@ namespace LittleKeep.Game
                 Portrait(card, content.FighterAsset(m.Def.Id), Top, new Vector2(0f, -70f), 280f);
                 Label("Name", card, $"<b>{m.Def.Name}</b>", 30, TextAnchor.UpperCenter, Top, new Vector2(0f, -150f), new Vector2(w - 30f, 40f));
                 float sy = -192f;
-                foreach (var s in m.Skills)
+                foreach (var s in m.Skills.Where(x => x.IsLearned))
                 {
                     string label = s.IsMaster ? s.Base.MasterForm.Name + " (Master)" : $"{s.Base.Name} +{s.Taken.Count}";
                     sy -= SkillRow(card, s.Build(), SkillText(s), label, sy, w - 40f, 20) + 4f;

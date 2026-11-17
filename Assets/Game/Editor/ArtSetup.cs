@@ -9,95 +9,27 @@ using UnityEngine;
 
 namespace LittleKeep.Editor
 {
-    /// Wires the imported art packs into the game: builds CharacterArt for each Keeper, Familiar and Hero from the
-    /// monster pack's own animation clips, builds the UiTheme from the UI pack, and renames the creatures whose
-    /// art changed who they are. Safe to re-run.
+    /// Wires the imported art packs into the game: builds CharacterArt from the monster pack's own animation clips
+    /// (ContentSetup asks for it per character) and builds the UiTheme from the UI pack. Safe to re-run.
     public static class ArtSetup
     {
         const string Content = "Assets/Game/Content";
         const string Monsters = "Assets/Imported/100 Top Down Monsters - Pixel Art - Vol 1/Monsters";
         const string Ui = "Assets/Imported/Layer Lab/GUI-TheStone/ResourcesData";
 
+        /// Builds the UI theme from the UI pack and hands it to the game. Character art is assigned by ContentSetup.
         [MenuItem("Little Keep/Apply Art Packs")]
         public static void Apply()
         {
             Directory.CreateDirectory($"{Content}/Art");
-            AssetDatabase.Refresh();
-
-            Fighter("Keeper", "Dragon Hatchling", 1.2f, "Keeper", "You: a little dragon who keeps the Keep. Hold a finger on the lane to aim.");
-            Fighter("Pip", "Elemental Fire 1", 1f, "Pip", "A little fire spirit. Pops Heroes in a bright burst.");
-            Fighter("Bramble", "Plant Seeder", 1f, "Bramble", "A prickly little plant. Sprays a wide fan of thorns.");
-            Fighter("Pony", "Canine Beagle", 1f, "Biscuit", "A knight's hound, glad of a quieter job. Bounds in with a big bark.");
-            Fighter("Owl", "Rabbit Horned", 1f, "Bun", "A huntsman's horned rabbit who never liked the huntsman. Quick and fierce.");
-            Fighter("Puff", "Mushroom", 1f, "Puff", "A grumpy mushroom. Puffs clouds of spores.");
-            Fighter("Tide", "Elemental Water 1", 1f, "Tide", "A playful water spirit who only follows those who reach the end of Meadow Road.");
-
-            Rename("Stomp", "Bark Blast", "A huge bark that knocks every Hero nearby.", "Howling Blast", "A howl that rattles half the lane.",
-                ("Big Bark", "Barks hit 35% harder."), ("Quick Bark", "Recharges 20% faster."), ("Echoing Bark", "The bark reaches 30% wider."));
-            Rename("FeatherFlurry", "Clover Flurry", "A quick flurry of sharp, lucky clovers.", "Lucky Gale", "A gale of four-leaf clovers.",
-                ("Four-Leaf", "Clovers hit 40% harder."), ("Quick Paws", "Recharges 20% faster."), ("Clover Patch", "Three more clovers per flurry."));
-
-            Hero("Squire", "Knight Squire", 1f);
-            Hero("Shieldbearer", "Knight Guardsman", 1f);
-            Hero("Archer", "Knight Archer", 1f);
-            Hero("Knight", "Knight", 1f, description: "Rides in with a hound at heel. Beat the knight and the hound is free.");
-            Hero("Falconer", "Knight Marksman", 1f, "Huntsman", "Shoots from afar with a horned rabbit in tow. Beat the huntsman and the rabbit is free.");
-            Hero("CaptainBrash", "Knight Bodyguard", 1f);
-            Hero("SergeantShieldwall", "Knight Royal Guard", 1f);
-            Hero("MasterArcherVale", "Mage Wizard", 1f, "Archmage Vale", "Mid-boss. Never misses, never stops talking about it.");
-            Hero("SirPompous", "Knight General", 1f);
-            Hero("LadyGleam", "Knight Templar", 1f);
-            Hero("TheParagon", "Knight Highborn", 1f);
-            var vale = AssetDatabase.LoadAssetAtPath<EncounterAsset>($"{Content}/Encounters/hill_mid.asset");
-            if (vale != null) { vale.displayName = "Archmage Vale"; EditorUtility.SetDirty(vale); }
-
             var theme = BuildTheme();
             var game = AssetDatabase.LoadAssetAtPath<GameContent>($"{Content}/GameContent.asset");
             if (game != null) { game.theme = theme; EditorUtility.SetDirty(game); }
             AssetDatabase.SaveAssets();
-            Debug.Log("Little Keep: art packs applied.");
-        }
-
-        // --- Characters -------------------------------------------------------------------------
-
-        static void Fighter(string file, string monster, float scale, string name, string description)
-        {
-            var a = AssetDatabase.LoadAssetAtPath<FighterAsset>($"{Content}/Fighters/{file}.asset");
-            if (a == null) { Debug.LogWarning($"No fighter asset {file}: run Little Keep/Add Keep Content first if it is Puff or Tide."); return; }
-            a.art = Art(monster, scale);
-            a.def.Name = name;
-            a.description = description;
-            EditorUtility.SetDirty(a);
-        }
-
-        static void Hero(string file, string monster, float scale, string name = null, string description = null)
-        {
-            var a = AssetDatabase.LoadAssetAtPath<HeroAsset>($"{Content}/Heroes/{file}.asset");
-            if (a == null) { Debug.LogWarning($"No hero asset {file}"); return; }
-            a.art = Art(monster, scale);
-            if (name != null) a.def.Name = name;
-            if (description != null) a.description = description;
-            EditorUtility.SetDirty(a);
-        }
-
-        static void Rename(string file, string name, string description, string masterName, string masterDescription, params (string name, string description)[] upgrades)
-        {
-            var s = AssetDatabase.LoadAssetAtPath<SkillAsset>($"{Content}/Skills/{file}.asset");
-            if (s == null) return;
-            s.def.Name = name;
-            s.description = description;
-            if (s.masterForm != null) s.masterForm.Name = masterName;
-            s.masterDescription = masterDescription;
-            for (int i = 0; i < upgrades.Length && i < s.upgrades.Count; i++)
-            {
-                s.upgrades[i].Name = upgrades[i].name;
-                s.upgrades[i].Description = upgrades[i].description;
-            }
-            EditorUtility.SetDirty(s);
         }
 
         /// One CharacterArt per monster, read from the pack's own Left/Right clips so frame order matches the pack.
-        static CharacterArt Art(string monster, float scale)
+        public static CharacterArt Art(string monster, float scale)
         {
             string folder = $"{Monsters}/{monster}";
             if (!AssetDatabase.IsValidFolder(folder)) { Debug.LogWarning($"Monster '{monster}' not found in the pack"); return null; }

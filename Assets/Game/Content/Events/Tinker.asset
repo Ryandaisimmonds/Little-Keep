@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 384e1d193a0614e1295a62643c05c901, type: 3}
+  m_Name: Tinker
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EventAsset
+  def:
+    Id: Tinker
+    Title: A travelling tinker
+    Text: A tinker with a cart full of clanking gadgets offers to tune up the squad.
+    Options:
+    - Text: Pay for a tune-up
+      Outcome: Whirr, clank, ping. Much better.
+      GoldCost: 25
+      Effects:
+      - Kind: 3
+        Amount: 1
+        CreatureId: 
+    - Text: No thank you
+      Outcome: 
+      GoldCost: 0
+      Effects: []

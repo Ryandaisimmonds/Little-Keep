@@ -25,23 +25,23 @@ MonoBehaviour:
     ProjectileSpeed: 18
   description: A soft cloud of spores that hits every Hero around the target.
   upgrades:
-  - Id: spore_puff_thick
+  - Id: spore_puff_thick_spores
     Name: Thick Spores
     Description: Spores hit 35% harder.
     Mods:
     - Stat: 0
       Op: 1
       Value: 1.35
-  - Id: spore_puff_quick
+  - Id: spore_puff_quick_puff
     Name: Quick Puff
     Description: Recharges 20% faster.
     Mods:
     - Stat: 1
       Op: 1
       Value: 0.8
-  - Id: spore_puff_big
+  - Id: spore_puff_big_puff
     Name: Big Puff
-    Description: The cloud spreads 30% wider.
+    Description: The cloud reaches 30% wider.
     Mods:
     - Stat: 3
       Op: 1

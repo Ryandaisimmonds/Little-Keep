@@ -19,12 +19,14 @@ MonoBehaviour:
   - entries:
     - hero: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
       count: 4
-    - hero: {fileID: 11400000, guid: 8c7e87a97b92f4ddcabd7ffb3166537b, type: 2}
+    - hero: {fileID: 11400000, guid: db9b0ac53c0c149b996ac7fc0a550b0e, type: 2}
       count: 1
     spawnInterval: 0.7
   - entries:
     - hero: {fileID: 11400000, guid: 31a3b65e2b2504ccea8b8d703454fab7, type: 2}
       count: 1
-    - hero: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
-      count: 4
+    - hero: {fileID: 11400000, guid: 4edd9b3afe5204aea9302c8c32fd14c4, type: 2}
+      count: 2
+    - hero: {fileID: 11400000, guid: 3dd7174f35aee4ff79c703e63e2ac4dc, type: 2}
+      count: 1
     spawnInterval: 1

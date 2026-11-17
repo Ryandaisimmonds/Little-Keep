@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5db4ae07af5c042309e0106dfe6a12f8, type: 3}
+  m_Name: CarrotRocket
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.SkillAsset
+  def:
+    Id: carrot_rocket
+    Name: Carrot Rocket
+    Shape: 0
+    Element: 1
+    Cooldown: 6
+    Damage: 30
+    Count: 1
+    Spread: 0
+    Radius: 1.5
+    ProjectileSpeed: 20
+  description: Launches one fiery carrot.
+  upgrades:
+  - Id: carrot_rocket_spicy_carrot
+    Name: Spicy Carrot
+    Description: The carrot hit 35% harder.
+    Mods:
+    - Stat: 0
+      Op: 1
+      Value: 1.35
+  - Id: carrot_rocket_quick_launch
+    Name: Quick Launch
+    Description: Recharges 20% faster.
+    Mods:
+    - Stat: 1
+      Op: 1
+      Value: 0.8
+  - Id: carrot_rocket_carrot_bunch
+    Name: Carrot Bunch
+    Description: Launches two more carrots.
+    Mods:
+    - Stat: 2
+      Op: 0
+      Value: 2
+  hasMasterForm: 1
+  masterForm:
+    Id: carrot_rocket_master
+    Name: Carrot Barrage
+    Shape: 0
+    Element: 1
+    Cooldown: 5
+    Damage: 34
+    Count: 5
+    Spread: 24
+    Radius: 1.5
+    ProjectileSpeed: 22
+  masterDescription: A whole barrage of fiery carrots.

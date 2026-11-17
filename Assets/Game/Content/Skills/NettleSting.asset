@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5db4ae07af5c042309e0106dfe6a12f8, type: 3}
+  m_Name: NettleSting
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.SkillAsset
+  def:
+    Id: nettle_sting
+    Name: Nettle Sting
+    Shape: 2
+    Element: 3
+    Cooldown: 6
+    Damage: 9
+    Count: 4
+    Spread: 20
+    Radius: 2.2
+    ProjectileSpeed: 18
+  description: Stinging nettles that jump from Hero to Hero.
+  upgrades:
+  - Id: nettle_sting_stingier
+    Name: Stingier
+    Description: Each sting hit 35% harder.
+    Mods:
+    - Stat: 0
+      Op: 1
+      Value: 1.35
+  - Id: nettle_sting_quick_sting
+    Name: Quick Sting
+    Description: Recharges 20% faster.
+    Mods:
+    - Stat: 1
+      Op: 1
+      Value: 0.8
+  - Id: nettle_sting_nettle_patch
+    Name: Nettle Patch
+    Description: Jumps to two more Heroes.
+    Mods:
+    - Stat: 2
+      Op: 0
+      Value: 2
+  hasMasterForm: 1
+  masterForm:
+    Id: nettle_sting_master
+    Name: Nettle Storm
+    Shape: 2
+    Element: 3
+    Cooldown: 5
+    Damage: 13
+    Count: 8
+    Spread: 20
+    Radius: 3
+    ProjectileSpeed: 18
+  masterDescription: A crackling hedge of nettles.

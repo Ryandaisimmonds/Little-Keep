@@ -23,6 +23,10 @@ namespace LittleKeep.Rules
         StatusApplied,
         /// A Hero's status wore off. Element is the status that ended.
         StatusEnded,
+        /// A Chain Skill jumped: From is where it came from, Position where it struck.
+        Zap,
+        /// A healer mended a Hero. Amount is the health restored.
+        HeroHealed,
         /// A second Element hit a Hero carrying another's status. Element hit, Other was the status; Amount is the burst damage.
         Combo,
         Won,
@@ -47,6 +51,8 @@ namespace LittleKeep.Rules
         public Element Element;
         /// For Combo: the status that was consumed.
         public Element Other;
+        /// For Zap: where the jump started.
+        public Vec2 From;
         /// For Hit: true if the damage is a Combo's burst.
         public bool Combo;
 

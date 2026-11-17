@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab8ceab340bf8429e8947823d7678273, type: 3}
+  m_Name: Mage Monk
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.CharacterArt
+  idleLeft:
+  - {fileID: -581494630, guid: b4c2ec817935a9d4a84e4b91a15256e3, type: 3}
+  - {fileID: 441165389, guid: b4c2ec817935a9d4a84e4b91a15256e3, type: 3}
+  - {fileID: -1414239451, guid: b4c2ec817935a9d4a84e4b91a15256e3, type: 3}
+  - {fileID: 161619566, guid: b4c2ec817935a9d4a84e4b91a15256e3, type: 3}
+  idleRight:
+  - {fileID: 693619952, guid: b4c2ec817935a9d4a84e4b91a15256e3, type: 3}
+  - {fileID: 538934327, guid: b4c2ec817935a9d4a84e4b91a15256e3, type: 3}
+  - {fileID: -873854477, guid: b4c2ec817935a9d4a84e4b91a15256e3, type: 3}
+  - {fileID: -978656670, guid: b4c2ec817935a9d4a84e4b91a15256e3, type: 3}
+  moveLeft:
+  - {fileID: -1094085332, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: 1080701206, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: 930429095, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: 1442705141, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: -726733099, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: -1139950852, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  moveRight:
+  - {fileID: -914044903, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: 1474909256, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: 2071137901, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: -493704733, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: -2092735228, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  - {fileID: 1040401668, guid: e49181c99ad35674caf4895842fb2392, type: 3}
+  attackLeft:
+  - {fileID: -402043163, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: 1889118565, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: 439623030, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: 358314829, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: 1602869171, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: -116620649, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  attackRight:
+  - {fileID: -1658141118, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: -1701290538, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: 128089863, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: 1213215904, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: 1335077154, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  - {fileID: -113066048, guid: 7e67ac34f3b1b8744b48828cb2942cc7, type: 3}
+  framesPerSecond: 8
+  scale: 1
+  footOffset: 0
+  visibleSize: {x: 0.2, y: 0.35000002}
+  visibleCenter: {x: 0, y: -0.0050000027}

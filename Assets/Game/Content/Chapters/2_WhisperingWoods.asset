@@ -17,6 +17,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 84773bbcb62e5497490bf4e3daca5d64, type: 2}
   - {fileID: 11400000, guid: d5cffaf5374914a329a93db5d00c87cc, type: 2}
   - {fileID: 11400000, guid: dcc4441d6871c4c118b79ec8b9979490, type: 2}
+  - {fileID: 11400000, guid: 87389eeac7bea4e2abc5a0746ef67243, type: 2}
   toughBattles:
   - {fileID: 11400000, guid: e6925fa9b4ee24cbda90dfa26a217571, type: 2}
   - {fileID: 11400000, guid: ff5641d136fa24002a11799772bc7f8d, type: 2}

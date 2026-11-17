@@ -11,6 +11,8 @@ namespace LittleKeep.Game
             public SpriteRenderer sr;
             public float age, life, startScale, endScale;
             public Color color;
+            /// For lines: fixed length and thickness instead of growing.
+            public Vector2 stretch;
         }
 
         readonly List<Pulse> live = new List<Pulse>();
@@ -30,6 +32,17 @@ namespace LittleKeep.Game
 
         public void Blob(Vector2 pos, float size, Color color, float life = 0.25f) =>
             Spawn(Shapes.Circle, pos, size, size * 1.6f, color, life, 1000);
+
+        /// A bolt between two points that thins and fades (Chain Skills).
+        public void Line(Vector2 from, Vector2 to, Color color, float life = 0.25f)
+        {
+            var d = to - from;
+            Spawn(Shapes.Square, (from + to) * 0.5f, 1f, 1f, color, life, 1001);
+            var p = live[live.Count - 1];
+            p.stretch = new Vector2(Mathf.Max(0.05f, d.magnitude), 0.14f);
+            p.sr.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg);
+            p.sr.transform.localScale = new Vector3(p.stretch.x, p.stretch.y, 1f);
+        }
 
         public void Shake(float amount) => shake = Mathf.Max(shake, amount);
 
@@ -91,12 +104,15 @@ namespace LittleKeep.Game
                 p.age += dt;
                 float k = Mathf.Clamp01(p.age / p.life);
                 float ease = 1f - (1f - k) * (1f - k);
-                p.sr.transform.localScale = Vector3.one * Mathf.Lerp(p.startScale, p.endScale, ease);
+                p.sr.transform.localScale = p.stretch != Vector2.zero
+                    ? new Vector3(p.stretch.x, p.stretch.y * (1f - k * 0.7f), 1f)
+                    : Vector3.one * Mathf.Lerp(p.startScale, p.endScale, ease);
                 var c = p.color;
                 c.a *= 1f - k;
                 p.sr.color = c;
                 if (k >= 1f)
                 {
+                    p.sr.transform.rotation = Quaternion.identity;
                     p.sr.gameObject.SetActive(false);
                     pool.Push(p.sr);
                     live.RemoveAt(i);

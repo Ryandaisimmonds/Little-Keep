@@ -25,21 +25,21 @@ MonoBehaviour:
     ProjectileSpeed: 20
   description: Fires a fan of little stars at the Hero nearest the Keep.
   upgrades:
-  - Id: star_volley_bright
+  - Id: star_volley_bright_stars
     Name: Bright Stars
     Description: Stars hit 35% harder.
     Mods:
     - Stat: 0
       Op: 1
       Value: 1.35
-  - Id: star_volley_quick
+  - Id: star_volley_shooting_stars
     Name: Shooting Stars
     Description: Recharges 20% faster.
     Mods:
     - Stat: 1
       Op: 1
       Value: 0.8
-  - Id: star_volley_more
+  - Id: star_volley_star_shower
     Name: Star Shower
     Description: Two more stars per volley.
     Mods:

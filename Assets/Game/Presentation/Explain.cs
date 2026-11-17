@@ -45,9 +45,14 @@ namespace LittleKeep.Game
 
         public static T Skill<T>(T target, SkillDef s, string description) where T : Component
         {
-            string shape = s.Shape == SkillShape.Burst
-                ? $"Hits every Hero within {s.Radius:0.#} of its target for {s.Damage:0.#}."
-                : $"Fires {s.Count} shot{(s.Count == 1 ? "" : "s")} of {s.Damage:0.#} damage.";
+            string shape;
+            switch (s.Shape)
+            {
+                case SkillShape.Burst: shape = $"Hits every Hero within {s.Radius:0.#} of its target for {s.Damage:0.#}."; break;
+                case SkillShape.Chain: shape = $"Strikes a Hero for {s.Damage:0.#}, then jumps to the next closest within {s.Radius:0.#}: {s.Count} Heroes in all."; break;
+                case SkillShape.Nova: shape = $"Hits every Hero within {s.Radius:0.#} of its caster for {s.Damage:0.#}. Waits until a Hero comes that close."; break;
+                default: shape = $"Fires {s.Count} shot{(s.Count == 1 ? "" : "s")} of {s.Damage:0.#} damage."; break;
+            }
             string element = s.Element == Rules.Element.None ? "" : $"\n\n<color=#FFD15A>{ElementLook.Name(s.Element)}</color>: {ElementLook.Effect(s.Element)}";
             string body = $"{description}\n\n{shape} Casts itself every {s.Cooldown:0.#} seconds while a Hero is on the lane.{element}";
             return On(target, s.Name, body, ElementLook.Icon(s.Element), ElementLook.IconTint(s.Element));

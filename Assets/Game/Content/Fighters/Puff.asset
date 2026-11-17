@@ -22,6 +22,9 @@ MonoBehaviour:
     Skills: []
   skills:
   - {fileID: 11400000, guid: ef6c33cb3e23543299091ecfc4dbd3bb, type: 2}
+  - {fileID: 11400000, guid: 7159b0c8569324895824dfb60c4b19d0, type: 2}
+  - {fileID: 11400000, guid: 08769440c902a4303878d2ea9c7b2840, type: 2}
+  - {fileID: 11400000, guid: 9550781c1e7224c76a9329d9fd20b1b1, type: 2}
   description: A grumpy mushroom. Puffs clouds of spores.
   color: {r: 0.85, g: 0.55, b: 0.55, a: 1}
   skillColor: {r: 0.85, g: 0.7, b: 1, a: 1}
@@ -29,4 +32,4 @@ MonoBehaviour:
   unlock: 0
   bondSize: 3
   deedId: 
-  unlockHint: 
+  unlockHint: Clerics carry one in their basket, and they turn up in the wild.

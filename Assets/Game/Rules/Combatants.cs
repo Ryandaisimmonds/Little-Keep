@@ -58,6 +58,7 @@ namespace LittleKeep.Rules
         internal int statusSource;
         internal float attackTimer;
         internal float summonTimer;
+        internal float healTimer;
 
         internal Hero(int id, HeroDef def, Vec2 position)
         {
@@ -66,6 +67,7 @@ namespace LittleKeep.Rules
             Position = position;
             Hp = def.Hp;
             summonTimer = def.SummonInterval;
+            healTimer = def.HealInterval;
         }
     }
 

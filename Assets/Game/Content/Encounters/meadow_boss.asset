@@ -25,4 +25,6 @@ MonoBehaviour:
   - entries:
     - hero: {fileID: 11400000, guid: b28f4eee091944af3a648e035b05868e, type: 2}
       count: 1
+    - hero: {fileID: 11400000, guid: b141b68911a4247fbb762c60d39a0cfd, type: 2}
+      count: 2
     spawnInterval: 1

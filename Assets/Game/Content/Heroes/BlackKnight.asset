@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1105c2e0a16c34baba59dda865ef9261, type: 3}
+  m_Name: BlackKnight
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.HeroAsset
+  def:
+    Id: black_knight
+    Name: Black Knight
+    Hp: 180
+    Speed: 0.8
+    KeepDamage: 16
+    Size: 0.5
+    MeleeDamage: 14
+    MeleeInterval: 1.4
+    MeleeRange: 1
+    ShotDamage: 0
+    ShotInterval: 1.5
+    ShotRange: 6
+    ShotSpeed: 9
+    AttackBlock: 0.5
+    CreatureId: 
+    HealAmount: 0
+    HealInterval: 2
+    HealRadius: 2.5
+    Steadfast: 1
+    IsBoss: 0
+    SummonInterval: 8
+    SummonCount: 2
+  description: Heavy armour, heavier attitude. Statuses don't stick and ordinary attacks barely dent it.
+  color: {r: 0.9, g: 0.75, b: 0.4, a: 1}
+  look: 1
+  art: {fileID: 11400000, guid: fd5142e95e7f1498089ac736f35abeb2, type: 2}
+  creature: {fileID: 0}
+  summon: {fileID: 0}

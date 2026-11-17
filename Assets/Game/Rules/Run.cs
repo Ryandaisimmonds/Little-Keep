@@ -24,7 +24,7 @@ namespace LittleKeep.Rules
     /// all randomness comes from the seed, and the choices are recorded, so Save/Load replays a Run exactly.
     public sealed class Run
     {
-        const string SaveHeader = "littlekeep-run/3";
+        const string SaveHeader = "littlekeep-run/4";
 
         readonly RunContent content;
         readonly RunTuning t;
@@ -363,9 +363,13 @@ namespace LittleKeep.Rules
         {
             var all = new List<UpgradeChoice>();
             foreach (var m in AllMembers())
+            {
                 foreach (var s in m.Skills)
                     foreach (var u in s.Remaining)
                         all.Add(new UpgradeChoice { Member = m, Skill = s, Upgrade = u, MakesMaster = s.NextMakesMaster });
+                var next = m.NextToLearn;
+                if (next != null) all.Add(new UpgradeChoice { Member = m, Skill = next, Learns = true });
+            }
             for (int i = all.Count - 1; i > 0; i--)
             {
                 int j = rng.Range(0, i + 1);
@@ -406,6 +410,12 @@ namespace LittleKeep.Rules
 
         void Apply(UpgradeChoice c)
         {
+            if (c.Learns)
+            {
+                c.Skill.Learn();
+                Message = $"{c.Member.Def.Name} learned {c.Skill.Base.Name}!";
+                return;
+            }
             bool master = c.Skill.NextMakesMaster;
             c.Skill.Take(c.Upgrade);
             Message = master ? $"{c.Skill.Base.Name} became {c.Skill.Base.MasterForm.Name}!" : $"{c.Skill.Base.Name}: {c.Upgrade.Name}.";
@@ -471,7 +481,7 @@ namespace LittleKeep.Rules
             var item = shop[index];
             if (item.Sold || Gold < item.Price) return false;
             if (item.Kind == ShopItemKind.Repair) return KeepHp < KeepMaxHp;
-            return !item.Upgrade.Skill.Taken.Contains(item.Upgrade.Upgrade);
+            return item.Upgrade.Learns ? !item.Upgrade.Skill.IsLearned : !item.Upgrade.Skill.Taken.Contains(item.Upgrade.Upgrade);
         }
 
         public bool Buy(int index)

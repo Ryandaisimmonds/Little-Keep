@@ -15,6 +15,10 @@ namespace LittleKeep.Rules
         Volley,
         /// Deals Damage to every Hero within Radius of the target, at once.
         Burst,
+        /// Strikes the target, then jumps to the closest Hero not yet struck within Radius, Count Heroes in all.
+        Chain,
+        /// Deals Damage to every Hero within Radius of the caster. Waits until a Hero is that close.
+        Nova,
     }
 
     /// A Skill: casts itself whenever its cooldown is ready and a Hero is on the lane.
@@ -129,6 +133,14 @@ namespace LittleKeep.Rules
 
         /// Id of the creature this Hero brought along, freed when the Hero is defeated ("" = none).
         public string CreatureId = "";
+
+        /// Healer: every HealInterval seconds, mends every Hero within HealRadius (itself included) by HealAmount.
+        public float HealAmount;
+        public float HealInterval = 2f;
+        public float HealRadius = 2.5f;
+
+        /// Steadfast: takes damage as usual but never carries a status (so it can't set off Combos either).
+        public bool Steadfast;
 
         /// Bosses get a big health bar and may call in more Heroes.
         public bool IsBoss;

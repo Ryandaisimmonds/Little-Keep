@@ -30,3 +30,11 @@ MonoBehaviour:
     - hero: {fileID: 11400000, guid: 83131b910b60d48cc8771157a9104864, type: 2}
       count: 4
     spawnInterval: 0.7
+  - entries:
+    - hero: {fileID: 11400000, guid: 0e80d6a23cabd427b998b916ee819df7, type: 2}
+      count: 1
+    - hero: {fileID: 11400000, guid: b141b68911a4247fbb762c60d39a0cfd, type: 2}
+      count: 3
+    - hero: {fileID: 11400000, guid: 33f968e5c911d493ea2062fa35b897f0, type: 2}
+      count: 3
+    spawnInterval: 0.6

@@ -28,6 +28,10 @@ MonoBehaviour:
     ShotSpeed: 9
     AttackBlock: 0
     CreatureId: 
+    HealAmount: 0
+    HealInterval: 2
+    HealRadius: 2.5
+    Steadfast: 0
     IsBoss: 0
     SummonInterval: 8
     SummonCount: 2

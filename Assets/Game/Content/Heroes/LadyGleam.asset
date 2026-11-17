@@ -28,10 +28,14 @@ MonoBehaviour:
     ShotSpeed: 9
     AttackBlock: 0.4
     CreatureId: 
+    HealAmount: 12
+    HealInterval: 3
+    HealRadius: 3
+    Steadfast: 0
     IsBoss: 1
     SummonInterval: 8
     SummonCount: 1
-  description: Boss. Polished armour, polished knights.
+  description: Boss. Polished armour, polished knights, and a glow that mends them.
   color: {r: 0.85, g: 0.85, b: 0.95, a: 1}
   look: 1
   art: {fileID: 11400000, guid: 46df42141b29b4c3aaa14dd69c8595db, type: 2}
