@@ -37,6 +37,7 @@ namespace LittleKeep.Game
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
             UiKit.Theme = content.theme;
             ElementLook.Tuning = content.battleTuning;
+            Audio.Prewarm();
 
             var cam = Camera.main != null ? Camera.main : new GameObject("Main Camera", typeof(Camera)).GetComponent<Camera>();
             cam.tag = "MainCamera";
@@ -77,7 +78,11 @@ namespace LittleKeep.Game
 
         void ShowWorkshop() => screens.ShowWorkshop(keep, id =>
         {
-            if (keep.TryBuy(id)) ProgressStore.Save(keep);
+            if (keep.TryBuy(id))
+            {
+                ProgressStore.Save(keep);
+                Audio.Play(Sound.Gems);
+            }
             ShowWorkshop();
         }, ShowKeep);
 
@@ -186,6 +191,8 @@ namespace LittleKeep.Game
                     lastRewards.Deeds.InsertRange(0, runDeeds);
                     lastRewards.NewFamiliars.InsertRange(0, runFamiliars);
                     ProgressStore.Save(keep);
+                    // Played here, where the rewards are recorded, so a redraw of the summary stays quiet.
+                    Audio.Play(lastRewards.NewFamiliars.Count > 0 ? Sound.NewFamiliar : Sound.Gems);
                 }
                 PlayerPrefs.DeleteKey(SaveKey);
                 PlayerPrefs.DeleteKey(NewsKey);
@@ -204,6 +211,7 @@ namespace LittleKeep.Game
                     runFamiliars.AddRange(news.NewFamiliars);
                     ProgressStore.Save(keep);
                     PlayerPrefs.SetString(NewsKey, string.Join(",", runDeeds) + ";" + string.Join(",", runFamiliars));
+                    if (news.NewFamiliars.Count > 0) Audio.Play(Sound.NewFamiliar);
                     trailNotice = string.Join("  ", news.Deeds.Select(id => $"Deed complete: {keep.Content.Deeds.Find(d => d.Id == id)?.Name}!")
                         .Concat(news.NewFamiliars.Select(id => $"{content.familiars.FirstOrDefault(f => f != null && f.def.Id == id)?.def.Name ?? id} joins your Familiars!")));
                 }
@@ -231,13 +239,18 @@ namespace LittleKeep.Game
                         keepHp => { run.SuspendBattle(keepHp); Save(); });
                     break;
                 case RunPhase.Upgrade:
-                    screens.ShowUpgrade(run, i => Act(() => run.PickUpgrade(i)), () => Act(run.SkipUpgrade), ShowSquad);
+                    screens.ShowUpgrade(run, i => Act(() =>
+                    {
+                        var o = run.UpgradeOffer[i];
+                        Audio.Play(o.Learns ? Sound.LearnSkill : o.MakesMaster ? Sound.MasterForm : Sound.SkillUpgrade);
+                        run.PickUpgrade(i);
+                    }), () => Act(run.SkipUpgrade), ShowSquad);
                     break;
                 case RunPhase.Befriend:
-                    screens.ShowBefriend(run, i => Act(() => run.Befriend(i)), () => Act(run.PassCreature), ShowSquad);
+                    screens.ShowBefriend(run, i => Act(() => { Audio.Play(Sound.Befriend); run.Befriend(i); }), () => Act(run.PassCreature), ShowSquad);
                     break;
                 case RunPhase.Shop:
-                    screens.ShowShop(run, i => Act(() => run.Buy(i)), () => Act(run.LeaveShop), ShowSquad);
+                    screens.ShowShop(run, i => Act(() => { if (run.Buy(i)) Audio.Play(Sound.Gold); }), () => Act(run.LeaveShop), ShowSquad);
                     break;
                 case RunPhase.Event:
                     screens.ShowEvent(run, i => Act(() => run.ChooseEventOption(i)), ShowSquad);

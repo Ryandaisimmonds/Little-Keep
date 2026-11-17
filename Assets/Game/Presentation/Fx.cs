@@ -72,6 +72,9 @@ namespace LittleKeep.Game
             t.color = color;
             t.sortingOrder = 1100;
             t.rectTransform.sizeDelta = new Vector2(8f, 2f);
+            // Words popping up at once in the same place stack instead of overlapping.
+            foreach (var other in floaters)
+                if (other.age < 0.5f && Mathf.Abs(other.from.x - pos.x) < 2.5f && Mathf.Abs(other.from.y - pos.y) < 0.6f) pos.y = other.from.y + 0.65f * size;
             go.transform.position = new Vector3(pos.x, pos.y, 0f);
             floaters.Add(new Floater { text = t, life = life, color = color, from = go.transform.position });
         }

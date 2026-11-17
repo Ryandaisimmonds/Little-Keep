@@ -139,7 +139,7 @@ namespace LittleKeep.Game
             img.raycastTarget = true;
             var b = img.gameObject.AddComponent<Button>();
             b.targetGraphic = img;
-            b.onClick.AddListener(() => onClick?.Invoke());
+            b.onClick.AddListener(() => { Audio.Play(Sound.Tap); onClick?.Invoke(); });
             float iconSize = Mathf.Min(dims.y * 0.6f, 64f);
             if (icon != null)
             {
@@ -166,7 +166,7 @@ namespace LittleKeep.Game
             img.raycastTarget = true;
             var b = img.gameObject.AddComponent<Button>();
             b.targetGraphic = img;
-            b.onClick.AddListener(() => onClick?.Invoke());
+            b.onClick.AddListener(() => { Audio.Play(Sound.Tap); onClick?.Invoke(); });
             if (icon != null) Icon("Icon", img.rectTransform, icon, new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), size * 0.5f);
             else Label("Label", img.rectTransform, fallback, (int)(size * 0.35f), TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size, size));
             return b;
@@ -195,6 +195,21 @@ namespace LittleKeep.Game
             new UiBar(name, parent, color, anchor, pos, size);
 
         public static Color WithAlpha(this Color c, float a) { c.a = a; return c; }
+
+        /// Width of the safe area in canvas units (the canvas is always 1080 tall, so 16:9 is ~1920 and 4:3 is 1440).
+        public static float SafeWidth =>
+            Screen.height > 0 ? 1080f * Screen.safeArea.width / Screen.height : 1920f;
+
+        /// How much to squeeze a layout drawn for an 1840-wide safe area so it fits this screen.
+        public static float Fit => Mathf.Clamp(SafeWidth / 1840f, 0.7f, 1f);
+
+        /// A full-screen child that keeps itself to the device safe area (for content laid over a full-screen dim).
+        public static RectTransform SafeChild(RectTransform fullScreen)
+        {
+            var area = Stretch("Safe", fullScreen);
+            area.gameObject.AddComponent<SafeArea>().Target = area;
+            return area;
+        }
     }
 
     /// A horizontal bar that keeps its nine-sliced ends at any fill.

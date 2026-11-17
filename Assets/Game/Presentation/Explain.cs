@@ -14,7 +14,11 @@ namespace LittleKeep.Game
         public Sprite Icon;
         public Color IconTint = Color.white;
 
-        public void OnPointerClick(PointerEventData e) => ExplainPopup.Show(Title, Body, Icon, IconTint);
+        public void OnPointerClick(PointerEventData e)
+        {
+            Audio.Play(Sound.Tap);
+            ExplainPopup.Show(Title, Body, Icon, IconTint);
+        }
     }
 
     public static class Explain
@@ -139,7 +143,7 @@ namespace LittleKeep.Game
             close.transition = Selectable.Transition.None;
             close.onClick.AddListener(() => root.SetActive(false));
             root = dim.gameObject;
-            var panel = Panel("Panel", dim.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 560f));
+            var panel = Panel("Panel", SafeChild(dim.rectTransform), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 560f));
             icon = UiKit.Icon("Icon", panel, null, new Vector2(0f, 1f), new Vector2(44f, -40f), 100f);
             title = Label("Title", panel, "", 44, TextAnchor.MiddleLeft, new Vector2(0f, 1f), new Vector2(164f, -50f), new Vector2(780f, 80f), TextGold);
             body = Label("Body", panel, "", 30, TextAnchor.UpperLeft, new Vector2(0f, 1f), new Vector2(60f, -160f), new Vector2(880f, 320f));

@@ -50,7 +50,7 @@ namespace LittleKeep.Game
             var keep = Panel("Keep", safe, new Vector2(0f, 1f), new Vector2(24f, -16f), new Vector2(520f, 100f));
             Icon("Heart", keep, Theme?.iconHeart, new Vector2(0f, 0.5f), new Vector2(26f, 2f), 60f);
             Label("Title", keep, "Keep", 30, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(96f, 2f), new Vector2(100f, 60f));
-            keepBar = Bar("Hp", keep, Theme != null ? Theme.health : Palette.Health, new Vector2(0f, 0.5f), new Vector2(190f, 0f), new Vector2(300f, 40f));
+            keepBar = Bar("Hp", keep, Palette.Health, new Vector2(0f, 0.5f), new Vector2(190f, 0f), new Vector2(300f, 40f));
             keepText = Label("Value", keepBar.Back, "", 24, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0f, 2f), new Vector2(300f, 40f));
             Explain.On(keep, "Keep health", Explain.KeepHealth, Theme?.iconHeart);
 
@@ -126,7 +126,7 @@ namespace LittleKeep.Game
             nameText.enableAutoSizing = true;
             nameText.fontSizeMax = 24;
             nameText.fontSizeMin = 14;
-            card.hp = Bar("Hp", root, Theme != null ? Theme.health : Palette.Health, new Vector2(0f, 1f), new Vector2(16f, -84f), new Vector2(192f, 22f));
+            card.hp = Bar("Hp", root, Palette.Health, new Vector2(0f, 1f), new Vector2(16f, -84f), new Vector2(192f, 22f));
             Explain.On(card.hp.Back, $"{f.Def.Name}'s health", Explain.FighterHealth);
             var skillColor = asset != null ? asset.skillColor : Color.white;
             for (int i = 0; i < skills; i++)
@@ -153,7 +153,7 @@ namespace LittleKeep.Game
         {
             float keep = battle.KeepMaxHp > 0f ? battle.KeepHp / battle.KeepMaxHp : 0f;
             keepBar.Value = keep;
-            keepBar.Color = keep < 0.3f ? (Theme != null ? Theme.healthLow : Palette.HealthLow) : (Theme != null ? Theme.health : Palette.Health);
+            keepBar.Color = keep < 0.3f ? Palette.HealthLow : Palette.Health;
             keepText.text = $"{Mathf.CeilToInt(battle.KeepHp)} / {Mathf.CeilToInt(battle.KeepMaxHp)}";
             string waves = battle.WaveNumber == 0 ? "Get ready" : $"Wave {battle.WaveNumber}/{battle.WaveCount}";
             headerText.text = string.IsNullOrEmpty(header) ? waves : $"{header}  ·  {waves}";
@@ -172,7 +172,7 @@ namespace LittleKeep.Game
             bool ready = battle.RallyCharge >= 1f && battle.Outcome == BattleOutcome.Ongoing;
             rallyText.text = ready ? "RALLY!" : "RALLY";
             rallyRoot.localScale = Vector3.one * (ready ? 1f + Mathf.Sin(Time.unscaledTime * 6f) * 0.04f : 1f);
-            var rally = Theme != null ? Theme.rally : Palette.Rally;
+            var rally = Palette.Rally;
             rallyFill.color = ready ? rally : rally.WithAlpha(0.5f);
         }
 
@@ -182,6 +182,7 @@ namespace LittleKeep.Game
         {
             endPanel.SetActive(true);
             bool won = battle.Outcome == BattleOutcome.Won;
+            Audio.Play(won ? Sound.Won : Sound.Lost);
             endTitle.text = won ? "The Keep holds!" : "The Keep has fallen";
             endBody.text = won
                 ? $"All {battle.WaveCount} waves held back, with {Mathf.CeilToInt(battle.KeepHp)} health left."
@@ -195,7 +196,7 @@ namespace LittleKeep.Game
             dim.rectTransform.anchorMin = Vector2.zero;
             dim.rectTransform.anchorMax = Vector2.one;
             dim.raycastTarget = true;
-            var panel = Panel("Panel", dim.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, -20f), new Vector2(900f, 520f));
+            var panel = Panel("Panel", SafeChild(dim.rectTransform), new Vector2(0.5f, 0.5f), new Vector2(0f, -20f), new Vector2(900f, 520f));
             titleText = Title("Title", panel, title, new Vector2(0.5f, 1f), new Vector2(0f, 40f), 760f);
             bodyText = Label("Body", panel, body, 30, TextAnchor.MiddleCenter, new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(760f, 160f));
             float w = 320f, gap = 30f, total = buttons.Length * w + (buttons.Length - 1) * gap;

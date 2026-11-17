@@ -147,6 +147,8 @@ namespace LittleKeep.Editor
             t.iconSpark = Find<Sprite>(picto, "Icon_PictoIcon_Thunder.png");
             t.iconBloom = Find<Sprite>(item, "Icon_ItemIcon_Clover.png");
             t.iconInfo = Find<Sprite>(picto, "Icon_PictoIcon_Mark_Info-1.png");
+            t.iconSound = Find<Sprite>(picto, "Icon_PictoIcon_Volume.png");
+            t.iconMute = Find<Sprite>(picto, "Icon_PictoIcon_Volume_Mute.png");
             EditorUtility.SetDirty(t);
             return t;
         }

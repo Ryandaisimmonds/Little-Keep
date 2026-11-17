@@ -60,6 +60,8 @@ MonoBehaviour:
   iconSpark: {fileID: 21300000, guid: 1db965eef26834593adb678409a53ca0, type: 3}
   iconBloom: {fileID: 21300000, guid: 39d033a1c909b44b0924abd4a3dcdf55, type: 3}
   iconInfo: {fileID: 21300000, guid: de88e3b5c51154830a30b5248ba859f3, type: 3}
+  iconSound: {fileID: 21300000, guid: f8ac49a8ecaef4780a3ddf1d23d666bf, type: 3}
+  iconMute: {fileID: 21300000, guid: 1ecf20a3530954393b5e3fbb1f94e533, type: 3}
   text: {r: 0.98, g: 0.93, b: 0.82, a: 1}
   textDark: {r: 0.27, g: 0.21, b: 0.18, a: 1}
   textGold: {r: 1, g: 0.82, b: 0.35, a: 1}
@@ -67,3 +69,21 @@ MonoBehaviour:
   health: {r: 0.55, g: 0.85, b: 0.35, a: 1}
   healthLow: {r: 0.95, g: 0.4, b: 0.3, a: 1}
   rally: {r: 1, g: 0.55, b: 0.8, a: 1}
+  sky: {r: 0.22, g: 0.19, b: 0.16, a: 1}
+  skyTop: {r: 0.55, g: 0.66, b: 0.72, a: 1}
+  skyBottom: {r: 0.93, g: 0.84, b: 0.68, a: 1}
+  hillsFar: {r: 0.55, g: 0.62, b: 0.55, a: 1}
+  hillsNear: {r: 0.42, g: 0.55, b: 0.36, a: 1}
+  trees: {r: 0.3, g: 0.43, b: 0.28, a: 1}
+  fog: {r: 0.9, g: 0.88, b: 0.84, a: 1}
+  lane: {r: 0.47, g: 0.6, b: 0.33, a: 1}
+  laneEdge: {r: 0.36, g: 0.47, b: 0.26, a: 1}
+  path: {r: 0.78, g: 0.66, b: 0.48, a: 1}
+  keepWall: {r: 0.8, g: 0.7, b: 0.58, a: 1}
+  keepStone: {r: 0.66, g: 0.57, b: 0.48, a: 1}
+  keepRoof: {r: 0.66, g: 0.38, b: 0.34, a: 1}
+  keepDoor: {r: 0.42, g: 0.28, b: 0.2, a: 1}
+  window: {r: 1, g: 0.85, b: 0.5, a: 1}
+  heroHealth: {r: 0.95, g: 0.45, b: 0.4, a: 1}
+  heroShot: {r: 0.85, g: 0.25, b: 0.25, a: 1}
+  panelPlain: {r: 0.27, g: 0.21, b: 0.24, a: 0.82}

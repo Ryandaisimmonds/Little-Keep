@@ -78,12 +78,33 @@ namespace LittleKeep.Game
             lane.transform.position = new Vector3(t.LaneLength * 0.5f, 0f, 0f);
             lane.transform.localScale = new Vector3(t.LaneLength + 40f, t.LaneHalfHeight * 2f, 1f);
 
-            keepBody = MakeSprite("Keep", Shapes.Square, Palette.Keep, 1f, -900, world);
-            keepBody.transform.position = new Vector3(t.KeepX - 0.9f, 0f, 0f);
-            keepBody.transform.localScale = new Vector3(1.8f, t.LaneHalfHeight * 2f + 0.5f, 1f);
-            var roof = MakeSprite("Roof", Shapes.Diamond, Palette.KeepRoof, 1f, -899, world);
-            roof.transform.position = new Vector3(t.KeepX - 0.9f, t.LaneHalfHeight + 0.35f, 0f);
-            roof.transform.localScale = new Vector3(2.4f, 1.0f, 1f);
+            // Hills and trees along the far side of the lane, and the Keep's tower at its end.
+            var hills = Scenery.Hills(11, 0.5f, 0.7f, 0.5f);
+            float hillWidth = 9f, hillHeight = hillWidth * hills.rect.height / hills.rect.width;
+            for (int i = -1; i < 4; i++)
+            {
+                var h = MakeSprite("Hills", hills, Palette.HillsNear, 1f, -998, world);
+                h.transform.position = new Vector3(t.LaneLength * 0.5f + (i - 1.5f) * hillWidth, t.LaneHalfHeight + 0.15f, 0f);
+                h.transform.localScale = new Vector3(hillWidth, hillWidth, 1f);
+            }
+            var far = Scenery.Hills(17, 0.45f, 0.6f, 0.3f);
+            for (int i = -1; i < 4; i++)
+            {
+                var h = MakeSprite("FarHills", far, Palette.HillsFar, 1f, -999, world);
+                h.transform.position = new Vector3(t.LaneLength * 0.5f + (i - 1.5f) * hillWidth + 2f, t.LaneHalfHeight + 0.4f, 0f);
+                h.transform.localScale = new Vector3(hillWidth, hillWidth, 1f);
+            }
+            var sky = MakeSprite("Sky", Scenery.Sky(), Color.white, 1f, -1001, world);
+            sky.transform.position = new Vector3(t.LaneLength * 0.5f, t.LaneHalfHeight + 0.1f, 0f);
+            // The sky sprite is one unit tall and a sixteenth of a unit wide: stretch it across the whole view.
+            var skySize = sky.sprite.bounds.size;
+            sky.transform.localScale = new Vector3(60f / skySize.x, 6f / skySize.y, 1f);
+
+            var keepSprite = Scenery.KeepSide();
+            float keepHeight = t.LaneHalfHeight * 2f + 1.6f;
+            keepBody = MakeSprite("Keep", keepSprite, Color.white, 1f, -900, world);
+            keepBody.transform.position = new Vector3(t.KeepX - 0.75f, -t.LaneHalfHeight - 0.3f, 0f);
+            keepBody.transform.localScale = Vector3.one * keepHeight;
         }
 
         /// A character: an animated sprite when it has art, otherwise a grey-box shape; plus a small health bar.
@@ -141,19 +162,23 @@ namespace LittleKeep.Game
                 switch (e.Kind)
                 {
                     case BattleEventKind.Attack:
+                        Audio.Play(Sound.Attack);
                         if (fighters.TryGetValue(e.SourceId, out var shooter)) shooter.attackTime = AttackPoseSeconds;
                         break;
                     case BattleEventKind.HeroAttack:
+                        Audio.Play(IsMelee(e.SourceId) ? Sound.HeroSwing : Sound.HeroShot);
                         if (heroes.TryGetValue(e.SourceId, out var striker)) striker.attackTime = AttackPoseSeconds;
                         break;
                     case BattleEventKind.Hit:
                         if (heroes.TryGetValue(e.TargetId, out var hv)) { hv.flash = 0.08f; hv.squash = 0.12f; }
                         else if (fighters.TryGetValue(e.TargetId, out var fv)) { fv.flash = 0.1f; fv.squash = 0.15f; }
                         if (e.Combo) break;
+                        if (!e.FromSkill) Audio.Play(Sound.Hit);
                         if (e.Element != Element.None) fx.Blob(pos, 0.5f, ElementLook.Color(e.Element).WithAlpha(0.8f), 0.2f);
                         else if (e.FromSkill) fx.Blob(pos, 0.5f, SkillColorOf(e.SourceId), 0.2f);
                         break;
                     case BattleEventKind.Zap:
+                        Audio.Play(Sound.Zap);
                         {
                             var c = ElementLook.Color(e.Element);
                             fx.Line(new Vector2(e.From.X, e.From.Y), pos, c, 0.25f);
@@ -161,6 +186,7 @@ namespace LittleKeep.Game
                         }
                         break;
                     case BattleEventKind.HeroHealed:
+                        Audio.Play(Sound.Heal);
                         fx.Blob(pos, 0.7f, new Color(0.5f, 1f, 0.55f, 0.6f), 0.35f);
                         fx.Text(pos + new Vector2(0f, 0.6f), $"+{e.Amount:0}", new Color(0.55f, 1f, 0.6f), 0.5f, 0.7f);
                         break;
@@ -169,6 +195,7 @@ namespace LittleKeep.Game
                         break;
                     case BattleEventKind.Combo:
                         {
+                            Audio.Play(Sound.Combo);
                             var a = ElementLook.Color(e.Element);
                             var b = ElementLook.Color(e.Other);
                             float r = battle.Tuning.ComboRadius;
@@ -184,6 +211,8 @@ namespace LittleKeep.Game
                         var col = SkillColorOf(e.SourceId);
                         int growth = SkillGrowthOf(e.SourceId, e.Tag);
                         float loud = 1f + growth * 0.35f;
+                        // Grown Skills sound bigger: louder and a touch lower.
+                        Audio.Play(SkillSound(SkillElementOf(e.SourceId, e.Tag)), 0.8f + growth * 0.15f, 1f - growth * 0.06f);
                         if (fighters.TryGetValue(e.SourceId, out var caster))
                         {
                             caster.squash = 0.25f;
@@ -199,29 +228,62 @@ namespace LittleKeep.Game
                         }
                         break;
                     case BattleEventKind.Rally:
+                        Audio.Play(Sound.Rally);
                         var keeper = battle.Keeper.Position;
                         fx.Ring(new Vector2(keeper.X, keeper.Y), 6f, Palette.Rally, 0.6f, 0.05f);
                         fx.Shake(0.15f);
                         break;
                     case BattleEventKind.HeroDefeated:
+                        Audio.Play(Sound.HeroDefeated);
                         fx.Ring(pos, 0.6f, Color.white, 0.3f);
                         break;
                     case BattleEventKind.CreatureFreed:
+                        Audio.Play(Sound.CreatureFreed);
                         fx.Ring(pos, 1.2f, new Color(1f, 0.9f, 0.5f), 0.8f, 0.1f);
                         fx.Blob(pos, 0.9f, new Color(1f, 0.95f, 0.7f, 0.6f), 0.6f);
                         break;
                     case BattleEventKind.HeroReachedKeep:
+                        Audio.Play(Sound.KeepHit);
                         keepFlash = 0.25f;
                         fx.Shake(0.2f);
                         fx.Blob(pos, 1.2f, Palette.HealthLow, 0.35f);
                         break;
                     case BattleEventKind.KnockedOut:
+                        Audio.Play(Sound.KnockedOut);
                         fx.Ring(pos, 0.8f, new Color(0.6f, 0.6f, 0.7f), 0.4f);
                         break;
                     case BattleEventKind.Recovered:
+                        Audio.Play(Sound.Recovered);
                         fx.Ring(pos, 0.9f, Palette.Health, 0.4f);
                         break;
                 }
+            }
+        }
+
+        bool IsMelee(int heroId)
+        {
+            foreach (var h in battle.Heroes) if (h.Id == heroId) return h.Def.MeleeDamage > 0f;
+            return false;
+        }
+
+        Element SkillElementOf(int fighterId, string skillId)
+        {
+            foreach (var f in battle.Squad)
+                if (f.Id == fighterId)
+                    foreach (var s in f.Skills)
+                        if (s.Def.Id == skillId) return s.Def.Element;
+            return Element.None;
+        }
+
+        static Sound SkillSound(Element e)
+        {
+            switch (e)
+            {
+                case Element.Fire: return Sound.SkillFire;
+                case Element.Frost: return Sound.SkillFrost;
+                case Element.Spark: return Sound.SkillSpark;
+                case Element.Bloom: return Sound.SkillBloom;
+                default: return Sound.SkillPlain;
             }
         }
 
@@ -325,7 +387,7 @@ namespace LittleKeep.Game
             else aimMarker.gameObject.SetActive(false);
 
             keepFlash = Mathf.Max(0f, keepFlash - dt);
-            keepBody.color = Color.Lerp(Palette.Keep, Palette.HealthLow, keepFlash * 4f);
+            keepBody.color = Color.Lerp(Color.white, Palette.HealthLow, keepFlash * 4f);
         }
 
         void RemoveMissing(Dictionary<int, CharacterView> map)

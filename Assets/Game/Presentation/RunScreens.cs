@@ -13,7 +13,9 @@ namespace LittleKeep.Game
     /// reading the Run and calling back with the Player's choice; the screens hold no game state of their own.
     public sealed class RunScreens : MonoBehaviour
     {
-        RectTransform safe, page;
+        RectTransform safe, page, scene;
+        /// Where the Trail was last drawn (in steps), so the land pans on from there.
+        static float lastTrailProgress = -1f;
         CompiledContent content;
         static readonly Vector2 Center = new Vector2(0.5f, 0.5f), Top = new Vector2(0.5f, 1f), TopLeft = new Vector2(0f, 1f),
             TopRight = new Vector2(1f, 1f), Bottom = new Vector2(0.5f, 0f), BottomLeft = new Vector2(0f, 0f);
@@ -23,6 +25,9 @@ namespace LittleKeep.Game
             this.content = content;
             Canvas(gameObject, 5, out safe);
             Backdrop((RectTransform)transform).transform.SetAsFirstSibling();
+            // Full-screen scenery (under the notch too) sits between the backdrop and the safe-area content.
+            scene = Stretch("Scene", (RectTransform)transform);
+            scene.SetSiblingIndex(1);
         }
 
         public void Hide() => gameObject.SetActive(false);
@@ -31,65 +36,156 @@ namespace LittleKeep.Game
         {
             gameObject.SetActive(true);
             if (page != null) Destroy(page.gameObject);
+            foreach (Transform c in scene) Destroy(c.gameObject);
             page = Stretch("Page", safe);
             return page;
         }
 
+        // --- Scenery ----------------------------------------------------------------------------------
+
+        /// Sky, two layers of hills that scroll at different speeds (so the land has depth), and the ground.
+        /// `progress` is in Trail steps; the hills pan to it from `from`. Returns the ground layer.
+        void Landscape(int seed, float trees, float bumpiness, Color far, Color near, float progress, float from, float horizon = 0.12f)
+        {
+            var sky = Img("Sky", scene, Color.white, Center, Vector2.zero, Vector2.zero, Scenery.Sky());
+            Fill(sky.rectTransform);
+            sky.preserveAspect = false;
+            Strip("FarHills", Scenery.Hills(seed, 0.45f, bumpiness * 0.8f, trees * 0.6f), far, 0.42f, horizon + 0.18f, progress * 0.05f, from * 0.05f);
+            Strip("NearHills", Scenery.Hills(seed + 7, 0.5f, bumpiness, trees), near, 0.32f, horizon, progress * 0.12f, from * 0.12f);
+            var ground = Img("Ground", scene, Palette.LaneEdge, Center, Vector2.zero, Vector2.zero);
+            ground.rectTransform.anchorMin = Vector2.zero;
+            ground.rectTransform.anchorMax = new Vector2(1f, 0.14f);
+            ground.rectTransform.sizeDelta = Vector2.zero;
+        }
+
+        /// A repeating strip anchored to the bottom of the screen: `height` and `bottom` are fractions of the screen.
+        void Strip(string name, Sprite sprite, Color tint, float height, float bottom, float offset, float from)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(RawImage), typeof(ScrollingStrip));
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(scene, false);
+            rt.anchorMin = new Vector2(0f, bottom);
+            rt.anchorMax = new Vector2(1f, bottom + height);
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+            var img = go.GetComponent<RawImage>();
+            img.texture = sprite.texture;
+            img.color = tint;
+            img.raycastTarget = false;
+            var strip = go.GetComponent<ScrollingStrip>();
+            strip.TileAspect = sprite.rect.width / sprite.rect.height;
+            strip.PanTo(offset, from);
+            // Ground under the strip, so its bottom edge never shows the sky.
+            var under = Img(name + "Ground", scene, tint, Center, Vector2.zero, Vector2.zero);
+            under.rectTransform.anchorMin = Vector2.zero;
+            under.rectTransform.anchorMax = new Vector2(1f, bottom + 0.005f);
+            under.rectTransform.sizeDelta = Vector2.zero;
+        }
+
+        static void Fill(RectTransform rt)
+        {
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+            rt.anchoredPosition = Vector2.zero;
+        }
+
+        /// A pixel-art building standing with its base at (x, groundY), drawn `scale` UI pixels per art pixel.
+        Image Building(RectTransform p, string name, Sprite sprite, float x, float groundY, float scale)
+        {
+            var rt = Rect(name, p, Center, Center, new Vector2(0.5f, 0f), new Vector2(x, groundY), new Vector2(sprite.rect.width, sprite.rect.height) * scale);
+            var img = rt.gameObject.AddComponent<Image>();
+            img.sprite = sprite;
+            img.raycastTarget = false;
+            return img;
+        }
+
         // --- The Keep (home) --------------------------------------------------------
 
-        /// Home: the Keep and its rooms. Rooms the Player has not opened yet show as locked with what opens them.
+        /// Home: the Keep, drawn as a little castle. A room's building and its signboard appear once it is unlocked.
         public void ShowKeep(KeepProgress keep, bool canContinue, int tier, Action onContinue, Action onNewRun,
             Action onBook, Action onWorkshop, Action onWatchtower, string notice = "")
         {
             var p = NewPage();
-            Title("Logo", p, "Little Keep", Top, new Vector2(0f, -40f), 900f, 70);
+            Title("Logo", p, "Little Keep", Top, new Vector2(0f, -40f), Mathf.Min(900f, SafeWidth - 680f), 70);
+            SoundToggle(p);
             GemCounter(p, keep);
+            var page = p;
+            // The castle is laid out for a 16:9 screen; on narrower ones (4:3 tablets) it is squeezed to fit.
+            p = Stretch("Keep", page);
+            p.localScale = new Vector3(Fit, Fit, 1f);
 
-            int rooms = 2 + (keep.HasWorkshop ? 1 : 0) + (keep.HasWatchtower ? 1 : 0);
-            float w = 400f, gap = 30f;
-            int slot = 0;
-            float X() => Row(slot++, rooms, w, gap);
+            // The Keep itself: buildings on a hill. A room's building appears once the room is unlocked.
+            Landscape(3, 0.5f, 0.6f, Palette.HillsFar, Palette.HillsNear, 0f, 0f);
+            const float ground = -250f, px = 5f;
+            var wallStrip = Rect("Wall", p, Center, Center, new Vector2(0.5f, 0f), new Vector2(40f, ground), new Vector2(1240f, 24f * px));
+            var wallImg = wallStrip.gameObject.AddComponent<RawImage>();
+            var wallSprite = Scenery.Wall();
+            wallImg.texture = wallSprite.texture;
+            wallImg.uvRect = new Rect(0f, 0f, 1240f / (wallSprite.rect.width * px), 1f);
+            wallImg.raycastTarget = false;
+            var floor = Img("Floor", p, Palette.Lane, Center, new Vector2(0f, ground - 200f), new Vector2(3200f, 400f));
+            floor.raycastTarget = false;
 
-            var gate = Room(p, X(), "The Gate", "Set out on a Run.", Theme?.iconGate);
+            Building(p, "Library", Scenery.Library(), -520f, ground, px);
+            Building(p, "Gatehouse", Scenery.Gatehouse(), 0f, ground, px);
+            if (keep.HasWorkshop) Building(p, "Workshop", Scenery.Workshop(), 380f, ground, px);
+            if (keep.HasWatchtower) Building(p, "Watchtower", Scenery.Watchtower(), 640f, ground, px);
+
+            // Signboards: the room buttons, in front of their buildings.
             if (canContinue)
             {
-                Button("Continue", gate, "Continue Run", 30, Bottom, new Vector2(0f, 150f), new Vector2(w - 70f, 96f), onContinue, ButtonStyle.Green, Theme?.iconPlay);
-                Button("New", gate, "New Run", 28, Bottom, new Vector2(0f, 40f), new Vector2(w - 70f, 90f), onNewRun, ButtonStyle.Brown);
+                Button("Continue", p, "Continue Run", 30, Center, new Vector2(0f, ground - 80f), new Vector2(330f, 96f), onContinue, ButtonStyle.Green, Theme?.iconPlay);
+                Button("New", p, "New Run", 26, Center, new Vector2(0f, ground - 180f), new Vector2(260f, 80f), onNewRun, ButtonStyle.Brown);
             }
-            else Button("New", gate, "New Run", 34, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 120f), onNewRun, ButtonStyle.Green, Theme?.iconBattle);
+            else Button("New", p, "New Run", 34, Center, new Vector2(0f, ground - 90f), new Vector2(330f, 110f), onNewRun, ButtonStyle.Green, Theme?.iconBattle);
             if (keep.HasWatchtower && keep.Content.Tiers.Count > tier)
-                Label("Tier", gate, $"Difficulty tier: {keep.Content.Tiers[tier].Name}", 24, TextAnchor.MiddleCenter, Top, new Vector2(0f, -300f), new Vector2(w - 40f, 40f), TextGold);
+                Label("Tier", p, $"Difficulty tier: {keep.Content.Tiers[tier].Name}", 22, TextAnchor.MiddleCenter, Center, new Vector2(660f, ground - 250f), new Vector2(320f, 36f), TextGold);
 
             int owned = keep.OwnedFamiliars.Count, all = keep.Content.Familiars.Count;
-            var book = Room(p, X(), "Familiar Book", $"{owned} of {all} Familiars found.", Theme?.iconBook);
-            Button("Open", book, "Open", 32, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 110f), onBook, ButtonStyle.Blue);
-
+            Button("Book", p, "Familiar Book", 28, Center, new Vector2(-520f, ground - 80f), new Vector2(300f, 96f), onBook, ButtonStyle.Blue, Theme?.iconBook);
+            Label("BookCount", p, $"{owned} of {all} Familiars found", 22, TextAnchor.MiddleCenter, Center, new Vector2(-520f, ground - 150f), new Vector2(320f, 36f));
             if (keep.HasWorkshop)
-            {
-                var workshop = Room(p, X(), "Workshop", "Spend Gems on Keeper upgrades.", Theme?.iconWorkshop);
-                Button("Open", workshop, "Open", 32, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 110f), onWorkshop, ButtonStyle.Teal);
-            }
+                Button("Workshop", p, "Workshop", 28, Center, new Vector2(380f, ground - 80f), new Vector2(240f, 96f), onWorkshop, ButtonStyle.Teal, Theme?.iconWorkshop);
             if (keep.HasWatchtower)
-            {
-                var tower = Room(p, X(), "Watchtower", "Choose the Difficulty tier.", Theme?.iconTower);
-                Button("Open", tower, "Open", 32, Bottom, new Vector2(0f, 60f), new Vector2(w - 70f, 110f), onWatchtower, ButtonStyle.Purple);
-            }
+                Button("Watchtower", p, "Watchtower", 26, Center, new Vector2(660f, ground - 180f), new Vector2(250f, 90f), onWatchtower, ButtonStyle.Purple, Theme?.iconTower);
 
-            if (canContinue) Label("Warn", p, "Starting a new Run ends the one in progress (it still pays its Gems).", 24, TextAnchor.MiddleCenter, Bottom, new Vector2(0f, 30f), new Vector2(1000f, 40f));
-            Toast(p, notice);
-        }
-
-        RectTransform Room(RectTransform p, float x, string title, string body, Sprite icon)
-        {
-            var card = Panel(title, p, Center, new Vector2(x, -60f), new Vector2(400f, 620f));
-            Icon("Icon", card, icon, Top, new Vector2(0f, -60f), 150f);
-            Label("Title", card, title, 40, TextAnchor.MiddleCenter, Top, new Vector2(0f, -230f), new Vector2(360f, 60f), TextGold);
-            Label("Body", card, body, 26, TextAnchor.UpperCenter, Top, new Vector2(0f, -330f), new Vector2(340f, 120f));
-            return card;
+            p = page;
+            if (canContinue) Label("Warn", p, "Starting a new Run ends the one in progress (it still pays its Gems).", 22, TextAnchor.MiddleCenter, Bottom, new Vector2(0f, 24f), new Vector2(1000f, 36f));
+            Toast(p, notice, bottom: 760f); // up in the sky, clear of the signboards
         }
 
         /// X position of item i in a centred row of n items.
         static float Row(int i, int n, float w, float gap) => -(n * w + (n - 1) * gap) * 0.5f + w * 0.5f + i * (w + gap);
+
+        /// Sound on or off, remembered between sessions. Falls back to a word when the theme has no icons.
+        void SoundToggle(RectTransform p)
+        {
+            var on = Theme != null ? Theme.iconSound : null;
+            var off = Theme != null && Theme.iconMute != null ? Theme.iconMute : on;
+            Image icon = null;
+            TMP_Text label = null;
+            void Refresh()
+            {
+                if (icon != null)
+                {
+                    icon.sprite = Audio.Muted ? off : on;
+                    // With no mute icon, the sound icon greys out instead.
+                    icon.color = Audio.Muted && off == on ? new Color(1f, 1f, 1f, 0.4f) : Color.white;
+                }
+                if (label != null) label.text = Audio.Muted ? "Off" : "On";
+            }
+            var b = RoundButton("Sound", p, on, "On", TopLeft, new Vector2(20f, -20f), 100f, () =>
+            {
+                Audio.Muted = !Audio.Muted;
+                Refresh();
+                if (!Audio.Muted) Audio.Play(Sound.Tap);
+            });
+            var t = b.transform.Find("Icon");
+            if (t != null) icon = t.GetComponent<Image>();
+            var l = b.transform.Find("Label");
+            if (l != null) label = l.GetComponent<TMP_Text>();
+            Refresh();
+        }
 
         RectTransform GemCounter(RectTransform p, KeepProgress keep)
         {
@@ -106,7 +202,7 @@ namespace LittleKeep.Game
         {
             var p = NewPage();
             Title("Title", p, "Who comes with you?", Top, new Vector2(0f, -90f), 900f);
-            float gap = 24f, w = Mathf.Min(480f, (1780f - (owned.Count - 1) * gap) / Mathf.Max(1, owned.Count));
+            float gap = 24f, w = Mathf.Min(480f, (SafeWidth - 140f - (owned.Count - 1) * gap) / Mathf.Max(1, owned.Count));
             bool compact = owned.Count > 3;
             for (int i = 0; i < owned.Count; i++)
             {
@@ -154,7 +250,7 @@ namespace LittleKeep.Game
                 Label("Body", card, body, 22, TextAnchor.UpperLeft, TopLeft, new Vector2(220f, -90f), new Vector2(w - 240f, h - 110f));
                 if (unlock.Kind == UnlockKind.Bond && !have)
                 {
-                    var bar = Bar("Bond", card, Theme != null ? Theme.rally : Palette.Rally, Bottom, new Vector2(110f, 30f), new Vector2(w - 260f, 26f));
+                    var bar = Bar("Bond", card, Palette.Rally, Bottom, new Vector2(110f, 30f), new Vector2(w - 260f, 26f));
                     bar.Value = keep.BondProgress(unlock.Id) / (float)Mathf.Max(1, unlock.BondSize);
                     Explain.On(bar.Back, "Bond", Explain.Bond);
                 }
@@ -222,8 +318,18 @@ namespace LittleKeep.Game
             var p = NewPage();
             TopBar(p, run, onSquad, onQuit);
 
-            var ground = Img("Path", p, Palette.Lane.WithAlpha(0.85f), Center, new Vector2(0f, -40f), new Vector2(2600f, 150f));
-            ground.transform.SetAsFirstSibling();
+            // The land scrolls by as the Run walks on: each Chapter has its own hills.
+            float progress = run.Chapter * run.StepsInChapter + run.Step;
+            float from = lastTrailProgress < 0f || lastTrailProgress > progress ? progress : lastTrailProgress;
+            lastTrailProgress = progress;
+            var (seed, trees, bumps, far, near) = ChapterLook(run.Chapter);
+            Landscape(seed, trees, bumps, far, near, progress, from, horizon: 0.42f);
+            var page = p;
+            p = Stretch("Trail", page);
+            p.localScale = new Vector3(Fit, Fit, 1f);
+
+            var path = Img("Path", p, Palette.Path.WithAlpha(0.9f), Center, new Vector2(0f, -40f), new Vector2(2600f, 110f));
+            path.transform.SetAsFirstSibling();
             var keeper = content.FighterAsset(run.Keeper.Def.Id);
             Portrait(p, keeper, Center, new Vector2(-730f, -30f), 360f);
             Label("YouLabel", p, "You", 28, TextAnchor.MiddleCenter, Center, new Vector2(-730f, -150f), new Vector2(200f, 40f));
@@ -245,22 +351,63 @@ namespace LittleKeep.Game
             }
             if (beyond.Count > 0) Label("Then", p, "then…", 28, TextAnchor.MiddleCenter, Center, new Vector2(340f, 240f), new Vector2(300f, 40f));
 
-            for (int i = 0; i < 6; i++)
-                Img("Fog", p, (Theme != null ? Theme.backdrop : Palette.Sky).WithAlpha(0.15f + i * 0.13f), Center, new Vector2(540f + i * 70f, -40f), new Vector2(80f, 760f));
-            Icon("Boss", p, Theme?.iconCrown, Center, new Vector2(800f, 30f), 200f);
+            // Past the two visible steps the Trail is lost in fog; the boss's castle looms out of it, nearer each step.
+            float near01 = 1f - Mathf.Clamp01((run.StepsToBoss - 1f) / Mathf.Max(1f, run.StepsInChapter - 1f));
+            var castle = Img("Castle", p, Color.Lerp(Palette.HillsFar, Palette.TextDark, 0.35f + near01 * 0.4f), Center, Vector2.zero, Vector2.zero, Scenery.BossCastle());
+            float castleSize = Mathf.Lerp(150f, 330f, near01);
+            castle.rectTransform.pivot = new Vector2(0.5f, 0f);
+            castle.rectTransform.anchoredPosition = new Vector2(690f, -40f + 30f);
+            castle.rectTransform.sizeDelta = new Vector2(castleSize * 56f / 48f, castleSize);
+            castle.raycastTarget = false;
+            var fog = Img("Fog", scene, Palette.Fog.WithAlpha(Mathf.Lerp(0.95f, 0.55f, near01)), Center, Vector2.zero, Vector2.zero, Scenery.FogRamp());
+            fog.preserveAspect = false;
+            fog.rectTransform.anchorMin = new Vector2(0.62f, 0f);
+            fog.rectTransform.anchorMax = new Vector2(1f, 1f);
+            fog.rectTransform.sizeDelta = Vector2.zero;
+            // Fog over the far end of the path too, behind the cards for the two visible steps.
+            var pathFog = Img("PathFog", p, Palette.Fog.WithAlpha(Mathf.Lerp(0.9f, 0.6f, near01)), Center, Vector2.zero, Vector2.zero, Scenery.FogRamp());
+            pathFog.preserveAspect = false;
+            pathFog.rectTransform.pivot = new Vector2(0f, 0.5f);
+            pathFog.rectTransform.anchoredPosition = new Vector2(470f, 0f);
+            pathFog.rectTransform.sizeDelta = new Vector2(1000f, 1400f);
+            pathFog.raycastTarget = false;
+            pathFog.transform.SetSiblingIndex(1);
+            // The castle looms out of the fog: faint while far off, clearer as it nears.
+            castle.color = Color.Lerp(castle.color, Palette.Fog, Mathf.Lerp(0.55f, 0.1f, near01));
+            castle.transform.SetSiblingIndex(2);
             string bossText = run.StepsToBoss <= 1 ? "The boss awaits!" : $"Boss in {run.StepsToBoss} steps";
-            Label("BossLabel", p, bossText, 32, TextAnchor.MiddleCenter, Center, new Vector2(800f, -110f), new Vector2(340f, 80f), TextGold);
+            Icon("Boss", p, Theme?.iconCrown, Center, new Vector2(690f, -10f + castleSize + 50f), 90f);
+            var bossTag = Panel("BossTag", p, Center, new Vector2(690f, -110f), new Vector2(300f, 76f));
+            var bossLabel = Label("BossLabel", bossTag, bossText, 30, TextAnchor.MiddleCenter, Center, new Vector2(0f, 2f), new Vector2(280f, 64f), TextGold);
+            bossLabel.enableAutoSizing = true;
+            bossLabel.fontSizeMax = 30;
+            bossLabel.fontSizeMin = 20;
 
-            Toast(p, run.Message);
-            Toast(p, notice, string.IsNullOrEmpty(run.Message) ? 0 : 1);
+            // Nothing sits along the bottom of the Trail, so its messages share one panel there.
+            p = page;
+            Toast(p, string.Join("\n", new[] { run.Message, notice }.Where(m => !string.IsNullOrEmpty(m))), bottom: 24f);
+        }
+
+        /// Each Chapter's land: meadows, then deep woods, then a bare, bumpy hill.
+        static (int seed, float trees, float bumps, Color far, Color near) ChapterLook(int chapter)
+        {
+            switch (chapter)
+            {
+                case 0: return (11, 0.35f, 0.7f, Palette.HillsFar, Palette.HillsNear);
+                case 1: return (23, 0.95f, 0.8f, Color.Lerp(Palette.HillsFar, Palette.Trees, 0.35f), Palette.Trees);
+                default:
+                    var grey = new Color(0.55f, 0.55f, 0.52f);
+                    return (37, 0.2f, 1.3f, Color.Lerp(Palette.HillsFar, grey, 0.45f), Color.Lerp(Palette.HillsNear, grey, 0.35f));
+            }
         }
 
         void TopBar(RectTransform p, Run run, Action onSquad, Action onQuit)
         {
             var bar = Panel("Bar", p, TopLeft, new Vector2(20f, -14f), new Vector2(1180f, 104f));
+            bar.localScale = new Vector3(Fit, Fit, 1f); // leaves room for the Squad and Title buttons on 4:3
             Label("Chapter", bar, $"{run.ChapterName}  ({run.Chapter + 1}/{run.ChapterCount})", 32, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(34f, 2f), new Vector2(430f, 60f));
             Icon("Heart", bar, Theme?.iconHeart, new Vector2(0f, 0.5f), new Vector2(470f, 2f), 56f);
-            var hp = Bar("Hp", bar, run.KeepHp / run.KeepMaxHp < 0.3f ? (Theme != null ? Theme.healthLow : Palette.HealthLow) : (Theme != null ? Theme.health : Palette.Health), new Vector2(0f, 0.5f), new Vector2(536f, 0f), new Vector2(300f, 38f));
+            var hp = Bar("Hp", bar, run.KeepHp / run.KeepMaxHp < 0.3f ? Palette.HealthLow : Palette.Health, new Vector2(0f, 0.5f), new Vector2(536f, 0f), new Vector2(300f, 38f));
             hp.Value = run.KeepHp / run.KeepMaxHp;
             Explain.On(hp.Back, "Keep health", Explain.KeepHealth, Theme?.iconHeart);
             Label("HpText", hp.Back, $"{Mathf.CeilToInt(run.KeepHp)}/{Mathf.CeilToInt(run.KeepMaxHp)}", 24, TextAnchor.MiddleCenter, Center, new Vector2(0f, 2f), new Vector2(300f, 38f));
@@ -518,15 +665,17 @@ namespace LittleKeep.Game
             overlay.rectTransform.anchorMin = Vector2.zero;
             overlay.rectTransform.anchorMax = Vector2.one;
             overlay.raycastTarget = true;
+            // The dim covers the whole screen; everything on it stays inside the safe area.
+            var area = SafeChild(overlay.rectTransform);
             var members = new List<SquadMember> { run.Keeper };
             members.AddRange(run.Familiars);
-            Title("Title", overlay.rectTransform, "Your squad", Top, new Vector2(0f, -90f), 800f);
-            float w = 340f, gap = 20f, total = members.Count * w + (members.Count - 1) * gap;
+            Title("Title", area, "Your squad", Top, new Vector2(0f, -90f), 800f);
+            float gap = 20f, w = Mathf.Min(340f, (SafeWidth - 140f - (members.Count - 1) * gap) / members.Count);
             for (int i = 0; i < members.Count; i++)
             {
                 var m = members[i];
                 var asset = content.FighterAsset(m.Def.Id);
-                var card = Panel("Member", overlay.rectTransform, Center, new Vector2(-total * 0.5f + w * 0.5f + i * (w + gap), -30f), new Vector2(w, 640f));
+                var card = Panel("Member", area, Center, new Vector2(Row(i, members.Count, w, gap), -30f), new Vector2(w, 640f));
                 Portrait(card, asset, Top, new Vector2(0f, -85f), 320f);
                 Label("Name", card, m.Def.Name, 38, TextAnchor.MiddleCenter, Top, new Vector2(0f, -170f), new Vector2(w - 30f, 50f), TextGold);
                 float sy = -230f;
@@ -539,7 +688,7 @@ namespace LittleKeep.Game
                     sy -= SkillRow(card, s.Build(), desc ?? "", $"{name}\n<size=20>{ups}</size>", sy, w - 50f, 22) + 10f;
                 }
             }
-            Button("Close", overlay.rectTransform, "Close", 34, Bottom, new Vector2(0f, 50f), new Vector2(300f, 100f), () => { Destroy(overlay.gameObject); onClose?.Invoke(); }, ButtonStyle.Green);
+            Button("Close", area, "Close", 34, Bottom, new Vector2(0f, 50f), new Vector2(300f, 100f), () => { Destroy(overlay.gameObject); onClose?.Invoke(); }, ButtonStyle.Green);
         }
 
         public void ShowSummary(Run run, RunRewards rewards, KeepProgress keep, Action onDone)
@@ -592,12 +741,14 @@ namespace LittleKeep.Game
 
         // --- Bits --------------------------------------------------------------------------
 
-        /// A message along the bottom. A second message on the same screen goes on row 1, above the first.
-        void Toast(RectTransform p, string message, int row = 0)
+        /// A message along the bottom, one line per line of text.
+        void Toast(RectTransform p, string message, float bottom = 140f)
         {
             if (string.IsNullOrEmpty(message)) return;
-            var t = Panel("Toast", p, Bottom, new Vector2(0f, 140f + row * 104f), new Vector2(1200f, 96f));
-            Label("Text", t, message, 30, TextAnchor.MiddleCenter, Center, new Vector2(0f, 2f), new Vector2(1140f, 80f));
+            int lines = message.Split('\n').Length;
+            float h = 96f + (lines - 1) * 40f;
+            var t = Panel("Toast", p, Bottom, new Vector2(0f, bottom), new Vector2(1200f, h));
+            Label("Text", t, message, 30, TextAnchor.MiddleCenter, Center, new Vector2(0f, 2f), new Vector2(1140f, h - 16f));
         }
 
         static void Line(RectTransform p, Vector2 from, Vector2 to)
