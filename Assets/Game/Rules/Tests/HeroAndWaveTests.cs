@@ -94,5 +94,22 @@ namespace LittleKeep.Rules.Tests
             Assert.That(events.Count(e => e.Kind == BattleEventKind.HeroDefeated), Is.EqualTo(spawned + 1));
             Assert.That(battle.Outcome, Is.EqualTo(BattleOutcome.Won));
         }
+
+        [Test]
+        public void A_shot_flies_past_a_Hero_defeated_in_the_same_moment()
+        {
+            // Two shots arrive together at two Heroes standing in the same spot: one shot each, not both into the first.
+            var pair = new SkillDef { Id = "pair", Shape = SkillShape.Volley, Cooldown = 100f, Damage = 5f, Count = 2, Spread = 0f, ProjectileSpeed = 30f };
+            var setup = Setup(Keeper(damage: 0f, skills: pair), waves: Wave(Walker(hp: 1f, speed: 0.01f), 2, spawnInterval: 0f));
+            setup.Tuning.SkillStartCharge = 1f;
+            setup.Tuning.FirstWaveDelay = 0f;
+            setup.Tuning.LaneHalfHeight = 0.4f;
+            var battle = new Battle(setup);
+
+            var events = Run(battle, 1.5f);
+
+            Assert.That(events.Count(e => e.Kind == BattleEventKind.SkillCast), Is.EqualTo(1));
+            Assert.That(events.Count(e => e.Kind == BattleEventKind.HeroDefeated), Is.EqualTo(2));
+        }
     }
 }

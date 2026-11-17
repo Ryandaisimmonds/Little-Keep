@@ -12,6 +12,8 @@ namespace LittleKeep.Game
     public sealed class GameRunner : MonoBehaviour
     {
         const string SaveKey = "littlekeep.run";
+        /// What the Run in progress has already earned for the Keep (Deeds and their Familiars), for its summary.
+        const string NewsKey = "littlekeep.run.news";
 
         [SerializeField] GameContent content;
         [SerializeField, Tooltip("0 = a new seed every Run")] int fixedSeed;
@@ -22,8 +24,10 @@ namespace LittleKeep.Game
         Run run;
         KeepProgress keep;
         RunRewards lastRewards;
-        /// Deeds completed during the current Run, shown again on its summary.
+        /// Deeds completed and Familiars earned during the current Run, shown again on its summary.
         readonly System.Collections.Generic.List<string> runDeeds = new System.Collections.Generic.List<string>();
+        readonly System.Collections.Generic.List<string> runFamiliars = new System.Collections.Generic.List<string>();
+        int lastActFrame = -1;
         string trailNotice = "";
 
         void Awake()
@@ -88,7 +92,7 @@ namespace LittleKeep.Game
             int seed = fixedSeed != 0 ? fixedSeed : Environment.TickCount & 0x7fffffff;
             run = new Run(compiled.Run, seed, starterId, keep.BonusesFor(keep.ChosenTier));
             lastRewards = null;
-            runDeeds.Clear();
+            SetRunNews("");
             SaveAndShow();
         }
 
@@ -100,20 +104,37 @@ namespace LittleKeep.Game
             }
             catch (Exception e)
             {
-                // A save from an older build that no longer replays: drop it rather than get stuck.
-                Debug.LogWarning("Could not resume the saved Run: " + e.Message);
+                // A save that no longer replays (an older build, or changed content): drop it rather than get stuck.
+                Debug.LogWarning("Could not resume the saved Run: " + e);
                 PlayerPrefs.DeleteKey(SaveKey);
-                ShowKeep(e.Message + " It can't be continued, sorry: start a new Run.");
+                SetRunNews("");
+                PlayerPrefs.Save();
+                string why = e is FormatException ? e.Message : "The saved Run could not be read.";
+                ShowKeep(why + " It can't be continued, sorry: start a new Run.");
                 return;
             }
             lastRewards = null;
-            runDeeds.Clear();
+            SetRunNews(PlayerPrefs.GetString(NewsKey, ""));
             Show();
+        }
+
+        /// Run news is kept as "deed,deed;familiar,familiar" beside the Run save.
+        void SetRunNews(string saved)
+        {
+            runDeeds.Clear();
+            runFamiliars.Clear();
+            var parts = (saved ?? "").Split(';');
+            if (parts.Length > 0) runDeeds.AddRange(parts[0].Split(',').Where(x => x.Length > 0));
+            if (parts.Length > 1) runFamiliars.AddRange(parts[1].Split(',').Where(x => x.Length > 0));
+            if (string.IsNullOrEmpty(saved)) PlayerPrefs.DeleteKey(NewsKey);
         }
 
         /// Do a Run action, then save and show what comes next.
         void Act(Action action)
         {
+            // One choice a frame: a second tap landing before the screen has changed must not act on the next screen.
+            if (Time.frameCount == lastActFrame) return;
+            lastActFrame = Time.frameCount;
             action();
             SaveAndShow();
         }
@@ -134,9 +155,11 @@ namespace LittleKeep.Game
                 {
                     lastRewards = keep.RecordRun(run.Result);
                     lastRewards.Deeds.InsertRange(0, runDeeds);
+                    lastRewards.NewFamiliars.InsertRange(0, runFamiliars);
                     ProgressStore.Save(keep);
                 }
                 PlayerPrefs.DeleteKey(SaveKey);
+                PlayerPrefs.DeleteKey(NewsKey);
             }
             else
             {
@@ -144,7 +167,9 @@ namespace LittleKeep.Game
                 if (news.Deeds.Count > 0)
                 {
                     runDeeds.AddRange(news.Deeds);
+                    runFamiliars.AddRange(news.NewFamiliars);
                     ProgressStore.Save(keep);
+                    PlayerPrefs.SetString(NewsKey, string.Join(",", runDeeds) + ";" + string.Join(",", runFamiliars));
                     trailNotice = string.Join("  ", news.Deeds.Select(id => $"Deed complete: {keep.Content.Deeds.Find(d => d.Id == id)?.Name}!")
                         .Concat(news.NewFamiliars.Select(id => $"{content.familiars.FirstOrDefault(f => f != null && f.def.Id == id)?.def.Name ?? id} joins your Familiars!")));
                 }
@@ -166,8 +191,10 @@ namespace LittleKeep.Game
                     string header = $"Ch {run.Chapter + 1} · Step {run.Step}/{run.StepsInChapter}";
                     if (!string.IsNullOrEmpty(run.EncounterName)) header += $" · {run.EncounterName}";
                     battle.Begin(run.CreateBattle(), compiled, header,
-                        report => Act(() => run.FinishBattle(report)),
-                        keepHp => { run.SuspendBattle(keepHp); Save(); ShowKeep(); });
+                        report => { run.FinishBattle(report); Save(); },
+                        Show,
+                        keepHp => { run.SuspendBattle(keepHp); Save(); ShowKeep(); },
+                        keepHp => { run.SuspendBattle(keepHp); Save(); });
                     break;
                 case RunPhase.Upgrade:
                     screens.ShowUpgrade(run, i => Act(() => run.PickUpgrade(i)), () => Act(run.SkipUpgrade), ShowSquad);

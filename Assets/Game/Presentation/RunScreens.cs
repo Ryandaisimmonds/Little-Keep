@@ -246,7 +246,7 @@ namespace LittleKeep.Game
             Label("BossLabel", p, bossText, 32, TextAnchor.MiddleCenter, Center, new Vector2(800f, -110f), new Vector2(340f, 80f), TextGold);
 
             Toast(p, run.Message);
-            Toast(p, notice);
+            Toast(p, notice, string.IsNullOrEmpty(run.Message) ? 0 : 1);
         }
 
         void TopBar(RectTransform p, Run run, Action onSquad, Action onQuit)
@@ -537,10 +537,11 @@ namespace LittleKeep.Game
 
         // --- Bits --------------------------------------------------------------------------
 
-        void Toast(RectTransform p, string message)
+        /// A message along the bottom. A second message on the same screen goes on row 1, above the first.
+        void Toast(RectTransform p, string message, int row = 0)
         {
             if (string.IsNullOrEmpty(message)) return;
-            var t = Panel("Toast", p, Bottom, new Vector2(0f, 140f), new Vector2(1200f, 96f));
+            var t = Panel("Toast", p, Bottom, new Vector2(0f, 140f + row * 104f), new Vector2(1200f, 96f));
             Label("Text", t, message, 30, TextAnchor.MiddleCenter, Center, new Vector2(0f, 2f), new Vector2(1140f, 80f));
         }
 

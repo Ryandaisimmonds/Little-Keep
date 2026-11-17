@@ -177,7 +177,7 @@ namespace LittleKeep.Rules
             Require(RunPhase.Trail);
             var choices = NextChoices;
             if (index < 0 || index >= choices.Count) throw new ArgumentOutOfRangeException(nameof(index));
-            log.Add("S:" + index);
+            log.Add(Entry("S", index));
             position++;
             CurrentStop = choices[index];
             Message = "";
@@ -367,7 +367,7 @@ namespace LittleKeep.Rules
         {
             Require(RunPhase.Upgrade);
             if (index < 0 || index >= offer.Count) throw new ArgumentOutOfRangeException(nameof(index));
-            log.Add("U:" + index);
+            log.Add(Entry("U", index));
             Apply(offer[index]);
             pendingUpgrades--;
             Advance();
@@ -392,7 +392,7 @@ namespace LittleKeep.Rules
 
         bool InSquad(FighterDef def) => familiars.Exists(f => f.Def == def);
 
-        /// A creature a wild Stop (or an event) can offer: one the Player can Bond with, not already in the squad.
+        /// A creature a wild Stop (or an event) can offer: one from the wild pool that is not already in the squad.
         FighterDef RandomCreature()
         {
             var pool = content.WildCreatures.Count > 0
@@ -408,7 +408,7 @@ namespace LittleKeep.Rules
             Require(RunPhase.Befriend);
             if (SquadFull && (replaceIndex < 0 || replaceIndex >= familiars.Count))
                 throw new ArgumentOutOfRangeException(nameof(replaceIndex), "The squad is full: choose a Familiar to swap out.");
-            log.Add("F:" + replaceIndex);
+            log.Add(Entry("F", replaceIndex));
             befriended.Add(CreatureOffer.Id);
             var member = new SquadMember(CreatureOffer);
             if (SquadFull)
@@ -455,7 +455,7 @@ namespace LittleKeep.Rules
         {
             Require(RunPhase.Shop);
             if (!CanBuy(index)) return false;
-            log.Add("$:" + index);
+            log.Add(Entry("$", index));
             var item = shop[index];
             Gold -= item.Price;
             item.Sold = true;
@@ -483,7 +483,7 @@ namespace LittleKeep.Rules
         {
             Require(RunPhase.Event);
             if (!CanChoose(index)) throw new ArgumentOutOfRangeException(nameof(index));
-            log.Add("E:" + index);
+            log.Add(Entry("E", index));
             var option = CurrentEvent.Options[index];
             Gold -= option.GoldCost;
             Message = option.Outcome ?? "";
@@ -535,6 +535,9 @@ namespace LittleKeep.Rules
                 Befriended = new List<string>(befriended),
             };
         }
+
+        /// A save log entry. Always written the same way, whatever language the device is set to.
+        static string Entry(string code, int value) => code + ":" + value.ToString(CultureInfo.InvariantCulture);
 
         void Require(RunPhase phase)
         {

@@ -18,8 +18,9 @@ namespace LittleKeep.Game
         BattleHud hud;
         AimInput aim;
         string header;
-        Action<BattleReport> onFinished;
-        Action<float> onQuit;
+        Action<BattleReport> onEnded;
+        Action onContinue;
+        Action<float> onQuit, onLeftApp;
         int speedIndex;
         bool paused, ended;
         float lastAspect;
@@ -50,21 +51,25 @@ namespace LittleKeep.Game
             };
             hud.ContinuePressed += () =>
             {
-                var report = BattleReport.From(battle);
                 Stop();
-                onFinished?.Invoke(report);
+                onContinue?.Invoke();
             };
             gameObject.SetActive(false);
         }
 
-        /// onQuit gets the Keep's health at the moment the Player left.
-        public void Begin(BattleSetup setup, CompiledContent content, string header, Action<BattleReport> onFinished, Action<float> onQuit)
+        /// onEnded gets the result the moment the Battle is decided, before the Player taps Continue, so it can be
+        /// saved at once. onQuit (the pause panel's Quit) and onLeftApp (the app going to the background mid-Battle)
+        /// get the Keep's health at that moment.
+        public void Begin(BattleSetup setup, CompiledContent content, string header, Action<BattleReport> onEnded, Action onContinue,
+            Action<float> onQuit, Action<float> onLeftApp)
         {
             gameObject.SetActive(true);
             this.content = content;
             this.header = header;
-            this.onFinished = onFinished;
+            this.onEnded = onEnded;
+            this.onContinue = onContinue;
             this.onQuit = onQuit;
+            this.onLeftApp = onLeftApp;
             battle = new Battle(setup);
             FitCamera(force: true);
             view.Show(battle, content, fx);
@@ -97,6 +102,7 @@ namespace LittleKeep.Game
             {
                 ended = true;
                 hud.ShowEnd(battle);
+                onEnded?.Invoke(BattleReport.From(battle));
             }
         }
 
@@ -107,10 +113,13 @@ namespace LittleKeep.Game
             hud.ShowPause(value);
         }
 
-        /// On a phone, leaving the app pauses the Battle. Not in the editor, where clicking another window would.
+        /// On a phone, leaving the app pauses the Battle (not in the editor, where clicking another window would)
+        /// and records the Keep's health, so closing the app mid-Battle is never a free retry.
         void OnApplicationPause(bool pausing)
         {
-            if (pausing && !Application.isEditor) SetPaused(true);
+            if (!pausing || battle == null || ended) return;
+            onLeftApp?.Invoke(battle.KeepHp);
+            if (!Application.isEditor) SetPaused(true);
         }
 
         /// Fit the Keep and the whole lane inside the safe area's width, leaving room above and below for the HUD.

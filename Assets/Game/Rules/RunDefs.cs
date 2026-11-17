@@ -100,16 +100,19 @@ namespace LittleKeep.Rules
         public List<EventDef> Events = new List<EventDef>();
         public RunTuning Tuning = new RunTuning();
         public BattleTuning BattleTuning = new BattleTuning();
-        /// Creatures wild creature Stops can offer (ids). Empty = any Familiar not in the squad.
+        /// Creatures wild creature Stops and events can offer (ids). Empty = any Familiar not in the squad.
         public List<string> WildCreatures = new List<string>();
 
         public FighterDef FindFamiliar(string id) => Familiars.Find(f => f.Id == id);
 
-        /// A short code that changes whenever anything a saved Run depends on changes: ids, order, counts and the
-        /// Trail and reward numbers that steer its random draws.
+        /// A short code that changes whenever anything a saved Run depends on changes: ids, order, counts, and every
+        /// number that steers its random draws or decides what a replayed choice can afford (Gold, prices, Keep health).
+        /// Hero health and Battle numbers are left out: a Battle is never replayed, only its result.
         public string Fingerprint()
         {
             var sb = new System.Text.StringBuilder();
+            // Numbers are written the same way whatever language the device is set to.
+            string N(float v) => v.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
             void Fighter(FighterDef f)
             {
                 sb.Append(f.Id).Append('[');
@@ -121,19 +124,35 @@ namespace LittleKeep.Rules
                 }
                 sb.Append(']');
             }
+            void Encounter(EncounterDef e) => sb.Append(e?.Id).Append('=').Append(N(e?.Gold ?? 0)).Append(',');
             Fighter(Keeper);
             foreach (var f in Familiars) Fighter(f);
             foreach (var c in Chapters)
             {
-                sb.Append('|').Append(c.Battles.Count).Append(',').Append(c.ToughBattles.Count);
-                foreach (var e in c.Battles) sb.Append(e.Id).Append(',');
-                foreach (var e in c.ToughBattles) sb.Append(e.Id).Append(',');
-                sb.Append(c.MidBoss?.Id).Append(c.Boss?.Id);
+                sb.Append('|').Append(c.Battles.Count).Append(',').Append(c.ToughBattles.Count).Append(':');
+                foreach (var e in c.Battles) Encounter(e);
+                foreach (var e in c.ToughBattles) Encounter(e);
+                Encounter(c.MidBoss);
+                Encounter(c.Boss);
             }
-            foreach (var e in Events) sb.Append('|').Append(e.Id).Append(e.Options.Count);
+            foreach (var e in Events)
+            {
+                sb.Append('|').Append(e.Id);
+                foreach (var o in e.Options)
+                {
+                    sb.Append('{').Append(N(o.GoldCost));
+                    foreach (var fx in o.Effects) sb.Append(';').Append((int)fx.Kind).Append(':').Append(N(fx.Amount)).Append(':').Append(fx.CreatureId);
+                    sb.Append('}');
+                }
+            }
             sb.Append('|').Append(string.Join(",", WildCreatures));
             var t = Tuning;
-            sb.Append($"|{t.StepsPerChapter},{t.MidBossStep},{t.UpgradeOfferSize},{t.ShopUpgrades},{t.MaxFamiliars},{t.WeightBattle},{t.WeightTough},{t.WeightRest},{t.WeightShop},{t.WeightEvent},{t.WeightWild}");
+            foreach (float v in new float[]
+            {
+                t.StepsPerChapter, t.MidBossStep, t.UpgradeOfferSize, t.ShopUpgrades, t.MaxFamiliars,
+                t.WeightBattle, t.WeightTough, t.WeightRest, t.WeightShop, t.WeightEvent, t.WeightWild,
+                t.KeepMaxHp, t.RestHeal, t.ShopUpgradePrice, t.ShopRepairPrice, t.ShopRepairAmount, t.ConsolationGold,
+            }) sb.Append('|').Append(N(v));
             uint hash = 2166136261;
             foreach (char ch in sb.ToString()) hash = (hash ^ ch) * 16777619;
             return hash.ToString("x8");

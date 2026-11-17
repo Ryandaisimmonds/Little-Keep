@@ -249,9 +249,9 @@ namespace LittleKeep.Rules.Tests
         }
 
         [Test]
-        public void Only_Bond_Familiars_turn_up_in_the_wild()
+        public void Every_Familiar_turns_up_in_the_wild_except_those_a_Deed_must_earn()
         {
-            Assert.That(Make().WildCreatures, Is.EquivalentTo(new[] { "biscuit", "bun" }));
+            Assert.That(Make().WildCreatures, Is.EquivalentTo(new[] { "pip", "bramble", "puff", "biscuit", "bun" }));
         }
 
         [Test]

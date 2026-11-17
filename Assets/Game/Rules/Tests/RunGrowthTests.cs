@@ -311,5 +311,54 @@ namespace LittleKeep.Rules.Tests
         }
 
         static int IndexOf(Run run, StopKind kind) => run.NextChoices.ToList().FindIndex(s => s.Kind == kind);
+
+        [Test]
+        public void The_fingerprint_changes_with_any_number_a_replay_depends_on()
+        {
+            string original = RunTestContent.Make().Fingerprint();
+            var changes = new (string what, System.Action<RunContent> change)[]
+            {
+                ("shop upgrade price", c => c.Tuning.ShopUpgradePrice += 5),
+                ("shop repair price", c => c.Tuning.ShopRepairPrice += 5),
+                ("consolation Gold", c => c.Tuning.ConsolationGold += 1),
+                ("Keep health", c => c.Tuning.KeepMaxHp += 10f),
+                ("rest heal", c => c.Tuning.RestHeal += 1f),
+                ("Encounter Gold", c => c.Chapters[0].Battles[0].Gold += 1),
+                ("event Gold cost", c => c.Events[0].Options[0].GoldCost += 1),
+                ("event effect", c => c.Events[0].Options[0].Effects.Add(new EventEffect { Kind = EventEffectKind.RandomUpgrade })),
+            };
+
+            foreach (var (what, change) in changes)
+            {
+                var content = RunTestContent.Make();
+                change(content);
+                Assert.That(content.Fingerprint(), Is.Not.EqualTo(original), what);
+            }
+        }
+
+        [Test]
+        public void A_save_reads_back_whatever_language_the_device_is_set_to()
+        {
+            var before = System.Globalization.CultureInfo.CurrentCulture;
+            var odd = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
+            odd.NumberFormat.NegativeSign = "\u2212";
+            odd.NumberFormat.NumberDecimalSeparator = ",";
+            System.Globalization.CultureInfo.CurrentCulture = odd;
+            try
+            {
+                var content = RunTestContent.Make();
+                var run = AfterFirstBattle(1, "pony");
+                run.SkipUpgrade();
+                run.Befriend();
+                Assert.That(run.Save(), Does.Contain("F:-1"), "the Run befriended a creature with room to spare");
+
+                var loaded = Run.Load(content, run.Save());
+
+                Assert.That(run.Save(), Does.Not.Contain("\u2212"));
+                Assert.That(loaded.Save(), Is.EqualTo(run.Save()));
+                Assert.That(content.Fingerprint(), Is.EqualTo(RunTestContent.Make().Fingerprint()));
+            }
+            finally { System.Globalization.CultureInfo.CurrentCulture = before; }
+        }
     }
 }

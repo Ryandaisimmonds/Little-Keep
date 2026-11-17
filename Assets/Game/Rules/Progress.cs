@@ -102,8 +102,8 @@ namespace LittleKeep.Rules
         public List<FamiliarUnlock> Familiars = new List<FamiliarUnlock>();
         public List<DeedDef> Deeds = new List<DeedDef>();
 
-        /// Familiars that can turn up on the Trail to be befriended: the ones earned through a Bond.
-        public List<string> WildCreatures => Familiars.Where(f => f.Kind == UnlockKind.Bond).Select(f => f.Id).ToList();
+        /// Familiars that can turn up on the Trail to be befriended: all but those a Deed must earn first.
+        public List<string> WildCreatures => Familiars.Where(f => f.Kind != UnlockKind.Deed).Select(f => f.Id).ToList();
         public List<KeeperUpgradeDef> Upgrades = new List<KeeperUpgradeDef>();
         public List<DifficultyDef> Tiers = new List<DifficultyDef>();
         public RewardTuning Rewards = new RewardTuning();

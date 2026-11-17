@@ -25,7 +25,7 @@
 - Keeper upgrade track: four short tracks (walls, claws, purse, horn) rather than one long one.
 - Deeds complete as soon as their condition is met mid-Run (Clear Meadow Road grants Tide on clearing Chapter 1).
 - Every Run pays at least 5 Gems. Each Run carries a Run number so it can never be paid twice.
-- Wild creatures on the Trail are the Bond Familiars (Biscuit, Bun), so Bonds can fill.
+- Wild creatures on the Trail are every Familiar except those a Deed must earn (so not Tide), which lets a squad reach four Familiars and the full-squad swap appear.
 - Tiers tuned with the Run bot (it never aims): Cozy 0.95x Hero health, about 6/12 bot wins; Brisk 1.15x HP, 1.1x numbers; Fierce 1.3x HP, 1.2x numbers.
 - Deferred: Keeper looks customisation (user story 54) is not in this checklist; suggest it joins ticket 06 or 07.
 - A Run saved by an older build is refused when the content has changed (ADR 0003). This update changes content, so any in-progress Run from the last build ends with a notice.

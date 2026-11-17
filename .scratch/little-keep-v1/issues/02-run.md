@@ -32,3 +32,10 @@
 - [x] A Run in progress is saved after every choice and resumes identically
 - [x] Edit-mode tests cover the behaviours above through the Run module's interface only
 - [ ] Milestone 2 build installed and played on the developer's phone
+
+## Fixes from the whole-game review
+
+- The Battle's result is saved the moment it is decided, and the Keep's health is recorded whenever the app goes to the background mid-Battle, so closing the app is never a free retry (ADR 0003).
+- The content fingerprint now covers Gold, prices, Keep health and event costs and effects.
+- Save entries are written the same way whatever language the device is set to.
+- One choice per frame: a double tap can't act on the next screen.

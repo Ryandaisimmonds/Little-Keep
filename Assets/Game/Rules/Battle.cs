@@ -364,7 +364,7 @@ namespace LittleKeep.Rules
                 {
                     foreach (var h in heroes)
                     {
-                        if (Vec2.Distance(h.Position, p.Position) > h.Def.Size + 0.15f) continue;
+                        if (h.Hp <= 0f || Vec2.Distance(h.Position, p.Position) > h.Def.Size + 0.15f) continue;
                         DamageHero(h, p.damage, p.SourceId, p.FromSkill, p.Element);
                         remove = true;
                         break;
