@@ -6,7 +6,7 @@
 
 **Done early (art packs added on 2026-11-16):** the UiTheme asset exists and is built from Layer Lab's GUI "The Stone" pack (font, panels, buttons, bars, ribbons, icons, background); every screen and the Battle HUD draw through it. Still to do here: the Trail and Keep as illustrated scenes, the Keep building in Battles, and sound.
 
-**Status:** ready-for-agent
+**Status:** done (phone play-test outstanding)
 
 - [x] One theme asset drives colours, type and panel and button styles on every screen; changing it restyles the whole game
 - [x] Every screen respects the safe area in landscape

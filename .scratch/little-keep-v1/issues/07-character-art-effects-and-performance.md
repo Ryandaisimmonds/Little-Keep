@@ -6,7 +6,7 @@
 
 **Done early (art packs added on 2026-11-16):** every Keeper, Familiar and Hero has animated pixel art from "100 Top Down Monsters Vol 1" (idle, move and attack, facing left or right), sized by each character's measured visible height; art is swappable per asset (Little Keep > Apply Art Packs rebuilds it). Still to do here: three-tier Skill effects, Combo and Rally effects, and the performance pass.
 
-**Status:** ready-for-agent
+**Status:** done apart from the phone checks: 60 fps in the Stress test, and the glow on the phone's GPU
 
 - [x] Keeper, Familiars, creatures, Heroes and bosses use single-view sprites from the supplied packs
 - [x] Any character's art can be swapped by replacing an asset, with no layout or code change
