@@ -91,6 +91,15 @@ namespace LittleKeep.Rules
             return list;
         }
 
+        /// Hands this tick's events over by filling `into` (cleared first), so a caller can reuse one list every
+        /// frame instead of getting a new one.
+        public void TakeEvents(List<BattleEvent> into)
+        {
+            into.Clear();
+            into.AddRange(events);
+            events.Clear();
+        }
+
         /// Move the Battle forward. Runs whole fixed ticks; leftover time carries to the next call.
         public void Advance(float seconds)
         {
@@ -332,7 +341,7 @@ namespace LittleKeep.Rules
             {
                 Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = f.Position, Amount = skill.Radius, Tag = skill.Id });
                 foreach (var h in heroes.ToArray())
-                    if (Vec2.Distance(h.Position, f.Position) <= skill.Radius + h.Def.Size) DamageHero(h, skill.Damage, f.Id, true, skill.Element);
+                    if (Vec2.Distance(h.Position, f.Position) <= skill.Radius + h.Def.Size) DamageHero(h, skill.Damage, f.Id, true, skill.Element, growth: skill.Growth);
                 return;
             }
             if (!TryGetAim(f, skill.Shape == SkillShape.Volley ? skill.ProjectileSpeed : 0f, out var aim)) return;
@@ -340,7 +349,7 @@ namespace LittleKeep.Rules
             {
                 Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = aim, Amount = skill.Radius, Tag = skill.Id });
                 foreach (var h in heroes)
-                    if (Vec2.Distance(h.Position, aim) <= skill.Radius + h.Def.Size) DamageHero(h, skill.Damage, f.Id, true, skill.Element);
+                    if (Vec2.Distance(h.Position, aim) <= skill.Radius + h.Def.Size) DamageHero(h, skill.Damage, f.Id, true, skill.Element, growth: skill.Growth);
                 return;
             }
             Emit(new BattleEvent { Kind = BattleEventKind.SkillCast, SourceId = f.Id, Position = aim, Tag = skill.Id });
@@ -368,8 +377,8 @@ namespace LittleKeep.Rules
             {
                 struck.Add(next);
                 var at = next.Position;
-                Emit(new BattleEvent { Kind = BattleEventKind.Zap, SourceId = f.Id, TargetId = next.Id, From = from, Position = at, Element = skill.Element });
-                DamageHero(next, skill.Damage, f.Id, true, skill.Element);
+                Emit(new BattleEvent { Kind = BattleEventKind.Zap, SourceId = f.Id, TargetId = next.Id, From = from, Position = at, Element = skill.Element, Growth = skill.Growth });
+                DamageHero(next, skill.Damage, f.Id, true, skill.Element, growth: skill.Growth);
                 from = at;
                 next = Nearest(at, skill.Radius, struck);
             }
@@ -432,7 +441,7 @@ namespace LittleKeep.Rules
                     foreach (var h in heroes)
                     {
                         if (h.Hp <= 0f || Vec2.Distance(h.Position, p.Position) > h.Def.Size + 0.15f) continue;
-                        DamageHero(h, p.damage, p.SourceId, p.FromSkill, p.Element);
+                        DamageHero(h, p.damage, p.SourceId, p.FromSkill, p.Element, growth: p.Growth);
                         remove = true;
                         break;
                     }
@@ -455,13 +464,14 @@ namespace LittleKeep.Rules
         enum HitKind { Normal, Burn, Combo }
 
         /// Damage a Hero. A normal hit with an Element leaves its status, or sets off a Combo if the Hero carries another's.
-        void DamageHero(Hero h, float amount, int sourceId, bool fromSkill, Element element = Element.None, HitKind kind = HitKind.Normal)
+        void DamageHero(Hero h, float amount, int sourceId, bool fromSkill, Element element = Element.None, HitKind kind = HitKind.Normal,
+            SkillGrowth growth = SkillGrowth.Base)
         {
             if (h.Hp <= 0f) return;
             if (!fromSkill) amount *= 1f - h.Def.AttackBlock;
             if (h.Status == Element.Spark) amount *= 1f + t.ShockBonus;
             h.Hp -= amount;
-            Emit(new BattleEvent { Kind = BattleEventKind.Hit, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Amount = amount, FromSkill = fromSkill, Element = element, Combo = kind == HitKind.Combo });
+            Emit(new BattleEvent { Kind = BattleEventKind.Hit, SourceId = sourceId, TargetId = h.Id, Position = h.Position, Amount = amount, FromSkill = fromSkill, Element = element, Combo = kind == HitKind.Combo, Growth = growth });
             bool defeated = h.Hp <= 0f;
             if (defeated) Defeat(h, sourceId);
             if (kind != HitKind.Normal || element == Element.None || h.Def.Steadfast) return;

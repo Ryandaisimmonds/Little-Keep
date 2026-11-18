@@ -55,6 +55,8 @@ namespace LittleKeep.Rules
         public Vec2 From;
         /// For Hit: true if the damage is a Combo's burst.
         public bool Combo;
+        /// For Hit and Zap from a Skill: how grown the Skill is (base, upgraded, Master Form), so effects can match.
+        public SkillGrowth Growth;
 
         public override string ToString() => $"{Kind} src={SourceId} tgt={TargetId} amt={Amount:0.#} {Tag}";
     }

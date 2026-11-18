@@ -21,9 +21,17 @@ namespace LittleKeep.Game
         const int Voices = 14;
         const string MuteKey = "littlekeep.muted";
 
-        static readonly Dictionary<Sound, AudioClip> clips = new Dictionary<Sound, AudioClip>();
-        static readonly Dictionary<Sound, AudioClip> overrides = new Dictionary<Sound, AudioClip>();
-        static readonly Dictionary<Sound, float> lastPlayed = new Dictionary<Sound, float>();
+        static readonly Dictionary<Sound, AudioClip> clips = new Dictionary<Sound, AudioClip>(SoundKeys.Instance);
+        static readonly Dictionary<Sound, AudioClip> overrides = new Dictionary<Sound, AudioClip>(SoundKeys.Instance);
+        static readonly Dictionary<Sound, float> lastPlayed = new Dictionary<Sound, float>(SoundKeys.Instance);
+
+        /// Compares Sounds without boxing them, so playing a sound allocates nothing.
+        sealed class SoundKeys : IEqualityComparer<Sound>
+        {
+            public static readonly SoundKeys Instance = new SoundKeys();
+            public bool Equals(Sound a, Sound b) => a == b;
+            public int GetHashCode(Sound s) => (int)s;
+        }
         static AudioSource[] sources;
         static GameObject host;
         static int next;

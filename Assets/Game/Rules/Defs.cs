@@ -102,6 +102,14 @@ namespace LittleKeep.Rules
         public float AttackInterval = 0.5f;
         public float ProjectileSpeed = 16f;
         public List<SkillDef> Skills = new List<SkillDef>();
+
+        /// A copy with its own Skill list (the Skills themselves are shared).
+        public FighterDef Clone()
+        {
+            var c = (FighterDef)MemberwiseClone();
+            c.Skills = new List<SkillDef>(Skills);
+            return c;
+        }
     }
 
     /// An invading Hero type.

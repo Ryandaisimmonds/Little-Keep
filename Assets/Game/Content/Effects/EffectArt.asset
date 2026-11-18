@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62ab9e7c6d4fb4672a5d2ac7e5335acc, type: 3}
+  m_Name: EffectArt
+  m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.EffectArt
+  glow: {fileID: 2100000, guid: 20b38c8e7bbc9499caf1b8bae77bf812, type: 2}
+  soft: {fileID: 0}
+  spark: {fileID: 0}
+  ember: {fileID: 0}
+  shard: {fileID: 0}
+  petal: {fileID: 0}
+  star: {fileID: 0}

@@ -103,7 +103,7 @@ namespace LittleKeep.Game
 
         /// Home: the Keep, drawn as a little castle. A room's building and its signboard appear once it is unlocked.
         public void ShowKeep(KeepProgress keep, bool canContinue, int tier, Action onContinue, Action onNewRun,
-            Action onBook, Action onWorkshop, Action onWatchtower, string notice = "")
+            Action onBook, Action onWorkshop, Action onWatchtower, string notice = "", Action onDevStress = null)
         {
             var p = NewPage();
             Title("Logo", p, "Little Keep", Top, new Vector2(0f, -40f), Mathf.Min(900f, SafeWidth - 680f), 70);
@@ -150,6 +150,8 @@ namespace LittleKeep.Game
                 Button("Watchtower", p, "Watchtower", 26, Center, new Vector2(660f, ground - 180f), new Vector2(250f, 90f), onWatchtower, ButtonStyle.Purple, Theme?.iconTower);
 
             p = page;
+            if (onDevStress != null)
+                Button("Stress", p, "Stress test", 20, TopRight, new Vector2(-20f, -130f), new Vector2(200f, 60f), onDevStress, ButtonStyle.Brown);
             if (canContinue) Label("Warn", p, "Starting a new Run ends the one in progress (it still pays its Gems).", 22, TextAnchor.MiddleCenter, Bottom, new Vector2(0f, 24f), new Vector2(1000f, 36f));
             Toast(p, notice, bottom: 760f); // up in the sky, clear of the signboards
         }

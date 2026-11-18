@@ -23,8 +23,9 @@ namespace LittleKeep.Editor
         {
             Directory.CreateDirectory($"{Content}/Art");
             var theme = BuildTheme();
+            var effects = BuildEffects();
             var game = AssetDatabase.LoadAssetAtPath<GameContent>($"{Content}/GameContent.asset");
-            if (game != null) { game.theme = theme; EditorUtility.SetDirty(game); }
+            if (game != null) { game.theme = theme; game.effects = effects; EditorUtility.SetDirty(game); }
             AssetDatabase.SaveAssets();
         }
 
@@ -85,6 +86,32 @@ namespace LittleKeep.Editor
                 }
             }
             return new Sprite[0];
+        }
+
+        // --- Effect art ---------------------------------------------------------------------------
+
+        /// The Effect Art asset and its glow material. Particle sprite slots are left empty (the game draws simple
+        /// shapes); drop sprites into them to restyle the effects.
+        static EffectArt BuildEffects()
+        {
+            Directory.CreateDirectory($"{Content}/Effects");
+            string matPath = $"{Content}/Effects/FxGlow.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+            if (mat == null)
+            {
+                mat = new Material(Shader.Find("LittleKeep/FxGlow"));
+                AssetDatabase.CreateAsset(mat, matPath);
+            }
+            string path = $"{Content}/Effects/EffectArt.asset";
+            var art = AssetDatabase.LoadAssetAtPath<EffectArt>(path);
+            if (art == null)
+            {
+                art = ScriptableObject.CreateInstance<EffectArt>();
+                AssetDatabase.CreateAsset(art, path);
+            }
+            art.glow = mat;
+            EditorUtility.SetDirty(art);
+            return art;
         }
 
         // --- UI theme -----------------------------------------------------------------------------

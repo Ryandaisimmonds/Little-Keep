@@ -26,6 +26,24 @@ namespace LittleKeep.Rules.Tests
             new SkillDef { Id = "nova", Name = "Nova", Shape = SkillShape.Nova, Cooldown = 1f, Damage = damage, Radius = radius };
 
         [Test]
+        public void Hits_and_zaps_from_a_grown_Skill_say_how_grown_it_is()
+        {
+            // So the effects can be bigger for an Upgraded or Master Form Skill.
+            var zap = Chain(count: 2, reach: 5f);
+            zap.Growth = SkillGrowth.Upgraded;
+            var battle = Bunch(Keeper(damage: 0f, skills: zap), Dummy(), 3);
+
+            var events = Run(battle, 1.05f);
+
+            var zaps = events.Where(e => e.Kind == BattleEventKind.Zap).ToList();
+            var hits = events.Where(e => e.Kind == BattleEventKind.Hit && e.FromSkill).ToList();
+            Assert.That(zaps.Count, Is.EqualTo(2));
+            Assert.That(hits.Count, Is.EqualTo(2));
+            Assert.That(zaps.All(e => e.Growth == SkillGrowth.Upgraded), Is.True);
+            Assert.That(hits.All(e => e.Growth == SkillGrowth.Upgraded), Is.True);
+        }
+
+        [Test]
         public void A_Chain_hits_a_Hero_then_jumps_to_the_next_closest_each_once()
         {
             // Four Heroes bunched together: a 3-link chain hits three different Heroes once each.

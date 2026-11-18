@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using static LittleKeep.Rules.Tests.TestContent;
@@ -88,6 +89,26 @@ namespace LittleKeep.Rules.Tests
             Assert.That(whileOut.Any(e => e.Kind == BattleEventKind.Attack && e.SourceId == battle.Keeper.Id), Is.False, "a knocked-out Keeper does not attack");
             Assert.That(afterwards.Any(e => e.Kind == BattleEventKind.Recovered && e.TargetId == battle.Keeper.Id), Is.True);
             Assert.That(battle.Keeper.Hp, Is.EqualTo(battle.Keeper.MaxHp));
+        }
+
+        [Test]
+        public void Taking_events_into_a_list_hands_over_the_same_events_and_replaces_what_the_list_held()
+        {
+            var keeper = Keeper();
+            var setup = Setup(keeper, waves: Wave(Walker(hp: 30f, speed: 1f), 3));
+            var copy = new Battle(Setup(Keeper(), waves: Wave(Walker(hp: 30f, speed: 1f), 3)));
+            var battle = new Battle(setup);
+            var into = new List<BattleEvent> { new BattleEvent() };
+
+            var expected = Run(copy, 3f);
+            for (int i = 0; i < 30; i++) battle.Advance(0.1f);
+            battle.TakeEvents(into);
+            battle.TakeEvents(new List<BattleEvent>());
+            var after = battle.TakeEvents();
+
+            Assert.That(expected.Count, Is.GreaterThan(0));
+            Assert.That(into.Select(e => e.Kind), Is.EqualTo(expected.Select(e => e.Kind)), "the same events, and nothing left over from before");
+            Assert.That(after, Is.Empty, "taken events are gone from the Battle");
         }
     }
 }

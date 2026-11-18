@@ -20,9 +20,17 @@ namespace LittleKeep.Game
             public CharacterArt art;
             public bool faceRight;
             public float animTime, attackTime;
+            /// hop: a little jump (casting, recovering); glow: a white flash (hit, cast); dying: a beaten Hero's last moment.
+            public float hop, glow, dying;
+            public float phase;
+            public Vector3 bodyBase;
+            /// The same frame drawn again in additive white over the body, faded in for flashes.
+            public SpriteRenderer flashSr;
         }
 
         const float AttackPoseSeconds = 0.4f;
+        const float HopSeconds = 0.3f;
+        const float DyingSeconds = 0.3f;
         /// Standard on-screen height of a character with art, in lane units.
         const float CharacterHeight = 1.05f;
         static readonly Color HitTint = new Color(1f, 0.55f, 0.55f);
@@ -35,6 +43,12 @@ namespace LittleKeep.Game
         readonly Dictionary<int, SpriteRenderer> shots = new Dictionary<int, SpriteRenderer>();
         readonly Stack<SpriteRenderer> shotPool = new Stack<SpriteRenderer>();
         readonly HashSet<int> seen = new HashSet<int>();
+        // Reused every frame, so a Battle allocates nothing while it runs.
+        readonly List<int> gone = new List<int>();
+        readonly List<CharacterView> dying = new List<CharacterView>();
+        readonly Dictionary<int, float> trailClock = new Dictionary<int, float>();
+        readonly List<Vector2> fighterSpots = new List<Vector2>();
+        float lastBattleTime;
         Transform world;
         SpriteRenderer aimMarker, keepBody;
         float keepFlash;
@@ -45,6 +59,8 @@ namespace LittleKeep.Game
             this.battle = battle;
             this.content = content;
             this.fx = fx;
+            fx.Clear();
+            lastBattleTime = 0f;
             world = new GameObject("World").transform;
             world.SetParent(transform, false);
             BuildLane(battle.Tuning);
@@ -67,6 +83,8 @@ namespace LittleKeep.Game
             heroes.Clear();
             shots.Clear();
             shotPool.Clear();
+            dying.Clear();
+            trailClock.Clear();
         }
 
         void BuildLane(BattleTuning t)
@@ -129,6 +147,14 @@ namespace LittleKeep.Game
                 v.baseScale = size;
             }
             v.body.transform.localScale = Vector3.one * v.baseScale;
+            v.bodyBase = v.body.transform.localPosition;
+            v.phase = Random.value * 6.28f;
+            if (Fx.GlowMaterial != null)
+            {
+                v.flashSr = MakeSprite("Flash", v.body.sprite, Color.white.WithAlpha(0f), 1f, 0, v.body.transform);
+                v.flashSr.sharedMaterial = Fx.GlowMaterial;
+                v.flashSr.enabled = false;
+            }
             float barY = art != null ? CharacterHeight * artScale * 0.5f + 0.2f : size * 0.5f + 0.18f;
             v.barBack = MakeSprite("HpBack", Shapes.Square, new Color(0f, 0f, 0f, 0.45f), 1f, 0, root);
             v.barBack.transform.localPosition = new Vector3(0f, barY, 0f);
@@ -163,27 +189,22 @@ namespace LittleKeep.Game
                 {
                     case BattleEventKind.Attack:
                         Audio.Play(Sound.Attack);
-                        if (fighters.TryGetValue(e.SourceId, out var shooter)) shooter.attackTime = AttackPoseSeconds;
+                        if (fighters.TryGetValue(e.SourceId, out var shooter)) { shooter.attackTime = AttackPoseSeconds; shooter.squash = Mathf.Max(shooter.squash, 0.06f); }
                         break;
                     case BattleEventKind.HeroAttack:
                         Audio.Play(IsMelee(e.SourceId) ? Sound.HeroSwing : Sound.HeroShot);
-                        if (heroes.TryGetValue(e.SourceId, out var striker)) striker.attackTime = AttackPoseSeconds;
+                        if (heroes.TryGetValue(e.SourceId, out var striker)) { striker.attackTime = AttackPoseSeconds; striker.squash = Mathf.Max(striker.squash, 0.06f); }
                         break;
                     case BattleEventKind.Hit:
-                        if (heroes.TryGetValue(e.TargetId, out var hv)) { hv.flash = 0.08f; hv.squash = 0.12f; }
-                        else if (fighters.TryGetValue(e.TargetId, out var fv)) { fv.flash = 0.1f; fv.squash = 0.15f; }
+                        if (heroes.TryGetValue(e.TargetId, out var hv)) { hv.flash = 0.08f; hv.squash = 0.12f; hv.glow = Mathf.Max(hv.glow, 0.08f); }
+                        else if (fighters.TryGetValue(e.TargetId, out var fv)) { fv.flash = 0.1f; fv.squash = 0.15f; fv.glow = Mathf.Max(fv.glow, 0.1f); }
                         if (e.Combo) break;
                         if (!e.FromSkill) Audio.Play(Sound.Hit);
-                        if (e.Element != Element.None) fx.Blob(pos, 0.5f, ElementLook.Color(e.Element).WithAlpha(0.8f), 0.2f);
-                        else if (e.FromSkill) fx.Blob(pos, 0.5f, SkillColorOf(e.SourceId), 0.2f);
+                        if (e.Element != Element.None || e.FromSkill) Effects.Splash(fx, pos, e.Element, SkillColorOf(e.SourceId), e.Growth);
                         break;
                     case BattleEventKind.Zap:
                         Audio.Play(Sound.Zap);
-                        {
-                            var c = ElementLook.Color(e.Element);
-                            fx.Line(new Vector2(e.From.X, e.From.Y), pos, c, 0.25f);
-                            fx.Blob(pos, 0.6f, c.WithAlpha(0.8f), 0.2f);
-                        }
+                        Effects.Zap(fx, new Vector2(e.From.X, e.From.Y), pos, e.Element, SkillColorOf(e.SourceId), e.Growth);
                         break;
                     case BattleEventKind.HeroHealed:
                         Audio.Play(Sound.Heal);
@@ -196,65 +217,70 @@ namespace LittleKeep.Game
                     case BattleEventKind.Combo:
                         {
                             Audio.Play(Sound.Combo);
-                            var a = ElementLook.Color(e.Element);
-                            var b = ElementLook.Color(e.Other);
-                            float r = battle.Tuning.ComboRadius;
-                            fx.Blob(pos, r * 1.3f, Color.Lerp(a, b, 0.5f).WithAlpha(0.55f), 0.45f);
-                            fx.Ring(pos, r * 1.2f, a, 0.5f, 0.1f);
-                            fx.Ring(pos, r * 1.6f, b, 0.7f, 0.15f);
-                            fx.Ring(pos, r * 2f, Color.white.WithAlpha(0.8f), 0.8f, 0.3f);
-                            fx.Text(pos + new Vector2(0f, 0.9f), ElementLook.ComboName(e.Element, e.Other), Color.Lerp(a, Color.white, 0.25f), 1.1f);
-                            fx.Shake(0.22f);
+                            Effects.Combo(fx, pos, battle.Tuning.ComboRadius, e.Element, e.Other, ElementLook.ComboName(e.Element, e.Other));
                         }
                         break;
                     case BattleEventKind.SkillCast:
-                        var col = SkillColorOf(e.SourceId);
-                        int growth = SkillGrowthOf(e.SourceId, e.Tag);
-                        float loud = 1f + growth * 0.35f;
-                        // Grown Skills sound bigger: louder and a touch lower.
-                        Audio.Play(SkillSound(SkillElementOf(e.SourceId, e.Tag)), 0.8f + growth * 0.15f, 1f - growth * 0.06f);
-                        if (fighters.TryGetValue(e.SourceId, out var caster))
                         {
-                            caster.squash = 0.25f;
-                            caster.attackTime = AttackPoseSeconds;
-                            if (growth > 0) fx.Ring(caster.root.position, 0.6f * loud, col, 0.3f);
-                        }
-                        if (e.Amount > 0f)
-                        {
-                            fx.Ring(pos, e.Amount, col, 0.45f * loud);
-                            fx.Blob(pos, e.Amount * 1.2f, col.WithAlpha(0.3f + growth * 0.15f), 0.3f * loud);
-                            if (growth == (int)SkillGrowth.Master) fx.Ring(pos, e.Amount * 1.4f, Color.white, 0.6f, 0.5f);
-                            fx.Shake(0.05f * loud);
+                            var col = SkillColorOf(e.SourceId);
+                            var growth = SkillGrowthOf(e.SourceId, e.Tag);
+                            var element = SkillElementOf(e.SourceId, e.Tag);
+                            // Grown Skills sound bigger: louder and a touch lower.
+                            Audio.Play(SkillSound(element), 0.8f + (int)growth * 0.15f, 1f - (int)growth * 0.06f);
+                            if (fighters.TryGetValue(e.SourceId, out var caster))
+                            {
+                                caster.squash = 0.25f;
+                                caster.hop = HopSeconds;
+                                caster.glow = 0.12f + (int)growth * 0.06f;
+                                caster.attackTime = AttackPoseSeconds;
+                                Effects.Cast(fx, caster.root.position, element, col, growth);
+                            }
+                            if (e.Amount > 0f) Effects.SkillBurst(fx, pos, e.Amount, element, col, growth);
                         }
                         break;
                     case BattleEventKind.Rally:
                         Audio.Play(Sound.Rally);
-                        var keeper = battle.Keeper.Position;
-                        fx.Ring(new Vector2(keeper.X, keeper.Y), 6f, Palette.Rally, 0.6f, 0.05f);
-                        fx.Shake(0.15f);
+                        {
+                            var keeper = battle.Keeper.Position;
+                            fighterSpots.Clear();
+                            foreach (var f in battle.Squad)
+                            {
+                                fighterSpots.Add(new Vector2(f.Position.X, f.Position.Y));
+                                if (fighters.TryGetValue(f.Id, out var rallied)) { rallied.hop = HopSeconds; rallied.glow = 0.25f; rallied.squash = 0.2f; }
+                            }
+                            Effects.Rally(fx, new Vector2(keeper.X, keeper.Y), fighterSpots, battle.Tuning, Palette.Rally);
+                        }
                         break;
                     case BattleEventKind.HeroDefeated:
                         Audio.Play(Sound.HeroDefeated);
                         fx.Ring(pos, 0.6f, Color.white, 0.3f);
+                        Effects.Poof(fx, pos, new Color(1f, 0.95f, 0.85f, 0.7f), 4);
                         break;
                     case BattleEventKind.CreatureFreed:
                         Audio.Play(Sound.CreatureFreed);
                         fx.Ring(pos, 1.2f, new Color(1f, 0.9f, 0.5f), 0.8f, 0.1f);
                         fx.Blob(pos, 0.9f, new Color(1f, 0.95f, 0.7f, 0.6f), 0.6f);
+                        fx.Particles.Burst(Mote.Star, pos, 16, 2f, 0.4f, new Color(1f, 0.9f, 0.5f), Color.white, 0.9f, 0.2f, new Vector2(0f, 1.5f));
                         break;
                     case BattleEventKind.HeroReachedKeep:
                         Audio.Play(Sound.KeepHit);
                         keepFlash = 0.25f;
                         fx.Shake(0.2f);
                         fx.Blob(pos, 1.2f, Palette.HealthLow, 0.35f);
+                        fx.Particles.Burst(Mote.Soft, pos, 10, 2.5f, 0.35f, Palette.HealthLow, new Color(1f, 0.8f, 0.6f), 0.4f);
+                        fx.Flash(Palette.HealthLow, 0.15f, 0.3f);
                         break;
                     case BattleEventKind.KnockedOut:
                         Audio.Play(Sound.KnockedOut);
                         fx.Ring(pos, 0.8f, new Color(0.6f, 0.6f, 0.7f), 0.4f);
+                        Effects.Poof(fx, pos, new Color(0.7f, 0.7f, 0.8f, 0.7f), 0);
+                        if (fighters.TryGetValue(e.TargetId, out var ko)) { ko.squash = 0.3f; ko.glow = 0.15f; }
                         break;
                     case BattleEventKind.Recovered:
                         Audio.Play(Sound.Recovered);
                         fx.Ring(pos, 0.9f, Palette.Health, 0.4f);
+                        fx.Particles.Burst(Mote.Star, pos, 10, 2f, 0.3f, Palette.Health, Color.white, 0.6f, 0.2f, new Vector2(0f, 1.2f));
+                        if (fighters.TryGetValue(e.TargetId, out var up)) { up.hop = HopSeconds; up.glow = 0.2f; }
                         break;
                 }
             }
@@ -287,13 +313,13 @@ namespace LittleKeep.Game
             }
         }
 
-        int SkillGrowthOf(int fighterId, string skillId)
+        SkillGrowth SkillGrowthOf(int fighterId, string skillId)
         {
             foreach (var f in battle.Squad)
                 if (f.Id == fighterId)
                     foreach (var s in f.Skills)
-                        if (s.Def.Id == skillId) return (int)s.Def.Growth;
-            return 0;
+                        if (s.Def.Id == skillId) return s.Def.Growth;
+            return SkillGrowth.Base;
         }
 
         Color SkillColorOf(int fighterId)
@@ -311,6 +337,9 @@ namespace LittleKeep.Game
         {
             if (battle == null) return;
             float dt = Time.deltaTime;
+            // How far the Battle itself moved this frame: zero while paused, small during a hit-stop.
+            float battleDt = Mathf.Max(0f, battle.Time - lastBattleTime);
+            lastBattleTime = battle.Time;
 
             foreach (var f in battle.Squad)
             {
@@ -373,10 +402,21 @@ namespace LittleKeep.Game
                     shots[p.Id] = sr;
                 }
                 sr.transform.position = new Vector3(p.Position.X, p.Position.Y, 0f);
+
+                // Skill shots leave a trail, thicker as the Skill grows.
+                float rate = p.FromSquad ? Effects.TrailRate(p.FromSkill, p.Growth) : 0f;
+                if (rate > 0f && battleDt > 0f)
+                {
+                    trailClock.TryGetValue(p.Id, out float clock);
+                    clock += battleDt * rate;
+                    for (; clock >= 1f; clock -= 1f)
+                        Effects.TrailBit(fx, new Vector2(p.Position.X, p.Position.Y), p.Element, SkillColorOf(p.SourceId), p.Growth);
+                    trailClock[p.Id] = clock;
+                }
             }
-            var gone = new List<int>();
+            gone.Clear();
             foreach (var kv in shots) if (!seen.Contains(kv.Key)) gone.Add(kv.Key);
-            foreach (var id in gone) { shots[id].gameObject.SetActive(false); shotPool.Push(shots[id]); shots.Remove(id); }
+            foreach (var id in gone) { shots[id].gameObject.SetActive(false); shotPool.Push(shots[id]); shots.Remove(id); trailClock.Remove(id); }
 
             if (battle.AimPoint.HasValue)
             {
@@ -386,21 +426,42 @@ namespace LittleKeep.Game
             }
             else aimMarker.gameObject.SetActive(false);
 
+            // Beaten Heroes flash white and flatten away rather than vanishing.
+            for (int i = dying.Count - 1; i >= 0; i--)
+            {
+                var d = dying[i];
+                d.dying -= dt;
+                if (d.dying <= 0f) { Destroy(d.root.gameObject); dying.RemoveAt(i); continue; }
+                float k = 1f - d.dying / DyingSeconds;
+                d.body.transform.localScale = new Vector3(d.baseScale * d.aspect * (1f + k * 0.5f), d.baseScale * (1f - k * 0.85f), 1f);
+                d.body.color = d.body.color.WithAlpha(1f - k);
+                if (d.flashSr != null) { d.flashSr.enabled = true; d.flashSr.sprite = d.body.sprite; d.flashSr.color = Color.white.WithAlpha(0.9f * (1f - k)); }
+            }
+
             keepFlash = Mathf.Max(0f, keepFlash - dt);
             keepBody.color = Color.Lerp(Color.white, Palette.HealthLow, keepFlash * 4f);
         }
 
         void RemoveMissing(Dictionary<int, CharacterView> map)
         {
-            var gone = new List<int>();
+            gone.Clear();
             foreach (var kv in map) if (!seen.Contains(kv.Key)) gone.Add(kv.Key);
-            foreach (var id in gone) { Destroy(map[id].root.gameObject); map.Remove(id); }
+            foreach (var id in gone)
+            {
+                var v = map[id];
+                map.Remove(id);
+                v.dying = DyingSeconds;
+                v.barBack.enabled = v.barFill.enabled = v.statusIcon.enabled = false;
+                dying.Add(v);
+            }
         }
 
         static void Animate(CharacterView v, Color tint, float dt, float sizeMul, CharacterPose pose, float laneY)
         {
             v.flash = Mathf.Max(0f, v.flash - dt);
             v.squash = Mathf.Max(0f, v.squash - dt);
+            v.hop = Mathf.Max(0f, v.hop - dt);
+            v.glow = Mathf.Max(0f, v.glow - dt);
             v.attackTime = Mathf.Max(0f, v.attackTime - dt);
             v.animTime += dt;
             if (v.art != null)
@@ -414,13 +475,27 @@ namespace LittleKeep.Game
             // Lower on the lane draws in front.
             int order = Mathf.RoundToInt(-laneY * 100f);
             v.body.sortingOrder = order;
-            v.barBack.sortingOrder = order + 1;
-            v.barFill.sortingOrder = order + 2;
+            v.barBack.sortingOrder = order + 2;
+            v.barFill.sortingOrder = order + 3;
 
+            // Squash on impact, a gentle breathing bob while idle, and a little jump when hopping.
             float s = v.squash * 2.2f;
-            float height = v.baseScale * sizeMul * (1f - s * 0.3f);
-            float width = v.baseScale * v.aspect * sizeMul * (1f + s * 0.3f);
+            float breathe = sizeMul < 1f ? 0f : Mathf.Sin(Time.time * 3.2f + v.phase) * 0.025f;
+            float height = v.baseScale * sizeMul * (1f - s * 0.3f + breathe);
+            float width = v.baseScale * v.aspect * sizeMul * (1f + s * 0.3f - breathe * 0.5f);
             v.body.transform.localScale = new Vector3(width, height, 1f);
+            float jump = v.hop > 0f ? Mathf.Sin((1f - v.hop / HopSeconds) * Mathf.PI) * 0.22f : 0f;
+            v.body.transform.localPosition = v.bodyBase + new Vector3(0f, jump, 0f);
+
+            // A white flash over the body: strongest the moment it starts.
+            bool glowing = v.glow > 0f && v.flashSr != null;
+            if (v.flashSr != null) v.flashSr.enabled = glowing;
+            if (glowing)
+            {
+                v.flashSr.sprite = v.body.sprite;
+                v.flashSr.sortingOrder = order + 1;
+                v.flashSr.color = Color.white.WithAlpha(Mathf.Clamp01(v.glow * 6f));
+            }
         }
 
         /// A Hero's body colour while it carries a status: burn and shock flicker, chill and root hold a cool or green cast.

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: GameContent
   m_EditorClassIdentifier: LittleKeep.Game::LittleKeep.Game.GameContent
   theme: {fileID: 11400000, guid: 0a0bf2731e7eb474eb0fefcedede371a, type: 2}
+  effects: {fileID: 11400000, guid: 5fbc2cc0b0d9e4ab0b0bb03aea809988, type: 2}
   keeper: {fileID: 11400000, guid: 31481cfcb68314e67a7d2f8d9d63d943, type: 2}
   familiars:
   - {fileID: 11400000, guid: be835fa8ab3bd4cf587ccaeaf485015d, type: 2}

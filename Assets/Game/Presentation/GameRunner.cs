@@ -36,8 +36,12 @@ namespace LittleKeep.Game
             QualitySettings.vSyncCount = 0;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
             UiKit.Theme = content.theme;
+            Fx.Art = content.effects;
             ElementLook.Tuning = content.battleTuning;
             Audio.Prewarm();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            FpsMeter.CreateIfDevelopment();
+#endif
 
             var cam = Camera.main != null ? Camera.main : new GameObject("Main Camera", typeof(Camera)).GetComponent<Camera>();
             cam.tag = "MainCamera";
@@ -67,8 +71,23 @@ namespace LittleKeep.Game
                 () => screens.ShowBook(keep, ShowKeep),
                 ShowWorkshop,
                 ShowWatchtower,
-                notice);
+                notice,
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                StressBattle
+#else
+                null
+#endif
+                );
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// Development builds only: the busiest Battle there is, for checking effects and frame rate. Saves nothing.
+        public void StressBattle()
+        {
+            screens.Hide();
+            battle.Begin(DevBattles.Stress(compiled), compiled, "Stress test", _ => { }, ShowKeep, _ => ShowKeep(), _ => { });
+        }
+#endif
 
         void ShowStarters()
         {

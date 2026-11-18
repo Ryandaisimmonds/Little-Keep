@@ -22,6 +22,7 @@ namespace LittleKeep.Game
         Action onContinue;
         Action<float> onQuit, onLeftApp;
         int speedIndex;
+        readonly System.Collections.Generic.List<BattleEvent> events = new System.Collections.Generic.List<BattleEvent>();
         bool paused, ended;
         float lastAspect;
         Rect lastSafeArea;
@@ -91,11 +92,13 @@ namespace LittleKeep.Game
             {
                 var held = aim.Read();
                 battle.SetAim(held.HasValue ? ClampToLane(held.Value) : (Vec2?)null);
-                battle.Advance(Mathf.Min(Time.deltaTime, 0.1f) * Speeds[speedIndex]);
+                // A big hit (a Combo, a Rally) slows the Battle for a moment so it lands.
+                battle.Advance(Mathf.Min(Time.deltaTime, 0.1f) * Speeds[speedIndex] * fx.TimeScale);
             }
             else battle.SetAim(null);
 
-            view.Handle(battle.TakeEvents());
+            battle.TakeEvents(events);
+            view.Handle(events);
             hud.Refresh(battle, Speeds[speedIndex], header);
 
             if (!ended && battle.Outcome != BattleOutcome.Ongoing)

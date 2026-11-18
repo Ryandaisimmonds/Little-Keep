@@ -9,6 +9,7 @@ namespace LittleKeep.Game
     public sealed class GameContent : ScriptableObject
     {
         public UiTheme theme;
+        [Tooltip("Particle sprites and the glow material Skill effects are drawn with")] public EffectArt effects;
         public FighterAsset keeper;
         [Tooltip("Every Familiar, in Familiar book order. Each one's Unlock says whether it is owned from the start or earned.")]
         public List<FighterAsset> familiars = new List<FighterAsset>();
